@@ -22,6 +22,20 @@
 #include <openssl/pem.h>
 #include "mconn-crypt.h"
 
+typedef struct _MConnCryptPrivate      MConnCryptPrivate;
+
+/**
+ * MConnCrypt:
+ *
+ * A simple wrapper for cypto operations.
+ **/
+
+struct _MConnCrypt
+{
+    GObject parent;
+    MConnCryptPrivate *priv;
+};
+
 struct _MConnCryptPrivate
 {
     RSA   *key;                 /* RSA key wrapper */
@@ -85,6 +99,12 @@ MConnCrypt *mconn_crypt_new_for_key_path(const char *path)
     }
 
     return self;
+}
+
+MConnCrypt * mconn_crypt_ref(MConnCrypt *self)
+{
+    g_assert(IS_MCONN_CRYPT(self));
+    return MCONN_CRYPT(g_object_ref(self));
 }
 
 void mconn_crypt_unref(MConnCrypt *self)
