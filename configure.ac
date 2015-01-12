@@ -44,7 +44,8 @@ PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              gio-2.0,
                              gio-unix-2.0,
                              json-glib-1.0,
-                             gee-0.8
+                             gee-0.8,
+                             libcrypto
                              ])
 AC_SUBST(MCONNECT_CFLAGS)
 AC_SUBST(MCONNECT_LIBS)
