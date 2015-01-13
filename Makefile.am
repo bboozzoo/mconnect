@@ -12,12 +12,12 @@ mconnect_LDADD = $(MCONNECT_LIBS)
 
 mconnect_CFLAGS = $(MCONNECT_CFLAGS)
 
-test_mconn_crypt_SOURCES = src/mconn-crypt-test.c \
+test_mconn_crypt_SOURCES = test/mconn-crypt-test.c \
 			   src/mconn-crypt.c \
 			   src/mconn-crypt.h
 
 test_mconn_crypt_LDADD = $(MCONNECT_LIBS)
-test_mconn_crypt_CFLAGS = $(MCONNECT_CFLAGS)
+test_mconn_crypt_CFLAGS = $(MCONNECT_CFLAGS) -Isrc
 
 VALAFLAGS = $(MCONNECT_VALAFLAGS)
 
