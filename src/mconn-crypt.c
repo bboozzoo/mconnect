@@ -69,7 +69,11 @@ mconn_crypt_dispose (GObject *object)
 {
     MConnCrypt *self = (MConnCrypt *)object;
 
-    g_clear_pointer(&self->priv->key, RSA_free);
+    if (self->priv->key != NULL)
+    {
+        RSA_free(self->priv->key);
+        self->priv->key = NULL;
+    }
 
     G_OBJECT_CLASS (mconn_crypt_parent_class)->dispose (object);
 }
