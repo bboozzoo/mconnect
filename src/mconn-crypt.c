@@ -61,6 +61,7 @@ mconn_crypt_class_init (MConnCryptClass *klass)
 static void
 mconn_crypt_init (MConnCrypt *self)
 {
+    g_debug("mconn-crypt: new instance");
     self->priv = mconn_crypt_get_instance_private(self);
 }
 
@@ -89,7 +90,7 @@ mconn_crypt_finalize (GObject *object)
 
 MConnCrypt *mconn_crypt_new_for_key_path(const char *path)
 {
-    g_debug("new crypt for key %s", path);
+    g_debug("mconn-crypt: new crypt for key %s", path);
 
     MConnCrypt *self = g_object_new(MCONN_TYPE_CRYPT, NULL);
 
@@ -149,6 +150,7 @@ static gchar *__mconn_get_public_key_as_pem(MConnCryptPrivate *priv)
     /* get PEM as text */
     char *oss_pubkey = NULL;
     long data = BIO_get_mem_data(bm, &oss_pubkey);
+    g_debug("mconn-crypt: public key length: %l", data);
     g_assert(data != 0);
     g_assert(oss_pubkey != NULL);
 
@@ -165,17 +167,17 @@ static gboolean __mconn_load_key(MConnCryptPrivate *priv, const char *path)
 {
     if (g_file_test(path, G_FILE_TEST_EXISTS) == FALSE)
     {
-        g_critical("key file %s does not exist", path);
+        g_critical("mconn-crypt: key file %s does not exist", path);
         return FALSE;
     }
 
-    g_debug("loading key from %s", path);
+    g_debug("mconn-crypt: loading key from %s", path);
 
     BIO *bf = BIO_new_file(path, "r");
 
     if (bf == NULL)
     {
-        g_critical("failed to open file %s", path);
+        g_critical("mconn-crypt: failed to open file %s", path);
         return FALSE;
     }
 
@@ -187,7 +189,7 @@ static gboolean __mconn_load_key(MConnCryptPrivate *priv, const char *path)
 
     if (rsa == NULL)
     {
-        g_critical("failed to read private key");
+        g_critical("mconn-crypt: failed to read private key");
         return FALSE;
     }
 
@@ -204,7 +206,7 @@ static gboolean __mconn_generate_key_at_path(const char *path)
     BIO *bf = BIO_new_file(path, "w");
     if (bf == NULL)
     {
-        g_error("failed to open file");
+        g_error("mconn-crypt: failed to open file");
         return FALSE;
     }
 
@@ -212,7 +214,7 @@ static gboolean __mconn_generate_key_at_path(const char *path)
 
     if (PEM_write_bio_RSAPrivateKey(bf, rsa, NULL, NULL, 0, NULL, NULL) == 0)
     {
-        g_critical("failed to private write key to file");
+        g_critical("mconn-crypt: failed to private write key to file");
         ret = FALSE;
     }
 
