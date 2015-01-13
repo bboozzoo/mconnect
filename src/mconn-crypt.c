@@ -212,6 +212,8 @@ static gboolean __mconn_generate_key_at_path(const char *path)
         ret = FALSE;
     }
 
+    RSA_free(rsa);
+
     BIO_free(bf);
 
     return ret;
