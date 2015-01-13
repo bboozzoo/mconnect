@@ -130,7 +130,7 @@ gchar *mconn_crypt_get_public_key_pem(MConnCrypt *self)
 {
     g_assert(IS_MCONN_CRYPT(self));
     g_assert(self->priv);
-
+    g_assert(self->priv->key);
     return __mconn_get_public_key_as_pem(self->priv);
 }
 
