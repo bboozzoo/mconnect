@@ -20,6 +20,10 @@
 
 public static int main(string[] args)
 {
+	var core = Core.instance();
+	if (core == null)
+		error("cannot initialize core");
+
 	var loop = new MainLoop();
 	var discovery = new Discovery();
 	var manager = new DeviceManager();
