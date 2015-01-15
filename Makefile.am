@@ -7,11 +7,13 @@ mconnect_SOURCES = src/main.vala \
 		   src/discovery.vala \
 		   src/packet.vala \
 		   src/device.vala \
-		   src/devicemanager.vala
+		   src/core.vala \
+		   src/mconn-crypt.c \
+		   src/mconn-crypt.h
 
 mconnect_LDADD = $(MCONNECT_LIBS)
 
-mconnect_CFLAGS = $(MCONNECT_CFLAGS)
+mconnect_CFLAGS = $(MCONNECT_CFLAGS) -Isrc
 
 test_mconn_crypt_SOURCES = test/mconn-crypt-test.c \
 			   src/mconn-crypt.c \
