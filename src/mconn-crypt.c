@@ -145,7 +145,8 @@ static gchar *__mconn_get_public_key_as_pem(MConnCryptPrivate *priv)
     BIO *bm = BIO_new(BIO_s_mem());
 
     /* generate PEM */
-    PEM_write_bio_RSAPublicKey(bm, priv->key);
+    /* PEM_write_bio_RSAPublicKey(bm, priv->key); */
+    PEM_write_bio_RSA_PUBKEY(bm, priv->key);
 
     /* get PEM as text */
     char *oss_pubkey = NULL;
