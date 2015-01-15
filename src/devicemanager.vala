@@ -25,10 +25,24 @@ class DeviceManager : GLib.Object
 
 	public DeviceManager() {
 		debug("device manager..");
+
+		this.devices = new HashMap<string, Device>();
 	}
 
 	public void found_device(Device dev) {
-		debug("new device: %s", dev.to_string());
+		debug("found device: %s", dev.to_string());
+
+		string unique = dev.to_unique_string();
+		if (this.devices.has_key(unique) == false) {
+			debug("adding new device with key: %s", unique);
+			this.devices.@set(unique, dev);
+
+			dev.activate();
+		} else {
+			var known_dev = this.devices.@get(unique);
+			known_dev.activate_from_device(dev);
+		}
+
 	}
 
 }
