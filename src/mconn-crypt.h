@@ -16,8 +16,8 @@
  *
  * Author: Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-#ifndef __MCONN_CRYPT_H__
-#define __MCONN_CRYPT_H__
+#ifndef __M_CONN_CRYPT_H__
+#define __M_CONN_CRYPT_H__
 
 #include <glib-object.h>
 #include <glib.h>
@@ -25,25 +25,25 @@
 
 G_BEGIN_DECLS
 
-#define MCONN_TYPE_CRYPT                        \
-   (mconn_crypt_get_type())
-#define MCONN_CRYPT(obj)                                                \
+#define M_CONN_TYPE_CRYPT                        \
+   (m_conn_crypt_get_type())
+#define M_CONN_CRYPT(obj)                                                \
    (G_TYPE_CHECK_INSTANCE_CAST ((obj),                                  \
-                                MCONN_TYPE_CRYPT,                       \
+                                M_CONN_TYPE_CRYPT,                       \
                                 MConnCrypt))
-#define MCONN_CRYPT_CLASS(klass)                                        \
+#define M_CONN_CRYPT_CLASS(klass)                                        \
    (G_TYPE_CHECK_CLASS_CAST ((klass),                                   \
-                             MCONN_TYPE_CRYPT,                          \
+                             M_CONN_TYPE_CRYPT,                          \
                              MConnCryptClass))
-#define IS_MCONN_CRYPT(obj)                                             \
+#define IS_M_CONN_CRYPT(obj)                                             \
    (G_TYPE_CHECK_INSTANCE_TYPE ((obj),                                  \
-                                MCONN_TYPE_CRYPT))
-#define IS_MCONN_CRYPT_CLASS(klass)                                     \
+                                M_CONN_TYPE_CRYPT))
+#define IS_M_CONN_CRYPT_CLASS(klass)                                     \
    (G_TYPE_CHECK_CLASS_TYPE ((klass),                                   \
-                             MCONN_TYPE_CRYPT))
-#define MCONN_CRYPT_GET_CLASS(obj)                                      \
+                             M_CONN_TYPE_CRYPT))
+#define M_CONN_CRYPT_GET_CLASS(obj)                                      \
    (G_TYPE_INSTANCE_GET_CLASS ((obj),                                   \
-                               MCONN_TYPE_CRYPT,                        \
+                               M_CONN_TYPE_CRYPT,                        \
                                MConnCryptClass))
 
 typedef struct _MConnCrypt      MConnCrypt;
@@ -53,49 +53,49 @@ struct _MConnCryptClass
     GObjectClass parent_class;
 };
 
-GType mconn_crypt_get_type (void) G_GNUC_CONST;
+GType m_conn_crypt_get_type (void) G_GNUC_CONST;
 
 /**
- * mconn_crypt_new_for_key_path: (constructor)
+ * m_conn_crypt_new_for_key_path: (constructor)
  * @path: key path
  *
  * Returns: (transfer full): new object
  */
-MConnCrypt *mconn_crypt_new_for_key_path(const char *path);
+MConnCrypt *m_conn_crypt_new_for_key_path(const char *path);
 
 /**
- * mconn_crypt_unref:
+ * m_conn_crypt_unref:
  * @crypt: crypt object
  */
-void mconn_crypt_unref(MConnCrypt *crypt);
+void m_conn_crypt_unref(MConnCrypt *crypt);
 
 /**
- * mconn_crypt_ref:
+ * m_conn_crypt_ref:
  * @crypt: crypt object
  *
  * Take reference to crypt object
  * Returns: (transfer none): reffed object
  */
-MConnCrypt *mconn_crypt_ref(MConnCrypt *crypt);
+MConnCrypt *m_conn_crypt_ref(MConnCrypt *crypt);
 
 /**
- * mconn_crypt_decrypt:
+ * m_conn_crypt_decrypt:
  * @crypt: crypt object
  * @data: (type GBytes): data
  * @error: return location for a GError or NULL
  *
  * Returns: (transfer full): a new #GBytes with decoded data
  */
-GBytes * mconn_crypt_decrypt(MConnCrypt *crypt, GBytes *data, GError **error);
+GBytes * m_conn_crypt_decrypt(MConnCrypt *crypt, GBytes *data, GError **error);
 
 /**
- * mconn_crypt_get_public_key_pem:
+ * m_conn_crypt_get_public_key_pem:
  * @crypt: crypt object
  *
  * Returns: (transfer full): allocated string with public key in PEM format
  */
-gchar * mconn_crypt_get_public_key_pem(MConnCrypt *crypt);
+gchar * m_conn_crypt_get_public_key_pem(MConnCrypt *crypt);
 
 G_END_DECLS
 
-#endif /* __MCONN_CRYPT_H__ */
+#endif /* __M_CONN_CRYPT_H__ */

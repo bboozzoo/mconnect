@@ -41,32 +41,32 @@ struct _MConnCryptPrivate
     RSA   *key;                 /* RSA key wrapper */
 };
 
-static void mconn_crypt_dispose (GObject *object);
-static void mconn_crypt_finalize (GObject *object);
-static gchar *__mconn_get_public_key_as_pem(MConnCryptPrivate *priv);
-static gboolean __mconn_load_key(MConnCryptPrivate *priv, const char *path);
-static gboolean __mconn_generate_key_at_path(const char *path);
+static void m_conn_crypt_dispose (GObject *object);
+static void m_conn_crypt_finalize (GObject *object);
+static gchar *__m_conn_get_public_key_as_pem(MConnCryptPrivate *priv);
+static gboolean __m_conn_load_key(MConnCryptPrivate *priv, const char *path);
+static gboolean __m_conn_generate_key_at_path(const char *path);
 
-G_DEFINE_TYPE_WITH_PRIVATE (MConnCrypt, mconn_crypt, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (MConnCrypt, m_conn_crypt, G_TYPE_OBJECT);
 
 static void
-mconn_crypt_class_init (MConnCryptClass *klass)
+m_conn_crypt_class_init (MConnCryptClass *klass)
 {
     GObjectClass *gobject_class = (GObjectClass *)klass;
 
-    gobject_class->dispose = mconn_crypt_dispose;
-    gobject_class->finalize = mconn_crypt_finalize;
+    gobject_class->dispose = m_conn_crypt_dispose;
+    gobject_class->finalize = m_conn_crypt_finalize;
 }
 
 static void
-mconn_crypt_init (MConnCrypt *self)
+m_conn_crypt_init (MConnCrypt *self)
 {
     g_debug("mconn-crypt: new instance");
-    self->priv = mconn_crypt_get_instance_private(self);
+    self->priv = m_conn_crypt_get_instance_private(self);
 }
 
 static void
-mconn_crypt_dispose (GObject *object)
+m_conn_crypt_dispose (GObject *object)
 {
     MConnCrypt *self = (MConnCrypt *)object;
 
@@ -76,68 +76,68 @@ mconn_crypt_dispose (GObject *object)
         self->priv->key = NULL;
     }
 
-    G_OBJECT_CLASS (mconn_crypt_parent_class)->dispose (object);
+    G_OBJECT_CLASS (m_conn_crypt_parent_class)->dispose (object);
 }
 
 static void
-mconn_crypt_finalize (GObject *object)
+m_conn_crypt_finalize (GObject *object)
 {
     MConnCrypt *self = (MConnCrypt *)object;
 
     g_signal_handlers_destroy (object);
-    G_OBJECT_CLASS (mconn_crypt_parent_class)->finalize (object);
+    G_OBJECT_CLASS (m_conn_crypt_parent_class)->finalize (object);
 }
 
-MConnCrypt *mconn_crypt_new_for_key_path(const char *path)
+MConnCrypt *m_conn_crypt_new_for_key_path(const char *path)
 {
     g_debug("mconn-crypt: new crypt for key %s", path);
 
-    MConnCrypt *self = g_object_new(MCONN_TYPE_CRYPT, NULL);
+    MConnCrypt *self = g_object_new(M_CONN_TYPE_CRYPT, NULL);
 
     if (g_file_test(path, G_FILE_TEST_EXISTS) == FALSE)
-        __mconn_generate_key_at_path(path);
+        __m_conn_generate_key_at_path(path);
 
-    if (__mconn_load_key(self->priv, path) == FALSE)
+    if (__m_conn_load_key(self->priv, path) == FALSE)
     {
-        mconn_crypt_unref(self);
+        m_conn_crypt_unref(self);
         return NULL;
     }
 
     return self;
 }
 
-MConnCrypt * mconn_crypt_ref(MConnCrypt *self)
+MConnCrypt * m_conn_crypt_ref(MConnCrypt *self)
 {
-    g_assert(IS_MCONN_CRYPT(self));
-    return MCONN_CRYPT(g_object_ref(self));
+    g_assert(IS_M_CONN_CRYPT(self));
+    return M_CONN_CRYPT(g_object_ref(self));
 }
 
-void mconn_crypt_unref(MConnCrypt *self)
+void m_conn_crypt_unref(MConnCrypt *self)
 {
     if (self != NULL)
     {
-        g_assert(IS_MCONN_CRYPT(self));
+        g_assert(IS_M_CONN_CRYPT(self));
         g_object_unref(self);
     }
 }
 
-GBytes * mconn_crypt_decrypt(MConnCrypt *self, GBytes *data, GError **err)
+GBytes * m_conn_crypt_decrypt(MConnCrypt *self, GBytes *data, GError **err)
 {
 
 }
 
-gchar *mconn_crypt_get_public_key_pem(MConnCrypt *self)
+gchar *m_conn_crypt_get_public_key_pem(MConnCrypt *self)
 {
-    g_assert(IS_MCONN_CRYPT(self));
+    g_assert(IS_M_CONN_CRYPT(self));
     g_assert(self->priv);
     g_assert(self->priv->key);
-    return __mconn_get_public_key_as_pem(self->priv);
+    return __m_conn_get_public_key_as_pem(self->priv);
 }
 
 /**
  *
  */
-static gchar *__mconn_get_public_key_as_pem(MConnCryptPrivate *priv)
+static gchar *__m_conn_get_public_key_as_pem(MConnCryptPrivate *priv)
 {
     gchar *pubkey = NULL;
 
@@ -164,7 +164,7 @@ static gchar *__mconn_get_public_key_as_pem(MConnCryptPrivate *priv)
     return pubkey;
 }
 
-static gboolean __mconn_load_key(MConnCryptPrivate *priv, const char *path)
+static gboolean __m_conn_load_key(MConnCryptPrivate *priv, const char *path)
 {
     if (g_file_test(path, G_FILE_TEST_EXISTS) == FALSE)
     {
@@ -199,7 +199,7 @@ static gboolean __mconn_load_key(MConnCryptPrivate *priv, const char *path)
     return TRUE;
 }
 
-static gboolean __mconn_generate_key_at_path(const char *path)
+static gboolean __m_conn_generate_key_at_path(const char *path)
 {
     gboolean ret = TRUE;
     RSA *rsa = NULL;
