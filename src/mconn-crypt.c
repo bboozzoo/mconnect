@@ -156,7 +156,7 @@ static gchar *__mconn_get_public_key_as_pem(MConnCryptPrivate *priv)
     g_assert(oss_pubkey != NULL);
 
     /* dup the key as buffer goes away with BIO */
-    pubkey = g_strdup(oss_pubkey);
+    pubkey = g_strndup(oss_pubkey, data);
 
     BIO_set_close(bm, BIO_CLOSE);
     BIO_free(bm);
