@@ -32,18 +32,17 @@ test_mconn_crypt_vala_CFLAGS = $(MCONNECT_CFLAGS) -Isrc -I.
 
 VALAFLAGS = $(MCONNECT_VALAFLAGS) --vapidir=. --pkg=mconn-crypt
 
-mconn-crypt.gir: src/mconn-crypt.h
+mconn-crypt.gi: src/mconn-crypt.h
 	rm -f $@
-	g-ir-scanner --header-only -n MConn --symbol-prefix mconn \
-		$< $(filter -I%,$(MCONNECT_CFLAGS)) | \
-		grep -v warning: > $@
+	$(GEN_INTROSPECT) -n MConn \
+		$< $(filter -I%,$(MCONNECT_CFLAGS)) > $@
 
-mconn-crypt.vapi: mconn-crypt.gir
+mconn-crypt.vapi: mconn-crypt.gi
 	rm -f $@
 	vapigen --library mconn-crypt $<
 
 
-BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gir
+BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gi
 
 CLEANFILES = $(BUILT_SOURCES)
 
