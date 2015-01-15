@@ -18,6 +18,9 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
+/**
+ * General device wrapper.
+ */
 class Device : Object {
 	public string device_id { get; private set; default = ""; }
 	public string device_name { get; private set; default = ""; }
@@ -47,8 +50,11 @@ class Device : Object {
 
 	}
 
+	/**
+	 * Generates a unique string for this device
+	 */
 	public string to_unique_string() {
-		return "";
+		return this.to_string().replace(" ", "-");
 	}
 
 	public string to_string() {
