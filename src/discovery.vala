@@ -66,7 +66,6 @@ class Discovery : GLib.Object
 			SocketAddress sa;
 			InetSocketAddress isa;
 
-
 			try {
 				ssize_t read = this.socket.receive_from(out sa, buffer);
 				isa = (InetSocketAddress)sa;
