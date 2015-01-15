@@ -46,9 +46,12 @@ PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              json-glib-1.0,
                              gee-0.8,
                              libcrypto
+                             libvala-0.26
                              ])
 AC_SUBST(MCONNECT_CFLAGS)
 AC_SUBST(MCONNECT_LIBS)
+
+AC_SUBST(GEN_INTROSPECT,$($PKG_CONFIG --variable=gen_introspect libvala-0.26))
 
 # Files to generate
 AC_CONFIG_FILES([Makefile])
