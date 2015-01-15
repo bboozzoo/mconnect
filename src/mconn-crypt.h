@@ -21,6 +21,7 @@
 
 #include <glib-object.h>
 #include <glib.h>
+#include <glib/gbytes.h>
 
 G_BEGIN_DECLS
 
@@ -55,10 +56,10 @@ struct _MConnCryptClass
 GType mconn_crypt_get_type (void) G_GNUC_CONST;
 
 /**
- * mconn_crypt_new_for_key_path:
+ * mconn_crypt_new_for_key_path: (constructor)
  * @path: key path
  *
- * Returns: (transfer full) (element-type MConnCrypt): new object
+ * Returns: (transfer full): new object
  */
 MConnCrypt *mconn_crypt_new_for_key_path(const char *path);
 
