@@ -22,19 +22,36 @@
  * General device wrapper.
  */
 class Device : Object {
+
+	public signal void paired();
+	public signal void connected();
+	public signal void disconnected();
+	public signal void message(Packet pkt);
+
 	public string device_id { get; private set; default = ""; }
 	public string device_name { get; private set; default = ""; }
 	public string device_type { get; private set; default = ""; }
 	public uint protocol_version {get; private set; default = 5; }
 	public uint tcp_port {get; private set; default = 1714; }
-	public InetAddress host { get; private set; }
-	public bool paired { get; set; default = false; }
+	public InetAddress host { get; private set; default = null; }
+	public bool is_paired { get; private set; default = false; }
 
-	public Device() {
+	private DeviceChannel _channel = null;
+
+	private Device() {
 
 	}
 
+	/**
+	 * Constructs a new Device wrapper based on identity packet.
+	 *
+	 * @param pkt identity packet
+	 * @param host source host that the packet came from
+	 */
 	public Device.from_identity(Packet pkt, InetAddress host) {
+
+		debug("got packet: %s", pkt.to_string());
+
 		var body = pkt.body;
 		this.host = host;
 		this.device_name = body.get_string_member("deviceName");
@@ -60,6 +77,47 @@ class Device : Object {
 	public string to_string() {
 		return "%s-%s-%s-%u".printf(this.device_id, this.device_name,
 									this.device_type, this.protocol_version);
+	}
+
+	private async void greet() {
+		string[] interfaces = {"kdeconnect.notification",
+							   "kdeconnect.battery",
+							   "kdeconnect.ping"};
+		yield _channel.send(Packet.new_identity("test-laptop",
+												"dadada",
+												interfaces, interfaces).to_string());
+		this.pair_if_needed();
+	}
+
+	public async void pair() {
+		if (this.host != null) {
+			debug("start pairing");
+
+			var core = Core.instance();
+			string pubkey = core.crypt.get_public_key_pem();
+			debug("public key: %s", pubkey);
+			_channel.send(Packet.new_pair(pubkey).to_string());
+		}
+	}
+
+	public void pair_if_needed() {
+		if (this.is_paired == false)
+			this.pair();
+	}
+
+	public void activate() {
+		assert(_channel == null);
+
+		_channel = new DeviceChannel(this.host, this.tcp_port);
+		_channel.connected.connect((c) => {
+				this.greet();
+			});
+		_channel.open();
+		debug("open finished");
+	}
+
+	public void activate_from_device(Device dev) {
+
 	}
 
 }
