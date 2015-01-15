@@ -26,24 +26,24 @@ static void test_simple(void)
     /* we made sure that file is removed */
     g_assert_false(g_file_test("/tmp/test.key", G_FILE_TEST_EXISTS));
 
-    MConnCrypt *cr = mconn_crypt_new_for_key_path("/tmp/test.key");
+    MConnCrypt *cr = m_conn_crypt_new_for_key_path("/tmp/test.key");
     g_assert_nonnull(cr);
     g_assert_true(g_file_test("/tmp/test.key", G_FILE_TEST_EXISTS));
 
-    gchar *pubkey1 = mconn_crypt_get_public_key_pem(cr);
+    gchar *pubkey1 = m_conn_crypt_get_public_key_pem(cr);
 
-    mconn_crypt_unref(cr);
+    m_conn_crypt_unref(cr);
     /* file should still exit */
     g_assert_true(g_file_test("/tmp/test.key", G_FILE_TEST_EXISTS));
 
-    cr = mconn_crypt_new_for_key_path("/tmp/test.key");
+    cr = m_conn_crypt_new_for_key_path("/tmp/test.key");
     /* key should have been loaded */
     g_assert_nonnull(cr);
     g_assert_true(g_file_test("/tmp/test.key", G_FILE_TEST_EXISTS));
 
-    gchar *pubkey2 = mconn_crypt_get_public_key_pem(cr);
+    gchar *pubkey2 = m_conn_crypt_get_public_key_pem(cr);
 
-    mconn_crypt_unref(cr);
+    m_conn_crypt_unref(cr);
 
     g_assert_cmpstr(pubkey1, ==, pubkey2);
 }
