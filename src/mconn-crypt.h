@@ -75,7 +75,7 @@ void mconn_crypt_unref(MConnCrypt *crypt);
  * Take reference to crypt object
  * Returns: (transfer none): reffed object
  */
-void mconn_crypt_unref(MConnCrypt *crypt);
+MConnCrypt *mconn_crypt_ref(MConnCrypt *crypt);
 
 /**
  * mconn_crypt_decrypt:
