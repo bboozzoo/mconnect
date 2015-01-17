@@ -34,6 +34,7 @@ class DeviceChannel : Object {
 	private SocketConnection _conn = null;
 	private DataOutputStream _dout = null;
 	private DataInputStream _din = null;
+	private uint _srcid = 0;
 
 	// channel encryption method
 	private Crypt _crypt = null;
@@ -75,9 +76,24 @@ class DeviceChannel : Object {
 				return true;
 			});
 		// attach source
-		source.attach(null);
+		_srcid = source.attach(null);
 
 		connected();
+	}
+
+	public async void close() {
+		debug("closing connection");
+
+		if (_srcid > 0) {
+			Source.remove(_srcid);
+			_srcid = 0;
+		}
+		_din.close();
+		_dout.close();
+		_conn.close();
+		_din = null;
+		_dout = null;
+		_conn = null;
 	}
 
 	/**
