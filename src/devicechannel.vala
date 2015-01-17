@@ -66,8 +66,8 @@ class DeviceChannel : Object {
 		connected();
 	}
 
-	public async void send(string message) {
-		string to_send = message + "\n";
+	public async void send(Packet pkt) {
+		string to_send = pkt.to_string() + "\n";
 		debug("send data: %s", to_send);
 		// _dout.put_string(data);
 		yield _conn.output_stream.write_async(to_send.data);
