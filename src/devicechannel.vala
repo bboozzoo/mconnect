@@ -28,6 +28,7 @@ using MConn;
 class DeviceChannel : Object {
 
 	public signal void connected();
+	public signal void disconnected();
 	public signal void packet_received(Packet pkt);
 
 	private InetSocketAddress _isa = null;
