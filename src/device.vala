@@ -23,7 +23,7 @@
  */
 class Device : Object {
 
-	public signal void paired();
+	public signal void paired(bool pair);
 	public signal void connected();
 	public signal void disconnected();
 	public signal void message(Packet pkt);
@@ -35,6 +35,9 @@ class Device : Object {
 	public uint tcp_port {get; private set; default = 1714; }
 	public InetAddress host { get; private set; default = null; }
 	public bool is_paired { get; private set; default = false; }
+
+	// set to true if pair request was sent
+	private bool _pair_in_progress = false;
 
 	private DeviceChannel _channel = null;
 
@@ -89,7 +92,14 @@ class Device : Object {
 		this.pair_if_needed();
 	}
 
-	public async void pair() {
+	/**
+	 * pair: sent pair request
+	 *
+	 * Internally changes pair requests state tracking.
+	 *
+	 * @param expect_response se to true if expecting a response
+	 */
+	public async void pair(bool expect_response = true) {
 		if (this.host != null) {
 			debug("start pairing");
 
@@ -97,12 +107,14 @@ class Device : Object {
 			string pubkey = core.crypt.get_public_key_pem();
 			debug("public key: %s", pubkey);
 
+			if (expect_response == true)
+				_pair_in_progress = true;
 			yield _channel.send(Packet.new_pair(pubkey));
 		}
 	}
 
 	public void pair_if_needed() {
-		if (this.is_paired == false)
+		if (is_paired == false && _pair_in_progress == false)
 			this.pair();
 	}
 
@@ -122,11 +134,71 @@ class Device : Object {
 		debug("open finished");
 	}
 
-	public void activate_from_device(Device dev) {
+	public void deactivate() {
+		if (_channel == null)
+			_channel.close();
+		_channel = null;
+	}
 
+	/**
+	 * activate_from_device:
+	 *
+	 * Try to activate using a newly discovered device. If device is
+	 * already active, compare the host address to see if it
+	 * changed. If so, close the current connection and activate with
+	 * new address.
+	 *
+	 * @param dev device
+	 */
+	public void activate_from_device(Device dev) {
+		if (host == null) {
+			activate();
+		} else if (dev.host.to_string() != host.to_string()) {
+			// same host, assuming no activation needed
+			deactivate();
+			activate();
+		} else {
+			debug("device %s already active", dev.to_string());
+		}
 	}
 
 	private void packet_received(Packet pkt) {
 		debug("got packet");
+		if (pkt.pkt_type == Packet.PAIR) {
+			// pairing
+			handle_pair_packet(pkt);
+		}
+	}
+
+	private void handle_pair_packet(Packet pkt) {
+		assert(pkt.pkt_type == Packet.PAIR);
+
+		bool pair = pkt.body.get_boolean_member("pair");
+		if (_pair_in_progress == true) {
+			// response to host initiated pairing
+			if (pair == true) {
+				debug("device is paired, pairing complete");
+				this.is_paired = true;
+			} else {
+				critical("pairing rejected by device");
+				this.is_paired = false;
+			}
+			// pair completed
+			_pair_in_progress = false;
+		} else {
+			debug("unsolicited pair change from device");
+			if (pair == false) {
+				// unpair from device
+				this.is_paired = false;
+			} else {
+				// pair request from device
+				this.pair(false);
+			}
+		}
+
+		// emit signal
+		paired(is_paired);
+	}
+
 	}
 }
