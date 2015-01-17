@@ -127,6 +127,9 @@ class Device : Object {
 		_channel.connected.connect((c) => {
 				this.greet();
 			});
+		_channel.disconnected.connect((c) => {
+				this.handle_disconnect();
+			});
 		_channel.packet_received.connect((c, pkt) => {
 				this.packet_received(pkt);
 			});
@@ -200,5 +203,8 @@ class Device : Object {
 		paired(is_paired);
 	}
 
+	private void handle_disconnect() {
+		// channel got disconnected
+		debug("channel disconnected");
 	}
 }
