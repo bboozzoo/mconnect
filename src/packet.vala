@@ -26,7 +26,7 @@ class Packet : GLib.Object {
 
 	public const string IDENTITY = "kdeconnect.identity";
 	public const string PAIR = "kdeconnect.pair";
-	public const string ENCRYPT = "kdeconnect.encrypt";
+	public const string ENCRYPTED = "kdeconnect.encrypted";
 
 	public string pkt_type { get; private set; default = ""; }
 	public int64 id { get; private set; default = 0; }
