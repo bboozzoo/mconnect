@@ -142,6 +142,23 @@ class DeviceChannel : Object {
 	}
 
 	private void handle_encrypted_packet(Packet pkt) {
+		// Ecypted packets have 'data' member in body. The 'data'
+		// member is an array of strings, each string is base64
+		// encoded data, of length appropriate for channel ecryption
+		// method.
+		Json.Array arr = pkt.body.get_array_member("data");
+		if (arr == null) {
+			critical("missing data member in encrypted packet");
+			return;
+		}
 
+		var msgbytes = new ByteArray();
+		arr.foreach_element((a, i, node) => {
+				debug("node data: %s", node.get_string());
+				uchar[] data = Base64.decode(node.get_string());
+				var dbytes = new Bytes.take(data);
+				Bytes decrypted = this._crypt.decrypt(dbytes);
+				msgbytes.append(decrypted.get_data());
+			});
 	}
 }
