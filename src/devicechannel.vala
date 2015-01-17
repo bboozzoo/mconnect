@@ -169,9 +169,10 @@ class DeviceChannel : Object {
 		debug("decrypted data: %s", decrypted_data);
 
 		Packet dec_pkt = Packet.new_from_data(decrypted_data);
-		if (dec_pkt == null)
-		{
+		if (dec_pkt == null) {
 			critical("failed to parse decrypted packet");
+		} else {
+			packet_received(dec_pkt);
 		}
 	}
 }
