@@ -18,6 +18,8 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
+using MConn;
+
 /**
  * Device communication channel
  *
@@ -33,10 +35,12 @@ class DeviceChannel : Object {
 	private DataOutputStream _dout = null;
 	private DataInputStream _din = null;
 
-	public signal void data_received(string data);
+	// channel encryption method
+	private Crypt _crypt = null;
 
-	public DeviceChannel(InetAddress host, uint port) {
+	public DeviceChannel(InetAddress host, uint port, Crypt crypt) {
 		_isa = new InetSocketAddress(host, (uint16) port);
+		_crypt = crypt;
 	}
 
 	public async void open() {
