@@ -22,6 +22,9 @@
 #include <openssl/pem.h>
 #include "mconn-crypt.h"
 
+/* encrypted data padding */
+#define M_CONN_CRYPT_RSA_PADDING RSA_PKCS1_PADDING
+
 typedef struct _MConnCryptPrivate      MConnCryptPrivate;
 
 /**
@@ -121,9 +124,31 @@ void m_conn_crypt_unref(MConnCrypt *self)
     }
 }
 
-GBytes * m_conn_crypt_decrypt(MConnCrypt *self, GBytes *data, GError **err)
+GByteArray * m_conn_crypt_decrypt(MConnCrypt *self, GBytes *data, GError **err)
 {
+    g_assert(IS_M_CONN_CRYPT(self));
+    g_assert(self->priv->key);
 
+    g_debug("decrypt: %zu bytes of data", g_bytes_get_size(data));
+
+    g_assert_cmpint(g_bytes_get_size(data), ==, RSA_size(self->priv->key));
+
+    /* decrypted data is less than RSA_size() long */
+    gsize out_buf_size = RSA_size(self->priv->key);
+    GByteArray *out_data = g_byte_array_sized_new(out_buf_size);
+
+    int dec_size;
+    dec_size = RSA_private_decrypt(g_bytes_get_size(data),
+                                   g_bytes_get_data(data, NULL),
+                                   (unsigned char *)out_data->data,
+                                   self->priv->key,
+                                   M_CONN_CRYPT_RSA_PADDING);
+    g_debug("decrypted size: %d", dec_size);
+    g_assert(dec_size != -1);
+
+    g_byte_array_set_size(out_data, dec_size);
+
+    return out_data;
 }
 
 gchar *m_conn_crypt_get_public_key_pem(MConnCrypt *self)

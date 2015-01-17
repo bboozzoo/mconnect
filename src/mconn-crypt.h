@@ -86,7 +86,7 @@ MConnCrypt *m_conn_crypt_ref(MConnCrypt *crypt);
  *
  * Returns: (transfer full): a new #GBytes with decoded data
  */
-GBytes * m_conn_crypt_decrypt(MConnCrypt *crypt, GBytes *data, GError **error);
+GByteArray * m_conn_crypt_decrypt(MConnCrypt *crypt, GBytes *data, GError **error);
 
 /**
  * m_conn_crypt_get_public_key_pem:
