@@ -112,6 +112,9 @@ class Device : Object {
 		_channel.connected.connect((c) => {
 				this.greet();
 			});
+		_channel.packet_received.connect((c, pkt) => {
+				this.packet_received(pkt);
+			});
 		_channel.open();
 		debug("open finished");
 	}
@@ -120,4 +123,7 @@ class Device : Object {
 
 	}
 
+	private void packet_received(Packet pkt) {
+		debug("got packet");
+	}
 }

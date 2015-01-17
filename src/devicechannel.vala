@@ -26,6 +26,7 @@
 class DeviceChannel : Object {
 
 	public signal void connected();
+	public signal void packet_received(Packet pkt);
 
 	private InetSocketAddress _isa = null;
 	private SocketConnection _conn = null;
@@ -106,6 +107,12 @@ class DeviceChannel : Object {
 		_din.read_byte();
 
 		pkt = Packet.new_from_data(data);
+		if (pkt == null) {
+			critical("failed to build packet from data");
+			return;
+		}
+
+		handle_packet(pkt);
 	}
 
 	private async void _io_ready() {
@@ -118,5 +125,19 @@ class DeviceChannel : Object {
 		} catch (Error e) {
 			critical("error occurred: %d: %s", e.code, e.message);
 		}
+	}
+
+	private void handle_packet(Packet pkt) {
+		debug("handle packet of type: %s", pkt.pkt_type);
+		if (pkt.pkt_type == Packet.ENCRYPTED) {
+			handle_encrypted_packet(pkt);
+		} else {
+			// signal that we got a packet
+			packet_received(pkt);
+		}
+	}
+
+	private void handle_encrypted_packet(Packet pkt) {
+
 	}
 }
