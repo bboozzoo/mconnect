@@ -109,7 +109,9 @@ class Device : Object {
 	public void activate() {
 		assert(_channel == null);
 
-		_channel = new DeviceChannel(this.host, this.tcp_port);
+		var core = Core.instance();
+		_channel = new DeviceChannel(this.host, this.tcp_port,
+									 core.crypt);
 		_channel.connected.connect((c) => {
 				this.greet();
 			});
