@@ -20,6 +20,10 @@
 
 using Json;
 
+public errordomain PacketError {
+	MALFORMED
+}
+
 class Packet : GLib.Object {
 
 	public const int PROTOCOL_VERSION = 5;
@@ -43,14 +47,25 @@ class Packet : GLib.Object {
 	}
 
 	public static Packet? new_from_data(string data) {
-		var jp = new Json.Parser();
+		Json.Parser jp = new Json.Parser();
 
 		try {
 			jp.load_from_data(data, -1);
-			var root_obj = jp.get_root().get_object();
-			var type = root_obj.get_string_member("type");
-			var id = root_obj.get_int_member("id");
-			var body = root_obj.get_object_member("body");
+			// there should be an object at root node
+			Json.Object root_obj = jp.get_root().get_object();
+			if (root_obj == null)
+				throw new PacketError.MALFORMED("Missing root object");
+
+			// object needs to have these fields
+			string[] required_members = {"type", "id", "body"};
+			foreach (string m in required_members) {
+				if (root_obj.has_member(m) == false)
+					throw new PacketError.MALFORMED(@"Missing $m member");
+			}
+
+			string type = root_obj.get_string_member("type");
+			int64 id = root_obj.get_int_member("id");
+			Json.Object body = root_obj.get_object_member("body");
 
 			debug("packet type: %s", type);
 
@@ -97,7 +112,7 @@ class Packet : GLib.Object {
 		builder.add_int_value(PROTOCOL_VERSION);
 		builder.end_object();
 
-		var data_obj = builder.get_root().get_object();
+		Json.Object data_obj = builder.get_root().get_object();
 
 		return new Packet(IDENTITY, data_obj);
 	}
@@ -115,7 +130,7 @@ class Packet : GLib.Object {
 		gen.set_root(root);
 		gen.set_pretty(false);
 
-		var data = gen.to_data(null);
+		string data = gen.to_data(null);
 
 		return data;
 	}
