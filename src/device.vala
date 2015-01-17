@@ -85,7 +85,7 @@ class Device : Object {
 							   "kdeconnect.ping"};
 		yield _channel.send(Packet.new_identity("test-laptop",
 												"dadada",
-												interfaces, interfaces).to_string());
+												interfaces, interfaces));
 		this.pair_if_needed();
 	}
 
