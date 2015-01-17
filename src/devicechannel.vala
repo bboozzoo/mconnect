@@ -67,8 +67,8 @@ class DeviceChannel : Object {
 		_din.set_newline_type(DataStreamNewlineType.LF);
 
 		// setup socket monitoring
-		var sock = _conn.get_socket();
-		var source = sock.create_source(IOCondition.IN | IOCondition.ERR |
+		Socket sock = _conn.get_socket();
+		SocketSource source = sock.create_source(IOCondition.IN | IOCondition.ERR |
 										IOCondition.HUP);
 		source.set_callback((src, cond) => {
 				this._io_ready();
