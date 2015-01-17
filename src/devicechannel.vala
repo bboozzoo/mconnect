@@ -42,7 +42,16 @@ class DeviceChannel : Object {
 		assert(this._isa != null);
 
 		var client = new SocketClient();
-		_conn = yield client.connect_async(_isa);
+		try {
+			_conn = yield client.connect_async(_isa);
+		} catch (Error e) {
+			//
+			critical("failed to connect to %s:%u: %s",
+					 _isa.address.to_string(), _isa.port,
+					 e.message);
+			return;
+			// TODO emit disconnected signal?
+		}
 
 		debug("connected to %s:%u", _isa.address.to_string(), _isa.port);
 
