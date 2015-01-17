@@ -98,7 +98,7 @@ class DeviceChannel : Object {
 		}
 	}
 
-	public async void receive(out Packet pkt) throws Error {
+	public async void receive() throws Error {
 		size_t line_len;
 		// read line up to newline
 		string data = yield _din.read_upto_async("\n", -1,
@@ -110,7 +110,7 @@ class DeviceChannel : Object {
 		_din.read_byte();
 		_din.read_byte();
 
-		pkt = Packet.new_from_data(data);
+		Packet pkt = Packet.new_from_data(data);
 		if (pkt == null) {
 			critical("failed to build packet from data");
 			return;
@@ -123,8 +123,7 @@ class DeviceChannel : Object {
 		debug("check for IO");
 		try {
 			debug("try read");
-			Packet pkt;
-			yield this.receive(out pkt);
+			this.receive();
 
 		} catch (Error e) {
 			critical("error occurred: %d: %s", e.code, e.message);
