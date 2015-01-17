@@ -75,11 +75,22 @@ class DeviceChannel : Object {
 		connected();
 	}
 
+	/**
+	 * send:
+	 * Possibly blocking
+	 *
+	 * @param: instance of Packet
+	 **/
 	public async void send(Packet pkt) {
 		string to_send = pkt.to_string() + "\n";
 		debug("send data: %s", to_send);
 		// _dout.put_string(data);
-		yield _conn.output_stream.write_async(to_send.data);
+		try {
+			_dout.put_string(to_send);
+		} catch (IOError e) {
+			critical("failed to send message: %s", e.message);
+			// TODO disconnect?
+		}
 	}
 
 	public async void receive(out Packet pkt) throws Error {
