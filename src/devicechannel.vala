@@ -20,6 +20,8 @@
 
 /**
  * Device communication channel
+ *
+ * Automatically handle channel encoding.
  */
 class DeviceChannel : Object {
 
@@ -41,10 +43,25 @@ class DeviceChannel : Object {
 
 		var client = new SocketClient();
 		_conn = yield client.connect_async(_isa);
-		// _dout = new DataOutputStream(_conn.output_stream);
-		// _din = new DataInputStream(_conn.input_stream);
 
 		debug("connected to %s:%u", _isa.address.to_string(), _isa.port);
+
+		// use data streams
+		_dout = new DataOutputStream(_conn.output_stream);
+		_din = new DataInputStream(_conn.input_stream);
+		// messages end with \n\n
+		_din.set_newline_type(DataStreamNewlineType.LF);
+
+		// setup socket monitoring
+		var sock = _conn.get_socket();
+		var source = sock.create_source(IOCondition.IN | IOCondition.ERR |
+										IOCondition.HUP);
+		source.set_callback((src, cond) => {
+				this._io_ready();
+				return true;
+			});
+		// attach source
+		source.attach(null);
 
 		connected();
 	}
@@ -56,8 +73,30 @@ class DeviceChannel : Object {
 		yield _conn.output_stream.write_async(to_send.data);
 	}
 
-	public async void receive(out string data) throws Error {
-		var received = yield _conn.input_stream.read_bytes_async(4096);
-		debug("received data: %zu", received.get_size());
+	public async void receive(out Packet pkt) throws Error {
+		size_t line_len;
+		// read line up to newline
+		string data = yield _din.read_upto_async("\n", -1,
+												 Priority.DEFAULT,
+												 null,
+												 out line_len);
+		debug("received line: %s", data);
+		// expecting \n\n
+		_din.read_byte();
+		_din.read_byte();
+
+		pkt = Packet.new_from_data(data);
+	}
+
+	private async void _io_ready() {
+		debug("check for IO");
+		try {
+			debug("try read");
+			Packet pkt;
+			yield this.receive(out pkt);
+
+		} catch (Error e) {
+			critical("error occurred: %d: %s", e.code, e.message);
+		}
 	}
 }
