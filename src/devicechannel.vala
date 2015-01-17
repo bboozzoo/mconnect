@@ -154,10 +154,24 @@ class DeviceChannel : Object {
 		var msgbytes = new ByteArray();
 		arr.foreach_element((a, i, node) => {
 				debug("node data: %s", node.get_string());
+				// encrypted data is base64 encoded
 				uchar[] data = Base64.decode(node.get_string());
 				var dbytes = new Bytes.take(data);
-				Bytes decrypted = this._crypt.decrypt(dbytes);
-				msgbytes.append(decrypted.get_data());
+				ByteArray decrypted = this._crypt.decrypt(dbytes);
+				debug("data length: %zu", decrypted.data.length);
+				msgbytes.append(decrypted.data);
 			});
+		// data should be complete now
+		debug("total length of packet data: %zu", msgbytes.len);
+		// make sure there is \0 at the end
+		msgbytes.append({'\0'});
+		string decrypted_data = ((string)msgbytes.data).dup();
+		debug("decrypted data: %s", decrypted_data);
+
+		Packet dec_pkt = Packet.new_from_data(decrypted_data);
+		if (dec_pkt == null)
+		{
+			critical("failed to parse decrypted packet");
+		}
 	}
 }
