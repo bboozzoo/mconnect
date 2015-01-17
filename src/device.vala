@@ -96,7 +96,8 @@ class Device : Object {
 			var core = Core.instance();
 			string pubkey = core.crypt.get_public_key_pem();
 			debug("public key: %s", pubkey);
-			_channel.send(Packet.new_pair(pubkey).to_string());
+
+			yield _channel.send(Packet.new_pair(pubkey));
 		}
 	}
 
