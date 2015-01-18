@@ -154,13 +154,8 @@ class DeviceChannel : Object {
 
 	private async void _io_ready() {
 		debug("check for IO");
-		try {
-			debug("try read");
-			this.receive.begin();
-
-		} catch (Error e) {
-			critical("error occurred: %d: %s", e.code, e.message);
-		}
+		debug("try read");
+		this.receive.begin();
 	}
 
 	private void handle_packet(Packet pkt) {
