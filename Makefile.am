@@ -1,3 +1,8 @@
+# location of *.desktop file, usually /usr/share/applications
+applicationsdir = $(datadir)/applications
+
+applications_DATA = mconnect.desktop
+
 bin_PROGRAMS = mconnect
 
 noinst_PROGRAMS = test-mconn-crypt \
@@ -46,8 +51,14 @@ mconn-crypt.vapi: mconn-crypt.gi
 	rm -f $@
 	vapigen --library mconn-crypt $<
 
+# configure will expand bindir to ${exec_prefix}/bin, we want the
+# whole thing, that's why mconnect.desktop is generated here and not
+# in configure
+do_desktop_subst = sed -e 's,[@]bindir[@],${bindir},g'
+mconnect.desktop: mconnect.desktop.in
+	$(do_desktop_subst) < $< > $@
 
-BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gi
+BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gi mconnect.desktop
 
 CLEANFILES = $(BUILT_SOURCES)
 
