@@ -51,7 +51,7 @@ class BatteryHandler : Object, PacketHandlerInterface {
 		int64 level = pkt.body.get_int_member("currentCharge");
 		bool charging = pkt.body.get_boolean_member("isCharging");
 
-		info("battery level: %u %s", (uint) level,
-			 (charging == true) ? "charging" : "");
+		GLib.message("battery level: %u %s", (uint) level,
+					 (charging == true) ? "charging" : "");
 	}
 }
