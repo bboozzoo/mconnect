@@ -1,5 +1,5 @@
 # git SHA1 of usable master
-%global commit 3cb70f54f3f185d063625ba91609766a92b4cf87
+%global commit 42a2ca123802122dbad3256b7ec5e438cbe67be2
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 %global owner bboozzoo
 
