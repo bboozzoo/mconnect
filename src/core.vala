@@ -23,11 +23,12 @@ class Core : Object {
 
 	public Crypt crypt { get; private set; default = null; }
 
+	public PacketHandlers handlers {get; private set; default = null; }
+
 	private static Core _instance = null;
 
-	private Core(Crypt crypt) {
+	private Core() {
 		debug("init core");
-		this.crypt = crypt;
 	}
 
 	public static Core? instance() {
@@ -35,7 +36,13 @@ class Core : Object {
 		{
 			var crypt = new Crypt.for_key_path("private.pem");
 
-			var core = new Core(crypt);
+			var core = new Core();
+			var handlers = new PacketHandlers();
+			core.crypt = crypt;
+			core.handlers = handlers;
+
+			info("supported interfaces: %s", string.joinv(", ",
+														  handlers.interfaces));
 			Core._instance = core;
 		}
 
