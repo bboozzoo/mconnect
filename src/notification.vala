@@ -44,5 +44,30 @@ class NotificationHandler : Object, PacketHandlerInterface {
 
 	public void message(Packet pkt) {
 		debug("got notification packet");
+
+		// get application ID
+		string id = pkt.body.get_string_member("id");
+
+		// dialer notifications are handled by telephony plugin
+		if (id.match_string("com.android.dialer", false) == true)
+			return;
+
+		// other notifications
+		if (pkt.body.has_member("appName") == false ||
+			pkt.body.has_member("ticker") == false)
+			return;
+
+		string app = pkt.body.get_string_member("appName");
+		string ticker = pkt.body.get_string_member("ticker");
+
+		// skip empty notifications
+		if (ticker.length == 0)
+			return;
+
+		GLib.message("notification from %s: %s", app, ticker);
+
+		var notif = new Notify.Notification(app, ticker,
+											"dialog-information");
+		notif.show();
 	}
 }
