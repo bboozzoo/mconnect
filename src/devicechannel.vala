@@ -92,9 +92,22 @@ class DeviceChannel : Object {
 			Source.remove(_srcid);
 			_srcid = 0;
 		}
-		_din.close();
-		_dout.close();
-		_conn.close();
+
+		try {
+			_din.close();
+		} catch (Error e) {
+			critical("failed to close data input: %s", e.message);
+		}
+		try {
+			_dout.close();
+		} catch (Error e) {
+			critical("failed to close data output: %s", e.message);
+		}
+		try {
+			_conn.close();
+		} catch (Error e) {
+			critical("failed to close connection: %s", e.message);
+		}
 		_din = null;
 		_dout = null;
 		_conn = null;
