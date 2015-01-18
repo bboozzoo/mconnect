@@ -45,6 +45,9 @@ public static int main(string[] args)
 	if (core == null)
 		error("cannot initialize core");
 
+	if (core.config.is_debug_on() == true)
+		Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
+
 	var loop = new MainLoop();
 	var discovery = new Discovery();
 	var manager = new DeviceManager();
