@@ -59,4 +59,10 @@ class PacketHandlers : Object {
 		}
 		// return interfaces;
 	}
+
+	public void use_device(Device dev) {
+		_handlers.foreach((h) => {
+				h.use_device(dev);
+			});
+	}
 }
