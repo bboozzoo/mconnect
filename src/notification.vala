@@ -68,6 +68,10 @@ class NotificationHandler : Object, PacketHandlerInterface {
 
 		var notif = new Notify.Notification(app, ticker,
 											"dialog-information");
-		notif.show();
+		try {
+			notif.show();
+		} catch (Error e) {
+			critical("failed to show notification: %s", e.message);
+		}
 	}
 }
