@@ -6,6 +6,9 @@ really needed only at build time. OpenSSL does the packet
 encryption/decryption at the protocol level, while Json-glib does
 packet parsing. Libnotify is responsible for displaying shell popups.
 
+Since I'm new ot Vala, I'm treating this as a learning execrise, yet
+with usable results.
+
 # Building
 
 Build dependencies (using package names as found in Fedora):
@@ -53,3 +56,4 @@ a connection at the sender's address will be made only if the device
 is listed as `allowed` in `mconnect.conf` (see the sample config).
 Should the device be whitelisted in configuration, pairing will happen
 automatically.
+
