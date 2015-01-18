@@ -179,15 +179,25 @@ class DeviceChannel : Object {
 			return;
 		}
 
+		bool failed = false;
 		var msgbytes = new ByteArray();
 		arr.foreach_element((a, i, node) => {
+				// exit early
+				if (failed == true)
+					return;
+
 				debug("node data: %s", node.get_string());
 				// encrypted data is base64 encoded
 				uchar[] data = Base64.decode(node.get_string());
 				var dbytes = new Bytes.take(data);
-				ByteArray decrypted = this._crypt.decrypt(dbytes);
-				debug("data length: %zu", decrypted.data.length);
-				msgbytes.append(decrypted.data);
+				try {
+					ByteArray decrypted = this._crypt.decrypt(dbytes);
+					debug("data length: %zu", decrypted.data.length);
+					msgbytes.append(decrypted.data);
+				} catch (Error e) {
+					critical("decryption failed: %s", e.message);
+					failed = true;
+				}
 			});
 		// data should be complete now
 		debug("total length of packet data: %zu", msgbytes.len);
