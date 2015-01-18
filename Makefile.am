@@ -13,6 +13,7 @@ mconnect_SOURCES = src/main.vala \
 		   src/packethandlerinterface.vala \
 		   src/packethandlers.vala \
 		   src/notification.vala \
+		   src/battery.vala \
 		   src/mconn-crypt.c \
 		   src/mconn-crypt.h
 
