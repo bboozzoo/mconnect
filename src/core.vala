@@ -25,6 +25,8 @@ class Core : Object {
 
 	public PacketHandlers handlers {get; private set; default = null; }
 
+	public Config config { get; private set; default = null; }
+
 	private static Core _instance = null;
 
 	private Core() {
@@ -34,12 +36,14 @@ class Core : Object {
 	public static Core? instance() {
 		if (Core._instance == null)
 		{
-			init_user_data();
+			init_user_dirs();
 
+			var config = init_config();
 			Crypt crypt = init_crypto();
 			var handlers = new PacketHandlers();
 
 			var core = new Core();
+			core.config = config;
 			core.crypt = crypt;
 			core.handlers = handlers;
 
@@ -55,14 +59,30 @@ class Core : Object {
 		return Environment.get_user_data_dir() + "/mconnect";
 	}
 
-	private static void init_user_data() {
-		string storage = get_storage_dir();
+	private static string get_config_dir() {
+		return Environment.get_user_config_dir() + "/mconnect";
+	}
 
-		DirUtils.create_with_parents(storage, 0700);
+	private static void init_user_dirs() {
+		DirUtils.create_with_parents(get_storage_dir(), 0700);
+		DirUtils.create_with_parents(get_config_dir(), 0700);
 	}
 
 	private static Crypt init_crypto() {
 		string key_path = get_storage_dir() + "/private.pem";
 		return new Crypt.for_key_path(key_path);
+	}
+
+	private static Config init_config() {
+		string user_config_path = get_config_dir() + "/" + Config.FILE;
+
+		var config = new Config(get_config_dir());
+
+		// write configuration to user config file if none is present
+		if (config.path != user_config_path) {
+			config.dump_to_file(user_config_path);
+		}
+
+		return config;
 	}
 }
