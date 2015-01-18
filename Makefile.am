@@ -80,9 +80,11 @@ do_desktop_subst = sed -e 's,[@]bindir[@],${bindir},g'
 mconnect.desktop: mconnect.desktop.in
 	$(do_desktop_subst) < $< > $@
 
+REV ?= HEAD
+
 git-source-dist:
-	gitsha=`git rev-list HEAD -1`; \
-	git archive --prefix=mconnect-$${gitsha}/ HEAD | \
+	gitsha=`git rev-list $(REV) -1`; \
+	git archive --prefix=mconnect-$${gitsha}/ $(REV) | \
 		gzip -c > mconnect-$${gitsha}.tar.gz
 
 BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gi mconnect.desktop
