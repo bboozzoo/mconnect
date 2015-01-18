@@ -116,7 +116,7 @@ class Device : Object {
 
 	public void pair_if_needed() {
 		if (is_paired == false && _pair_in_progress == false)
-			this.pair();
+			this.pair.begin();
 	}
 
 	public void activate() {
@@ -126,7 +126,7 @@ class Device : Object {
 		_channel = new DeviceChannel(this.host, this.tcp_port,
 									 core.crypt);
 		_channel.connected.connect((c) => {
-				this.greet();
+				this.greet.begin();
 			});
 		_channel.disconnected.connect((c) => {
 				this.handle_disconnect();
@@ -134,13 +134,13 @@ class Device : Object {
 		_channel.packet_received.connect((c, pkt) => {
 				this.packet_received(pkt);
 			});
-		_channel.open();
+		_channel.open.begin();
 		debug("open finished");
 	}
 
 	public void deactivate() {
 		if (_channel == null)
-			_channel.close();
+			_channel.close.begin();
 		_channel = null;
 	}
 
@@ -209,7 +209,7 @@ class Device : Object {
 				this.is_paired = false;
 			} else {
 				// pair request from device
-				this.pair(false);
+				this.pair.begin(false);
 			}
 		}
 
