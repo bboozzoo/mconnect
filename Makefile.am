@@ -37,6 +37,7 @@ mconnect_SOURCES = src/main.vala \
 		   src/notification.vala \
 		   src/battery.vala \
 		   src/telephony.vala \
+		   src/config.vala \
 		   src/mconn-crypt.c \
 		   src/mconn-crypt.h
 
