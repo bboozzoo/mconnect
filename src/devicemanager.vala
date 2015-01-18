@@ -32,6 +32,11 @@ class DeviceManager : GLib.Object
 	public void found_device(Device dev) {
 		debug("found device: %s", dev.to_string());
 
+		if (device_allowed(dev) == false) {
+			message("device %s not on whitelist", dev.to_string());
+			return;
+		}
+
 		string unique = dev.to_unique_string();
 		if (this.devices.has_key(unique) == false) {
 			debug("adding new device with key: %s", unique);
@@ -45,6 +50,13 @@ class DeviceManager : GLib.Object
 			var known_dev = this.devices.@get(unique);
 			known_dev.activate_from_device(dev);
 		}
+	}
+
+	private bool device_allowed(Device dev) {
+		var core = Core.instance();
+		return core.config.is_device_allowed(dev.device_name,
+											 dev.device_type);
+
 	}
 
 	private void device_paired(Device dev, bool status) {
