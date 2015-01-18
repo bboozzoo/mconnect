@@ -20,6 +20,10 @@ applicationsdir = $(datadir)/applications
 
 applications_DATA = mconnect.desktop
 
+mconnectdatadir = $(sysconfdir)/mconnect
+
+mconnectdata_DATA = mconnect.conf
+
 bin_PROGRAMS = mconnect
 
 noinst_PROGRAMS = test-mconn-crypt \
