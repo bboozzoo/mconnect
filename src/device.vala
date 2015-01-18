@@ -84,8 +84,10 @@ class Device : Object {
 
 	private async void greet() {
 		var core = Core.instance();
-		yield _channel.send(Packet.new_identity("test-laptop",
-												"dadada",
+		string host_name = Environment.get_host_name();
+		string user = Environment.get_user_name();
+		yield _channel.send(Packet.new_identity(@"$user@$host_name",
+												Environment.get_host_name(),
 												core.handlers.interfaces,
 												core.handlers.interfaces));
 		this.pair_if_needed();
