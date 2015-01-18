@@ -58,6 +58,11 @@ do_desktop_subst = sed -e 's,[@]bindir[@],${bindir},g'
 mconnect.desktop: mconnect.desktop.in
 	$(do_desktop_subst) < $< > $@
 
+git-source-dist:
+	gitsha=`git rev-list HEAD -1`; \
+	git archive --prefix=mconnect-$${gitsha}/ HEAD | \
+		gzip -c > mconnect-$${gitsha}.tar.gz
+
 BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gi mconnect.desktop
 
 CLEANFILES = $(BUILT_SOURCES)
