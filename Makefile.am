@@ -10,6 +10,8 @@ mconnect_SOURCES = src/main.vala \
 		   src/devicemanager.vala \
 		   src/devicechannel.vala \
 		   src/core.vala \
+		   src/packethandlerinterface.vala \
+		   src/packethandlers.vala \
 		   src/mconn-crypt.c \
 		   src/mconn-crypt.h
 
