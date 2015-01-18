@@ -57,7 +57,7 @@ class TelephonyHandler : Object, PacketHandlerInterface {
 		GLib.message("call from %s, status %s", number, ev);
 
 		// handle only missed call and ringing events
-		string[] accepted_events = {"ringing", "missedCall"};
+		const string[] accepted_events = {"ringing", "missedCall"};
 
 		if (ev in accepted_events) {
 			string summary = "Other event";
