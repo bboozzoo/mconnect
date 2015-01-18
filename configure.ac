@@ -37,7 +37,7 @@ AC_PROG_CC
 AM_PROG_VALAC([0.7.0])
 AC_PROG_INSTALL
 
-AC_SUBST(MCONNECT_VALAFLAGS, ["--pkg=json-glib-1.0 --pkg=gee-0.8"])
+AC_SUBST(MCONNECT_VALAFLAGS, ["--pkg=json-glib-1.0 --pkg=gee-0.8 --pkg=libnotify"])
 # AC_SUBST(MCONNECT_VALAFLAGS, [--pkg=json-glib-1.0 --pkg=gee-0.8])
 PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              gobject-2.0,
@@ -47,6 +47,7 @@ PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              gee-0.8,
                              libcrypto
                              libvala-0.26
+                             libnotify
                              ])
 AC_SUBST(MCONNECT_CFLAGS)
 AC_SUBST(MCONNECT_LIBS)
