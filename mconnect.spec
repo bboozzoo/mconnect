@@ -45,7 +45,8 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/mconnect.desktop
 %doc LICENSE
 %{_bindir}/mconnect
 %{_datadir}/applications/*.desktop
-
+%dir %{_sysconfdir}/mconnect
+%{_sysconfdir}/mconnect/*
 
 %changelog
 * Sun Jan 18 2015 Maciek Borzecki <maciek.borzecki@gmail.com>
