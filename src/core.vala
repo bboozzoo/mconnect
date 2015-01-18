@@ -34,10 +34,12 @@ class Core : Object {
 	public static Core? instance() {
 		if (Core._instance == null)
 		{
-			var crypt = new Crypt.for_key_path("private.pem");
+			init_user_data();
+
+			Crypt crypt = init_crypto();
+			var handlers = new PacketHandlers();
 
 			var core = new Core();
-			var handlers = new PacketHandlers();
 			core.crypt = crypt;
 			core.handlers = handlers;
 
@@ -49,4 +51,18 @@ class Core : Object {
 		return Core._instance;
 	}
 
+	private static string get_storage_dir() {
+		return Environment.get_user_data_dir() + "/mconnect";
+	}
+
+	private static void init_user_data() {
+		string storage = get_storage_dir();
+
+		DirUtils.create_with_parents(storage, 0700);
+	}
+
+	private static Crypt init_crypto() {
+		string key_path = get_storage_dir() + "/private.pem";
+		return new Crypt.for_key_path(key_path);
+	}
 }
