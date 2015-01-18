@@ -69,14 +69,14 @@ class Discovery : GLib.Object
 			try {
 				ssize_t read = this.socket.receive_from(out sa, buffer);
 				isa = (InetSocketAddress)sa;
-				message("got %zd bytes from: %s:%u", read,
+				debug("got %zd bytes from: %s:%u", read,
 						isa.address.to_string(), isa.port);
 			} catch (Error e) {
-				message("faile to receive packet: %s", e.message);
+				message("failed to receive packet: %s", e.message);
 				return;
 			}
 
-			message("message data: %s", (string)buffer);
+			debug("message data: %s", (string)buffer);
 
 			this.parsePacketFromHost((string) buffer, isa.address);
 		}
@@ -92,7 +92,7 @@ class Discovery : GLib.Object
 			}
 
 			var dev = new Device.from_identity(pkt, host);
-			debug("connection from device: \'%s\', responds at: %s:%u",
+			message("connection from device: \'%s\', responds at: %s:%u",
 				  dev.device_name, host.to_string(), dev.tcp_port);
 
 			device_found(dev);
