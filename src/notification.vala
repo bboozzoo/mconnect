@@ -73,7 +73,7 @@ class NotificationHandler : Object, PacketHandlerInterface {
 		GLib.message("notification from %s: %s", app, ticker);
 
 		var notif = new Notify.Notification(app, ticker,
-											"dialog-information");
+											"phone");
 		try {
 			notif.show();
 		} catch (Error e) {
