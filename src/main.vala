@@ -20,6 +20,8 @@
 
 public static int main(string[] args)
 {
+	Notify.init("mconnect");
+
 	var core = Core.instance();
 	if (core == null)
 		error("cannot initialize core");
