@@ -57,6 +57,12 @@ class NotificationHandler : Object, PacketHandlerInterface {
 			pkt.body.has_member("ticker") == false)
 			return;
 
+		// maybe it's a notification about a notification being
+		// cancelled
+		if (pkt.body.has_member("isCancel") == true &&
+			pkt.body.get_boolean_member("isCancel") == true)
+			return;
+
 		string app = pkt.body.get_string_member("appName");
 		string ticker = pkt.body.get_string_member("ticker");
 
