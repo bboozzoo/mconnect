@@ -77,7 +77,7 @@ class TelephonyHandler : Object, PacketHandlerInterface {
 			}
 
 			var notif = new Notify.Notification(summary, number,
-												"dialog-information");
+												"phone");
 			try {
 				notif.show();
 			} catch (Error e) {
