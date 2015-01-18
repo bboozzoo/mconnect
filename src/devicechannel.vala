@@ -76,7 +76,7 @@ class DeviceChannel : Object {
 		SocketSource source = sock.create_source(IOCondition.IN | IOCondition.ERR |
 										IOCondition.HUP);
 		source.set_callback((src, cond) => {
-				this._io_ready();
+				this._io_ready.begin();
 				return true;
 			});
 		// attach source
@@ -143,7 +143,7 @@ class DeviceChannel : Object {
 		debug("check for IO");
 		try {
 			debug("try read");
-			this.receive();
+			this.receive.begin();
 
 		} catch (Error e) {
 			critical("error occurred: %d: %s", e.code, e.message);
