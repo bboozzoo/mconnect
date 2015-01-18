@@ -37,12 +37,22 @@ class DeviceManager : GLib.Object
 			debug("adding new device with key: %s", unique);
 			this.devices.@set(unique, dev);
 
+			dev.paired.connect((d, p) => {
+					device_paired(d, p);
+				});
 			dev.activate();
 		} else {
 			var known_dev = this.devices.@get(unique);
 			known_dev.activate_from_device(dev);
 		}
+	}
 
+	private void device_paired(Device dev, bool status) {
+		if (status == true) {
+			var core = Core.instance();
+			// register message handlers
+			core.handlers.use_device(dev);
+		}
 	}
 
 }
