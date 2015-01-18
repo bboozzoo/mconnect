@@ -170,6 +170,15 @@ class Device : Object {
 			// pairing
 			handle_pair_packet(pkt);
 		} else {
+			// we sent a pair request, but got another packet,
+			// supposedly meaning we're alredy paired since the device
+			// is sending us data
+			if (_pair_in_progress == true) {
+				_pair_in_progress = false;
+				// just to be clear, send paired signal
+				paired(true);
+			}
+
 			debug("signal packet");
 			// emit signal
 			message(pkt);
