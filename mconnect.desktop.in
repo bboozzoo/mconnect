@@ -2,6 +2,8 @@
 Type=Application
 Name=Mobile Connect
 Exec=@bindir@/mconnect
+Terminal=false
 Icon=phone
-# OnlyShowIn=GNOME;Unity;
+Categories=Network;
+
 
