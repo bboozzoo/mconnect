@@ -83,12 +83,11 @@ class Device : Object {
 	}
 
 	private async void greet() {
-		string[] interfaces = {"kdeconnect.notification",
-							   "kdeconnect.battery",
-							   "kdeconnect.ping"};
+		var core = Core.instance();
 		yield _channel.send(Packet.new_identity("test-laptop",
 												"dadada",
-												interfaces, interfaces));
+												core.handlers.interfaces,
+												core.handlers.interfaces));
 		this.pair_if_needed();
 	}
 
