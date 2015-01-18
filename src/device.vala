@@ -169,6 +169,10 @@ class Device : Object {
 		if (pkt.pkt_type == Packet.PAIR) {
 			// pairing
 			handle_pair_packet(pkt);
+		} else {
+			debug("signal packet");
+			// emit signal
+			message(pkt);
 		}
 	}
 
