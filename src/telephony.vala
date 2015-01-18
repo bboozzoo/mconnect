@@ -78,7 +78,11 @@ class TelephonyHandler : Object, PacketHandlerInterface {
 
 			var notif = new Notify.Notification(summary, number,
 												"dialog-information");
-			notif.show();
+			try {
+				notif.show();
+			} catch (Error e) {
+				critical("failed to show notification: %s", e.message);
+			}
 
 		}
 	}
