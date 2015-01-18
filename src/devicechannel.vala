@@ -70,6 +70,9 @@ class DeviceChannel : Object {
 
 		// setup socket monitoring
 		Socket sock = _conn.get_socket();
+		// enable keepalive
+		sock.set_keepalive(true);
+		// prep source for monitoring events
 		SocketSource source = sock.create_source(IOCondition.IN | IOCondition.ERR |
 										IOCondition.HUP);
 		source.set_callback((src, cond) => {
