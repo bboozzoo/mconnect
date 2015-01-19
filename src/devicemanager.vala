@@ -38,6 +38,7 @@ class DeviceManager : GLib.Object
 		}
 
 		string unique = dev.to_unique_string();
+		debug("device key: %s", unique);
 		if (this.devices.has_key(unique) == false) {
 			debug("adding new device with key: %s", unique);
 			this.devices.@set(unique, dev);
@@ -45,8 +46,13 @@ class DeviceManager : GLib.Object
 			dev.paired.connect((d, p) => {
 					device_paired(d, p);
 				});
+
+			dev.disconnected.connect((d) => {
+					device_disconnected(d);
+				});
 			dev.activate();
 		} else {
+			debug("activate from device");
 			var known_dev = this.devices.@get(unique);
 			known_dev.activate_from_device(dev);
 		}
@@ -65,6 +71,10 @@ class DeviceManager : GLib.Object
 			// register message handlers
 			core.handlers.use_device(dev);
 		}
+	}
+
+	private void device_disconnected(Device dev) {
+		debug("device %s got disconnected", dev.to_string());
 	}
 
 }
