@@ -140,6 +140,7 @@ class Device : Object {
 		if (_channel != null)
 			_channel.close.begin();
 		_channel = null;
+		_host = null;
 	}
 
 	/**
@@ -225,8 +226,13 @@ class Device : Object {
 		paired(is_paired);
 	}
 
-	private void handle_disconnect() {
+	private async void handle_disconnect() {
 		// channel got disconnected
 		debug("channel disconnected");
+		yield _channel.close();
+		_channel = null;
+		_host = null;
+		// emit disconnected
+		disconnected();
 	}
 }
