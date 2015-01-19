@@ -99,17 +99,20 @@ class DeviceChannel : Object {
 		}
 
 		try {
-			_din.close();
+			if (_din != null)
+				_din.close();
 		} catch (Error e) {
 			critical("failed to close data input: %s", e.message);
 		}
 		try {
-			_dout.close();
+			if (_dout != null)
+				_dout.close();
 		} catch (Error e) {
 			critical("failed to close data output: %s", e.message);
 		}
 		try {
-			_conn.close();
+			if (_conn != null)
+				_conn.close();
 		} catch (Error e) {
 			critical("failed to close connection: %s", e.message);
 		}
