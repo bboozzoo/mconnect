@@ -70,6 +70,21 @@ class NotificationHandler : Object, PacketHandlerInterface {
 		if (ticker.length == 0)
 			return;
 
+		DateTime time = null;
+		// check if time was provided, prepend to ticker
+		if (pkt.body.has_member("time") == true) {
+			string timestr = pkt.body.get_string_member("time");
+			int64 t = int64.parse(timestr);
+			// time in ms since Epoch, convert to seconds
+			t /= 1000;
+			time = new DateTime.from_unix_local(t);
+		} else {
+			time = new DateTime.now_local();
+		}
+		if (time != null)
+			ticker = "%s %s".printf(time.format("%X"),
+									ticker);
+
 		GLib.message("notification from %s: %s", app, ticker);
 
 		var notif = new Notify.Notification(app, ticker,
