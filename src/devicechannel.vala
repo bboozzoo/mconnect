@@ -79,9 +79,9 @@ class DeviceChannel : Object {
 		sock.set_keepalive(true);
 		// prep source for monitoring events
 		SocketSource source = sock.create_source(IOCondition.IN | IOCondition.ERR |
-										IOCondition.HUP);
+												 IOCondition.HUP);
 		source.set_callback((src, cond) => {
-				this._io_ready.begin();
+				this._io_ready.begin(cond);
 				return true;
 			});
 		// attach source
@@ -136,13 +136,30 @@ class DeviceChannel : Object {
 		}
 	}
 
-	public async void receive() throws Error {
+	/**
+	 * receive:
+	 * Try to receive some data from channel
+	 *
+	 * @return false if channel was closed, true otherwise
+	 */
+	public async bool receive() throws Error {
 		size_t line_len;
+		string data = null;
 		// read line up to newline
-		string data = yield _din.read_upto_async("\n", -1,
-												 Priority.DEFAULT,
-												 null,
-												 out line_len);
+		try {
+			data = yield _din.read_upto_async("\n", -1,
+											  Priority.DEFAULT,
+											  null,
+											  out line_len);
+		} catch (IOError ie) {
+			debug("I/O error: %s", ie.message);
+		}
+
+		if (data == null) {
+			debug("connection closed?");
+			return false;
+		}
+
 		debug("received line: %s", data);
 		// expecting \n\n
 		_din.read_byte();
@@ -151,16 +168,23 @@ class DeviceChannel : Object {
 		Packet pkt = Packet.new_from_data(data);
 		if (pkt == null) {
 			critical("failed to build packet from data");
-			return;
+			// data was received, hence connection is still alive
+			return true;
 		}
 
 		handle_packet(pkt);
+
+		return true;
 	}
 
-	private async void _io_ready() {
-		debug("check for IO");
-		debug("try read");
-		this.receive.begin();
+	private async void _io_ready(uint flags) {
+		debug("check for IO, conditions: 0x%x", flags);
+		bool res = yield this.receive();
+
+		if (res == false) {
+			// disconnected
+			disconnected();
+		}
 	}
 
 	private void handle_packet(Packet pkt) {
