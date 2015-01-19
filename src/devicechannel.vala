@@ -27,7 +27,6 @@ using MConn;
  */
 class DeviceChannel : Object {
 
-	public signal void connected();
 	public signal void disconnected();
 	public signal void packet_received(Packet pkt);
 
@@ -45,8 +44,10 @@ class DeviceChannel : Object {
 		_crypt = crypt;
 	}
 
-	public async void open() {
+	public async bool open() {
 		assert(this._isa != null);
+
+		debug("connect to %s:%u", _isa.address.to_string(), _isa.port);
 
 		var client = new SocketClient();
 		try {
@@ -56,8 +57,8 @@ class DeviceChannel : Object {
 			critical("failed to connect to %s:%u: %s",
 					 _isa.address.to_string(), _isa.port,
 					 e.message);
-			return;
-			// TODO emit disconnected signal?
+			// emit disconnected
+			return false;
 		}
 
 		debug("connected to %s:%u", _isa.address.to_string(), _isa.port);
@@ -82,7 +83,7 @@ class DeviceChannel : Object {
 		// attach source
 		_srcid = source.attach(null);
 
-		connected();
+		return true;
 	}
 
 	public async void close() {
