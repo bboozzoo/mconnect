@@ -20,7 +20,7 @@ applicationsdir = $(datadir)/applications
 
 applications_DATA = mconnect.desktop
 
-mconnectdatadir = $(sysconfdir)/mconnect
+mconnectdatadir = $(datadir)/mconnect
 
 mconnectdata_DATA = mconnect.conf
 
