@@ -14,8 +14,8 @@ with usable results.
 Build dependencies (using package names as found in Fedora):
 
 - vala
-- vala-devel
 - glib2-devel
+- gobject-introspection-devel
 - libgee-devel
 - json-glib
 - openssl-devel

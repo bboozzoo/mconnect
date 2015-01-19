@@ -46,32 +46,34 @@ mconnect_SOURCES = src/main.vala \
 		   src/mconn-crypt.h
 
 mconnect_LDADD = $(MCONNECT_LIBS)
-
 mconnect_CFLAGS = $(MCONNECT_CFLAGS) -Isrc
 
-test_mconn_crypt_SOURCES = test/mconn-crypt-test.c \
-			   src/mconn-crypt.c \
-			   src/mconn-crypt.h
+noinst_LTLIBRARIES = libmconn-crypt.la
+libmconn_crypt_la_SOURCES = src/mconn-crypt.c \
+			    src/mconn-crypt.h
+libmconn_crypt_la_CFLAGS = $(MCONNECT_CFLAGS)
+libmconn_crypt_la_LIBADD = $(MCONNECT_LIBS)
 
-test_mconn_crypt_LDADD = $(MCONNECT_LIBS)
+test_mconn_crypt_SOURCES = test/mconn-crypt-test.c
+test_mconn_crypt_LDADD = $(MCONNECT_LIBS) libmconn-crypt.la
 test_mconn_crypt_CFLAGS = $(MCONNECT_CFLAGS) -Isrc
 
-test_mconn_crypt_vala_SOURCES = test/mconn-crypt-vala-test.vala \
-				src/mconn-crypt.c \
-				src/mconn-crypt.h
-test_mconn_crypt_vala_LDADD = $(MCONNECT_LIBS)
+test_mconn_crypt_vala_SOURCES = test/mconn-crypt-vala-test.vala
+test_mconn_crypt_vala_LDADD = $(MCONNECT_LIBS) libmconn-crypt.la
 test_mconn_crypt_vala_CFLAGS = $(MCONNECT_CFLAGS) -Isrc -I.
 
 VALAFLAGS = $(MCONNECT_VALAFLAGS) --vapidir=. --pkg=mconn-crypt
 
-mconn-crypt.gi: src/mconn-crypt.h
+mconn-crypt.gir: libmconn-crypt.la
 	rm -f $@
-	$(GEN_INTROSPECT) -n MConn \
-		$< $(filter -I%,$(MCONNECT_CFLAGS)) > $@
+	$(G_IR_SCANNER) src/mconn-crypt.[ch] $(MCONNECT_CFLAGS) \
+			--include=GObject-2.0 \
+			--namespace=MConn --library $< \
+			--output=$@
 
-mconn-crypt.vapi: mconn-crypt.gi
+mconn-crypt.vapi: mconn-crypt.gir
 	rm -f $@
-	vapigen --library mconn-crypt $<
+	$(VALA_API_GEN) --library mconn-crypt $<
 
 # configure will expand bindir to ${exec_prefix}/bin, we want the
 # whole thing, that's why mconnect.desktop is generated here and not
@@ -87,7 +89,7 @@ git-source-dist:
 	git archive --prefix=mconnect-$${gitsha}/ $(REV) | \
 		gzip -c > mconnect-$${gitsha}.tar.gz
 
-BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gi mconnect.desktop
+BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gir mconnect.desktop
 
 CLEANFILES = $(BUILT_SOURCES)
 

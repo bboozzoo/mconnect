@@ -84,7 +84,7 @@ MConnCrypt *m_conn_crypt_ref(MConnCrypt *crypt);
  * @data: (type GBytes): data
  * @error: return location for a GError or NULL
  *
- * Returns: (transfer full): a new #GBytes with decoded data
+ * Returns: (transfer full): a new #GByteArray with decoded data
  */
 GByteArray * m_conn_crypt_decrypt(MConnCrypt *crypt, GBytes *data, GError **error);
 
