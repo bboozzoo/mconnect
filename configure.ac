@@ -20,6 +20,7 @@ AC_INIT([mconnect], [0.1.0], [maciek.borzecki@gmail.com])
 AC_CONFIG_SRCDIR([src/main.vala])
 AC_CONFIG_AUX_DIR([.])
 AC_PROG_MAKE_SET
+AM_PROG_LIBTOOL
 AM_INIT_AUTOMAKE([tar-pax foreign subdir-objects])
 AM_SILENT_RULES([yes])
 
@@ -41,18 +42,23 @@ AC_SUBST(MCONNECT_VALAFLAGS, ["--pkg=json-glib-1.0 --pkg=gee-0.8 --pkg=libnotify
 # AC_SUBST(MCONNECT_VALAFLAGS, [--pkg=json-glib-1.0 --pkg=gee-0.8])
 PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              gobject-2.0,
+                             gobject-introspection-1.0
                              gio-2.0,
                              gio-unix-2.0,
                              json-glib-1.0,
                              gee-0.8,
                              libcrypto
-                             libvala-0.26
                              libnotify
                              ])
 AC_SUBST(MCONNECT_CFLAGS)
 AC_SUBST(MCONNECT_LIBS)
 
-AC_SUBST(GEN_INTROSPECT,$($PKG_CONFIG --variable=gen_introspect libvala-0.26))
+AC_SUBST(G_IR_SCANNER,$($PKG_CONFIG gobject-introspection-1.0 --variable=g_ir_scanner))
+
+AC_PATH_PROG([VALA_API_GEN], [vapigen])
+if test -z "$VALA_API_GEN"; then
+  AC_MSG_ERROR([vapigen is needed])
+fi
 
 # Files to generate
 AC_CONFIG_FILES([Makefile])
