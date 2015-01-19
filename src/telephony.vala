@@ -76,6 +76,10 @@ class TelephonyHandler : Object, PacketHandlerInterface {
 				}
 			}
 
+			// telephony packets have no time information
+			var time = new DateTime.now_local();
+			number = "%s %s".printf(time.format("%X"), number);
+
 			var notif = new Notify.Notification(summary, number,
 												"phone");
 			try {
