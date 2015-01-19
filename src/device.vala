@@ -119,6 +119,12 @@ class Device : Object {
 			this.pair.begin();
 	}
 
+	/**
+	 * activate:
+	 *
+	 * Activate device. Triggers sending of #paired signal after
+	 * successfuly opening a connection.
+	 */
 	public void activate() {
 		assert(_channel == null);
 
@@ -136,6 +142,11 @@ class Device : Object {
 			});
 	}
 
+	/**
+	 * deactivate:
+	 *
+	 * Deactivate device
+	 */
 	public void deactivate() {
 		if (_channel != null)
 			_channel.close.begin((c) => {
@@ -169,6 +180,12 @@ class Device : Object {
 		}
 	}
 
+    /**
+	 * channel_openend:
+	 *
+	 * Callback after DeviceChannel.open() has completed. If the
+	 * channel was successfuly opened, proceed with handshake.
+	 */
 	private void channel_openend(bool result) {
 		debug("channel openend: %s", result.to_string());
 		if (result == true) {
@@ -200,6 +217,13 @@ class Device : Object {
 		}
 	}
 
+	/**
+	 * handle_pair_packet:
+	 *
+	 * Handle incoming packet of Packet.PAIR type. Inside, try to
+	 * guess if we got a response for a pair request, or is this an
+	 * unsolicited pair request coming from mobile.
+	 */
 	private void handle_pair_packet(Packet pkt) {
 		assert(pkt.pkt_type == Packet.PAIR);
 
@@ -230,6 +254,11 @@ class Device : Object {
 		paired(is_paired);
 	}
 
+	/**
+	 * handle_disconnect:
+	 *
+	 * Handler for DeviceChannel.disconnected() signal
+	 */
 	private void handle_disconnect() {
 		// channel got disconnected
 		debug("channel disconnected");
@@ -237,6 +266,12 @@ class Device : Object {
 				channel_closed_cleanup();
 			});
 	}
+
+	/**
+	 * channel_closed_cleanup:
+	 *
+	 * Single cleanup point after channel has been closed
+	 */
 	private void channel_closed_cleanup() {
 		_channel = null;
 		_host = null;
