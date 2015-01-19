@@ -155,11 +155,16 @@ class Device : Object {
 	 */
 	public void activate_from_device(Device dev) {
 		if (host == null) {
+			host = dev.host;
+			tcp_port = dev.tcp_port;
 			activate();
 		} else if (dev.host.to_string() != host.to_string()) {
 			deactivate();
+			host = dev.host;
+			tcp_port = dev.tcp_port;
 			activate();
 		} else {
+			// same host, assuming no activation needed
 			debug("device %s already active", dev.to_string());
 		}
 	}
