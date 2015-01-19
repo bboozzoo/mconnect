@@ -28,9 +28,10 @@ public class Config : Object {
 	public static string[] config_search_dirs(string primary_dir) {
 		string[] dirs = {primary_dir};
 
-		string[] sysdirs = Environment.get_system_config_dirs();
+		string[] sysdirs = Environment.get_system_data_dirs();
 		foreach (string d in sysdirs) {
-			dirs += d.dup();
+			dirs += Path.build_path(Path.DIR_SEPARATOR_S,
+									d, "mconnect");
 		}
 		return dirs;
 	}
@@ -40,6 +41,10 @@ public class Config : Object {
 		_kf = new KeyFile();
 		string[] dirs = config_search_dirs(base_config_dir);
 		string full_path = null;
+
+		foreach (string d in dirs) {
+			debug("config search dir: %s", d);
+		}
 
 		try {
 			bool found = _kf.load_from_dirs(Config.FILE, dirs,
