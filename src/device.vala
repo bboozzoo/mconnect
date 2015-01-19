@@ -138,9 +138,9 @@ class Device : Object {
 
 	public void deactivate() {
 		if (_channel != null)
-			_channel.close.begin();
-		_channel = null;
-		_host = null;
+			_channel.close.begin((c) => {
+					channel_closed_cleanup();
+				});
 	}
 
 	/**
@@ -169,13 +169,13 @@ class Device : Object {
 		}
 	}
 
-
 	private void channel_openend(bool result) {
 		debug("channel openend: %s", result.to_string());
 		if (result == true) {
-			greet();
+			greet.begin();
 		} else {
-			_channel = null;
+			// failed to open channel, invoke cleanup
+			channel_closed_cleanup();
 		}
 	}
 
@@ -230,10 +230,14 @@ class Device : Object {
 		paired(is_paired);
 	}
 
-	private async void handle_disconnect() {
+	private void handle_disconnect() {
 		// channel got disconnected
 		debug("channel disconnected");
-		yield _channel.close();
+		_channel.close.begin((c) => {
+				channel_closed_cleanup();
+			});
+	}
+	private void channel_closed_cleanup() {
 		_channel = null;
 		_host = null;
 		// emit disconnected
