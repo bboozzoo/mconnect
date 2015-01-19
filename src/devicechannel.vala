@@ -44,6 +44,10 @@ class DeviceChannel : Object {
 		_crypt = crypt;
 	}
 
+	~DeviceChannel() {
+		debug("channel destroyed");
+	}
+
 	public async bool open() {
 		assert(this._isa != null);
 
