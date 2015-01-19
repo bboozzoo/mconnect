@@ -145,7 +145,7 @@ class DeviceChannel : Object {
 	 *
 	 * @return false if channel was closed, true otherwise
 	 */
-	public async bool receive() throws Error {
+	public async bool receive() {
 		size_t line_len;
 		string data = null;
 		// read line up to newline
@@ -154,6 +154,9 @@ class DeviceChannel : Object {
 											  Priority.DEFAULT,
 											  null,
 											  out line_len);
+			// expecting \n\n
+			_din.read_byte();
+			_din.read_byte();
 		} catch (IOError ie) {
 			debug("I/O error: %s", ie.message);
 		}
@@ -164,9 +167,6 @@ class DeviceChannel : Object {
 		}
 
 		debug("received line: %s", data);
-		// expecting \n\n
-		_din.read_byte();
-		_din.read_byte();
 
 		Packet pkt = Packet.new_from_data(data);
 		if (pkt == null) {
