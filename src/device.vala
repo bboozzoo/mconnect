@@ -157,7 +157,6 @@ class Device : Object {
 		if (host == null) {
 			activate();
 		} else if (dev.host.to_string() != host.to_string()) {
-			// same host, assuming no activation needed
 			deactivate();
 			activate();
 		} else {
