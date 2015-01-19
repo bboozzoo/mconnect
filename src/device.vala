@@ -137,7 +137,7 @@ class Device : Object {
 	}
 
 	public void deactivate() {
-		if (_channel == null)
+		if (_channel != null)
 			_channel.close.begin();
 		_channel = null;
 	}
