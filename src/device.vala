@@ -125,17 +125,15 @@ class Device : Object {
 		var core = Core.instance();
 		_channel = new DeviceChannel(this.host, this.tcp_port,
 									 core.crypt);
-		_channel.connected.connect((c) => {
-				this.greet.begin();
-			});
 		_channel.disconnected.connect((c) => {
 				this.handle_disconnect();
 			});
 		_channel.packet_received.connect((c, pkt) => {
 				this.packet_received(pkt);
 			});
-		_channel.open.begin();
-		debug("open finished");
+		_channel.open.begin((c, res) => {
+				this.channel_openend(_channel.open.end(res));
+			});
 	}
 
 	public void deactivate() {
@@ -163,6 +161,16 @@ class Device : Object {
 			activate();
 		} else {
 			debug("device %s already active", dev.to_string());
+		}
+	}
+
+
+	private void channel_openend(bool result) {
+		debug("channel openend: %s", result.to_string());
+		if (result == true) {
+			greet();
+		} else {
+			_channel = null;
 		}
 	}
 
