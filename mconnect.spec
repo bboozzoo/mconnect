@@ -5,7 +5,7 @@
 
 Name:           mconnect
 Version:        0.2
-Release:        2.20150125git%{shortcommit}%{?dist}
+Release:        4.20150125git%{shortcommit}%{?dist}
 Summary:        Implementation of KDE Connect protocol
 
 License:        GPLv2
@@ -14,7 +14,9 @@ URL:            http://github.com/bboozzoo/mconnect
 Source:         %{name}-%{commit}.tar.gz
 
 BuildRequires:  vala
+BuildRequires:  vala-tools
 BuildRequires:  glib2-devel
+BuildRequires:  gobject-introspection-devel
 BuildRequires:  json-glib-devel
 BuildRequires:  libgee-devel
 BuildRequires:  openssl-devel
@@ -49,6 +51,12 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/mconnect.desktop
 %{_datadir}/applications/*.desktop
 
 %changelog
+* Sun Jan 25 2015 Maciek Borzęcki <maciek.borzecki@gmail.com> - 0.2-4.20150125gite4d57ef
+- Add vala-tools to BuildRequires
+
+* Sun Jan 25 2015 Maciek Borzęcki <maciek.borzecki@gmail.com> - 0.2-3.20150125gite4d57ef
+- Add missing gobject-introspection-devel to BuildRequires 
+
 * Sun Jan 25 2015 Maciek Borzęcki <maciek.borzecki@gmail.com> - 0.2-2.20150125gite4d57ef
 - Updated BuildRequires with autotools, libtool, pkg-config
 
