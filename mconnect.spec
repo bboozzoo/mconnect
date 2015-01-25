@@ -5,7 +5,7 @@
 
 Name:           mconnect
 Version:        0.2
-Release:        1.20150125git%{shortcommit}%{?dist}
+Release:        2.20150125git%{shortcommit}%{?dist}
 Summary:        Implementation of KDE Connect protocol
 
 License:        GPLv2
@@ -49,6 +49,9 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/mconnect.desktop
 %{_datadir}/applications/*.desktop
 
 %changelog
+* Sun Jan 25 2015 Maciek Borzęcki <maciek.borzecki@gmail.com> - 0.2-2.20150125gite4d57ef
+- Updated BuildRequires with autotools, libtool, pkg-config
+
 * Sun Jan 25 2015 Maciek Borzęcki <maciek.borzecki@gmail.com> - 0.2-1.20150125gite4d57ef
 - Bump to version 0.2
 
