@@ -20,6 +20,7 @@ BuildRequires:  libgee-devel
 BuildRequires:  openssl-devel
 BuildRequires:  libnotify-devel
 BuildRequires:  desktop-file-utils
+BuildRequires:  autoconf automake libtool pkgconfig
 
 %description
 
