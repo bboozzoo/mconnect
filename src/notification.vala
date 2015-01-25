@@ -17,17 +17,20 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
+using Gee;
 
 class NotificationHandler : Object, PacketHandlerInterface {
 
 	private const string  NOTIFICATION = "kdeconnect.notification";
+
+	private HashMap<string, Notify.Notification> _pending_notifications;
 
 	public string get_pkt_type() {
 		return NOTIFICATION;
 	}
 
 	private NotificationHandler() {
-
+		_pending_notifications = new HashMap<string, Notify.Notification>();
 	}
 
 	public static NotificationHandler instance() {
@@ -52,15 +55,41 @@ class NotificationHandler : Object, PacketHandlerInterface {
 		if (id.match_string("com.android.dialer", false) == true)
 			return;
 
-		// other notifications
-		if (pkt.body.has_member("appName") == false ||
-			pkt.body.has_member("ticker") == false)
-			return;
-
 		// maybe it's a notification about a notification being
 		// cancelled
 		if (pkt.body.has_member("isCancel") == true &&
 			pkt.body.get_boolean_member("isCancel") == true)
+		{
+			debug("message cancels notification %s", id);
+			if (_pending_notifications.has_key(id) == true)
+			{
+				// cancel out pending notifications
+				Notify.Notification notif = _pending_notifications.@get(id);
+				if (notif != null)
+				{
+					_pending_notifications.unset(id);
+					try {
+						notif.close();
+					} catch (Error e) {
+						critical("error closing notification: %s", e.message);
+					}
+				}
+			}
+			return;
+		}
+
+		// check if notification is already known, if so don't show
+		// anything
+		if (_pending_notifications.has_key(id) == true)
+		{
+			debug("notification %s is known, ignore", id);
+			return;
+		}
+		debug("new notification %s", id);
+
+		// other notifications
+		if (pkt.body.has_member("appName") == false ||
+			pkt.body.has_member("ticker") == false)
 			return;
 
 		string app = pkt.body.get_string_member("appName");
@@ -81,6 +110,8 @@ class NotificationHandler : Object, PacketHandlerInterface {
 		} else {
 			time = new DateTime.now_local();
 		}
+		// format the body of notification, so that a time information
+		// is included
 		if (time != null)
 			ticker = "%s %s".printf(time.format("%X"),
 									ticker);
@@ -90,9 +121,22 @@ class NotificationHandler : Object, PacketHandlerInterface {
 		var notif = new Notify.Notification(app, ticker,
 											"phone");
 		try {
+			// react to closed signal
+			notif.closed.connect((n) => {
+					this.handle_closed_notification(id);
+				});
 			notif.show();
+			_pending_notifications.@set(id, notif);
 		} catch (Error e) {
 			critical("failed to show notification: %s", e.message);
+		}
+	}
+
+	private void handle_closed_notification(string id) {
+		debug("notification %s closed by user", id);
+		if (_pending_notifications.has_key(id) == true)
+		{
+			_pending_notifications.unset(id);
 		}
 	}
 }
