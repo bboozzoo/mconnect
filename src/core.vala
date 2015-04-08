@@ -67,6 +67,11 @@ class Core : Object {
 								   APP_NAME);
 	}
 
+	public static string get_cache_dir() {
+		return Path.build_filename(Environment.get_user_cache_dir(),
+								   APP_NAME);
+	}
+
 	private static void init_user_dirs() {
 		DirUtils.create_with_parents(get_storage_dir(), 0700);
 		DirUtils.create_with_parents(get_config_dir(), 0700);
