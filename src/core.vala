@@ -21,6 +21,8 @@ using MConn;
 
 class Core : Object {
 
+	public static const string APP_NAME = "mconnect";
+
 	public Crypt crypt { get; private set; default = null; }
 
 	public PacketHandlers handlers {get; private set; default = null; }
@@ -55,12 +57,14 @@ class Core : Object {
 		return Core._instance;
 	}
 
-	private static string get_storage_dir() {
-		return Environment.get_user_data_dir() + "/mconnect";
+	public static string get_storage_dir() {
+		return Path.build_filename(Environment.get_user_data_dir(),
+								   APP_NAME);
 	}
 
-	private static string get_config_dir() {
-		return Environment.get_user_config_dir() + "/mconnect";
+	public static string get_config_dir() {
+		return Path.build_filename(Environment.get_user_config_dir(),
+								   APP_NAME);
 	}
 
 	private static void init_user_dirs() {
