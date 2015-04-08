@@ -66,6 +66,32 @@ class Device : Object {
 		debug("added new device: %s", this.to_string());
 	}
 
+	/**
+	 * Constructs a new Device wrapper based on data read from device
+	 * cache file.
+	 *
+	 * @cache: device cache file
+	 * @name: device name
+	 */
+	public Device.from_cache(KeyFile cache, string name) {
+		debug("device from cache group %s", name);
+
+		this.device_id = cache.get_string(name, "deviceId");
+		this.device_name = cache.get_string(name, "deviceName");
+		this.device_type = cache.get_string(name, "deviceType");
+		this.protocol_version = cache.get_integer(name, "protocolVersion");
+		this.tcp_port = (uint) cache.get_integer(name, "tcpPort");
+		var last_ip_str = cache.get_string(name, "lastIPAddress");
+		debug("last known address: %s:%u", last_ip_str, this.tcp_port);
+
+		var host = new InetAddress.from_string(last_ip_str);
+		if (host == null) {
+			debug("failed to parse last known IP address (%s) for device %s",
+				  last_ip_str, name);
+		}
+		this.host = host;
+	}
+
 	~Device() {
 
 	}
@@ -80,6 +106,21 @@ class Device : Object {
 	public string to_string() {
 		return "%s-%s-%s-%u".printf(this.device_id, this.device_name,
 									this.device_type, this.protocol_version);
+	}
+
+	/**
+	 * Dump device information to cache
+	 *
+	 * @cache: device cache
+	 * @name: group name
+	 */
+	public void to_cache(KeyFile cache, string name) {
+		cache.set_string(name, "deviceId", this.device_id);
+		cache.set_string(name, "deviceName", this.device_name);
+		cache.set_string(name, "deviceType", this.device_type);
+		cache.set_integer(name, "protocolVersion", (int) this.protocol_version);
+		cache.set_integer(name, "tcpPort", (int) this.tcp_port);
+		cache.set_string(name, "lastIPAddress", this.host.to_string());
 	}
 
 	private async void greet() {

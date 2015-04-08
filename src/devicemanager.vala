@@ -21,12 +21,82 @@ using Gee;
 
 class DeviceManager : GLib.Object
 {
+	public static const string DEVICES_CACHE_FILE = "devices";
+
 	private HashMap<string, Device> devices;
 
 	public DeviceManager() {
 		debug("device manager..");
 
 		this.devices = new HashMap<string, Device>();
+
+		// TODO: check for network connectivity first, possibly pass
+		// this through the main loop
+		load_cache();
+	}
+
+	/**
+	 * Obtain path to devices cache file
+	 */
+	private string get_cache_file() {
+		var cache_file = Path.build_filename(Core.get_cache_dir(),
+											 DEVICES_CACHE_FILE);
+		debug("cache file: %s", cache_file);
+
+		// make sure that cache dir exists
+		DirUtils.create_with_parents(Core.get_cache_dir(),
+									 0700);
+
+		return cache_file;
+	}
+
+	/**
+	 * Load known devices from cache and attempt pairing.
+	 */
+	private void load_cache() {
+		debug("try loading devices from device cache");
+
+		var cache_file = get_cache_file();
+
+		var kf = new KeyFile();
+		try {
+			kf.load_from_file(cache_file, KeyFileFlags.NONE);
+
+			string[] groups = kf.get_groups();
+
+			foreach (string group in groups) {
+				var dev = new Device.from_cache(kf, group);
+				debug("device %s from cache", dev.to_string());
+				found_device(dev);
+			}
+		} catch (Error e) {
+			debug("error loading cache file: %s", e.message);
+		}
+	}
+
+	/**
+	 * Update contents of device cache
+	 */
+	private void update_cache() {
+		debug("update devices cache");
+
+		if (devices.size == 0)
+			return;
+
+		var kf = new KeyFile();
+
+		foreach (Device dev in devices.values) {
+			dev.to_cache(kf, dev.device_name);
+		}
+
+		try {
+			debug("saving to cache");
+			FileUtils.set_contents(get_cache_file(),
+								   kf.to_data());
+		} catch (FileError e) {
+			debug("failed to save to cache file %s: %s",
+				  get_cache_file(), e.message);
+		}
 	}
 
 	public void found_device(Device dev) {
@@ -56,6 +126,10 @@ class DeviceManager : GLib.Object
 			var known_dev = this.devices.@get(unique);
 			known_dev.activate_from_device(dev);
 		}
+
+		// device in whitelist and added to currently used devices, so
+		// it's ok to update the device cache
+		update_cache();
 	}
 
 	private bool device_allowed(Device dev) {
