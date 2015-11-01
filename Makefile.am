@@ -64,17 +64,6 @@ test_mconn_crypt_vala_CFLAGS = $(MCONNECT_CFLAGS) -Isrc -I.
 
 VALAFLAGS = -g $(MCONNECT_VALAFLAGS) --vapidir=. --pkg=mconn-crypt
 
-mconn-crypt.gir: libmconn-crypt.la
-	rm -f $@
-	$(G_IR_SCANNER) src/mconn-crypt.[ch] $(MCONNECT_CFLAGS) \
-			--include=GObject-2.0 \
-			--namespace=MConn --library $< \
-			--output=$@
-
-mconn-crypt.vapi: mconn-crypt.gir
-	rm -f $@
-	$(VALA_API_GEN) --library mconn-crypt $<
-
 # configure will expand bindir to ${exec_prefix}/bin, we want the
 # whole thing, that's why mconnect.desktop is generated here and not
 # in configure
@@ -90,7 +79,7 @@ git-source-dist:
 		gzip -c > mconnect-$${gitsha}.tar.gz
 
 GEN_FROM_VALA = $(filter %.vala,$(mconnect_SOURCES))
-BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gir mconnect.desktop \
+BUILT_SOURCES = mconnect.desktop \
 		$(GEN_FROM_VALA:.vala=.c)
 
 CLEANFILES = $(BUILT_SOURCES)
