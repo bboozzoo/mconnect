@@ -19,6 +19,7 @@
  */
 
 using MConn;
+using Posix;
 
 /**
  * Device communication channel
@@ -49,7 +50,7 @@ class DeviceChannel : Object {
 	}
 
 	public async bool open() {
-		assert(this._isa != null);
+		GLib.assert(this._isa != null);
 
 		debug("connect to %s:%u", _isa.address.to_string(), _isa.port);
 
@@ -75,6 +76,35 @@ class DeviceChannel : Object {
 
 		// setup socket monitoring
 		Socket sock = _conn.get_socket();
+
+#if 0
+		IPPROTO_TCP = 6,	   /* Transmission Control Protocol.  */
+
+		TCP_KEEPIDLE	 4  /* Start keeplives after this period */
+		TCP_KEEPINTVL	 5  /* Interval between keepalives */
+		TCP_KEEPCNT		 6  /* Number of keepalives before death */
+#endif
+#if 0
+		int option = 10;
+		Posix.setsockopt(sock.fd, 6, 4, &option, (Posix.socklen_t) sizeof(int));
+		option = 5;
+		Posix.setsockopt(sock.fd, 6, 5, &option, (Posix.socklen_t) sizeof(int));
+		option = 3;
+		Posix.setsockopt(sock.fd, 6, 6, &option, (Posix.socklen_t) sizeof(int));
+#endif
+		int option = 10;
+		Posix.setsockopt(sock.fd, IPProto.TCP,
+						 Posix.TCP_KEEPIDLE,
+						 &option, (Posix.socklen_t) sizeof(int));
+		option = 5;
+		Posix.setsockopt(sock.fd, IPProto.TCP,
+						 Posix.TCP_KEEPINTVL,
+						 &option, (Posix.socklen_t) sizeof(int));
+		option = 3;
+		Posix.setsockopt(sock.fd, IPProto.TCP,
+						 Posix.TCP_KEEPCNT,
+						 &option, (Posix.socklen_t) sizeof(int));
+
 		// enable keepalive
 		sock.set_keepalive(true);
 		// prep source for monitoring events
