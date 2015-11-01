@@ -18,51 +18,102 @@
 # location of *.desktop file, usually /usr/share/applications
 applicationsdir = $(datadir)/applications
 
-applications_DATA = mconnect.desktop
+applications_DATA = \
+	mconnect.desktop
 
 mconnectdatadir = $(datadir)/mconnect
 
-mconnectdata_DATA = mconnect.conf
+mconnectdata_DATA = \
+	mconnect.conf
 
-bin_PROGRAMS = mconnect
+bin_PROGRAMS = \
+	mconnect
 
-noinst_PROGRAMS = test-mconn-crypt \
-		  test-mconn-crypt-vala
+noinst_PROGRAMS = \
+	test-mconn-crypt \
+	test-mconn-crypt-vala
 
-mconnect_SOURCES = src/main.vala \
-		   src/discovery.vala \
-		   src/packet.vala \
-		   src/device.vala \
-		   src/devicemanager.vala \
-		   src/devicechannel.vala \
-		   src/core.vala \
-		   src/packethandlerinterface.vala \
-		   src/packethandlers.vala \
-		   src/notification.vala \
-		   src/battery.vala \
-		   src/telephony.vala \
-		   src/config.vala \
-		   src/mconn-crypt.c \
-		   src/mconn-crypt.h
+noinst_LTLIBRARIES = \
+	libmconn-crypt.la
 
-mconnect_LDADD = $(MCONNECT_LIBS)
-mconnect_CFLAGS = $(MCONNECT_CFLAGS) -Isrc
+VALAFLAGS = \
+	-g \
+	--pkg=json-glib-1.0 \
+	--pkg=gee-0.8 \
+	--pkg=libnotify \
+	--pkg=posix \
+	--vapidir=src/crypt
 
-noinst_LTLIBRARIES = libmconn-crypt.la
-libmconn_crypt_la_SOURCES = src/mconn-crypt.c \
-			    src/mconn-crypt.h
-libmconn_crypt_la_CFLAGS = $(MCONNECT_CFLAGS)
-libmconn_crypt_la_LIBADD = $(MCONNECT_LIBS)
+#-------------------------------------------------------------
 
-test_mconn_crypt_SOURCES = test/mconn-crypt-test.c
-test_mconn_crypt_LDADD = $(MCONNECT_LIBS) libmconn-crypt.la
-test_mconn_crypt_CFLAGS = $(MCONNECT_CFLAGS) -Isrc
+mconnect_SOURCES = \
+	src/mconnect/main.vala \
+	src/mconnect/discovery.vala \
+	src/mconnect/packet.vala \
+	src/mconnect/device.vala \
+	src/mconnect/devicemanager.vala \
+	src/mconnect/devicechannel.vala \
+	src/mconnect/core.vala \
+	src/mconnect/packethandlerinterface.vala \
+	src/mconnect/packethandlers.vala \
+	src/mconnect/notification.vala \
+	src/mconnect/battery.vala \
+	src/mconnect/telephony.vala \
+	src/mconnect/config.vala
 
-test_mconn_crypt_vala_SOURCES = test/mconn-crypt-vala-test.vala
-test_mconn_crypt_vala_LDADD = $(MCONNECT_LIBS) libmconn-crypt.la
-test_mconn_crypt_vala_CFLAGS = $(MCONNECT_CFLAGS) -Isrc -I.
+mconnect_LDADD = \
+	libmconn-crypt.la \
+	$(MCONNECT_LIBS)
 
-VALAFLAGS = -g $(MCONNECT_VALAFLAGS) --vapidir=. --pkg=mconn-crypt
+mconnect_CFLAGS = \
+	$(MCONNECT_CFLAGS) \
+	-I$(top_srcdir)/src/crypt
+
+mconnect_VALAFLAGS = \
+	--pkg=mconn-crypt
+
+#-------------------------------------------------------------
+
+libmconn_crypt_la_SOURCES = \
+	src/crypt/mconn-crypt.c \
+	src/crypt/mconn-crypt.h
+
+libmconn_crypt_la_CFLAGS = \
+	$(MCONNECT_CFLAGS)
+
+libmconn_crypt_la_LIBADD = \
+	$(MCONNECT_LIBS)
+
+#-------------------------------------------------------------
+
+test_mconn_crypt_SOURCES = \
+	test/mconn-crypt-test.c
+
+test_mconn_crypt_LDADD = \
+	$(MCONNECT_LIBS) \
+	libmconn-crypt.la
+
+test_mconn_crypt_CFLAGS = \
+	$(MCONNECT_CFLAGS) \
+	-I$(top_srcdir)/src/crypt
+
+#-------------------------------------------------------------
+
+test_mconn_crypt_vala_SOURCES = \
+	test/mconn-crypt-vala-test.vala
+
+test_mconn_crypt_vala_LDADD = \
+	$(MCONNECT_LIBS) \
+	libmconn-crypt.la
+
+test_mconn_crypt_vala_CFLAGS = \
+	$(MCONNECT_CFLAGS) \
+	-I$(top_srcdir)/src/crypt
+
+test_mconn_crypt_vala_VALAFLAGS = \
+	--pkg=mconn-crypt
+
+#-------------------------------------------------------------
 
 # configure will expand bindir to ${exec_prefix}/bin, we want the
 # whole thing, that's why mconnect.desktop is generated here and not
@@ -71,6 +122,8 @@ do_desktop_subst = sed -e 's,[@]bindir[@],${bindir},g'
 mconnect.desktop: mconnect.desktop.in
 	$(do_desktop_subst) < $< > $@
 
+#-------------------------------------------------------------
+
 REV ?= HEAD
 
 git-source-dist:
@@ -78,9 +131,11 @@ git-source-dist:
 	git archive --prefix=mconnect-$${gitsha}/ $(REV) | \
 		gzip -c > mconnect-$${gitsha}.tar.gz
 
+#-------------------------------------------------------------
+
 GEN_FROM_VALA = $(filter %.vala,$(mconnect_SOURCES))
-BUILT_SOURCES = mconnect.desktop \
-		$(GEN_FROM_VALA:.vala=.c)
+BUILT_SOURCES = \
+	mconnect.desktop \
+	$(GEN_FROM_VALA:.vala=.c)
 
 CLEANFILES = $(BUILT_SOURCES)
-

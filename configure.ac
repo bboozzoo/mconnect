@@ -17,7 +17,7 @@
 #
 AC_PREREQ(2.61)
 AC_INIT([mconnect], [0.1.0], [maciek.borzecki@gmail.com])
-AC_CONFIG_SRCDIR([src/main.vala])
+AC_CONFIG_SRCDIR([src/mconnect/main.vala])
 AC_CONFIG_AUX_DIR([.])
 AC_PROG_MAKE_SET
 AM_PROG_LIBTOOL
@@ -38,8 +38,6 @@ AC_PROG_CC
 AM_PROG_VALAC([0.7.0])
 AC_PROG_INSTALL
 
-AC_SUBST(MCONNECT_VALAFLAGS, ["--pkg=json-glib-1.0 --pkg=gee-0.8 --pkg=libnotify --pkg=posix"])
-# AC_SUBST(MCONNECT_VALAFLAGS, [--pkg=json-glib-1.0 --pkg=gee-0.8])
 PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              gobject-2.0,
                              gobject-introspection-1.0
