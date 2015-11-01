@@ -89,7 +89,9 @@ git-source-dist:
 	git archive --prefix=mconnect-$${gitsha}/ $(REV) | \
 		gzip -c > mconnect-$${gitsha}.tar.gz
 
-BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gir mconnect.desktop
+GEN_FROM_VALA = $(filter %.vala,$(mconnect_SOURCES))
+BUILT_SOURCES = mconn-crypt.vapi mconn-crypt.gir mconnect.desktop \
+		$(GEN_FROM_VALA:.vala=.c)
 
 CLEANFILES = $(BUILT_SOURCES)
 
