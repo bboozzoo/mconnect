@@ -17,7 +17,7 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-using MConn;
+using Mconn;
 
 class TelephonyHandler : Object, PacketHandlerInterface {
 
