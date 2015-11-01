@@ -1,4 +1,4 @@
-using MConn;
+using Mconn;
 
 void test_simple() {
 	string file_path = "/tmp/test-key-vala.pem";
