@@ -18,7 +18,7 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
-using MConn;
+using Mconn;
 using Posix;
 
 /**
