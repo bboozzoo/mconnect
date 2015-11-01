@@ -17,54 +17,9 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-private static bool log_debug = false;
-
-private const GLib.OptionEntry[] options = {
-	{"debug", 'd', 0, OptionArg.NONE, ref log_debug, "Show debug output", null},
-	{null}
-};
-
 public static int main(string[] args)
 {
-	try {
-		var opt_context = new OptionContext ("mconnect");
-		opt_context.set_help_enabled (true);
-		opt_context.add_main_entries (options, null);
-		opt_context.parse (ref args);
-	} catch (OptionError e) {
-		stdout.printf ("error: %s\n", e.message);
-		stdout.printf ("Run '%s --help' to see a full list of available command line options.\n", args[0]);
-		return 0;
-	}
+	var app = new Mconn.Application();
 
-	if (log_debug == true)
-		Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
-
-	Gdk.init(ref args);
-
-	Notify.init("mconnect");
-
-	var core = Core.instance();
-	if (core == null)
-		error("cannot initialize core");
-
-	if (core.config.is_debug_on() == true)
-		Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
-
-	var loop = new MainLoop();
-	var discovery = new Discovery();
-	var manager = new DeviceManager();
-
-	discovery.device_found.connect((disc, dev) => {
-			manager.found_device(dev);
-		});
-
-	try {
-		discovery.listen();
-	} catch (Error e) {
-		message("failed to setup device listener: %s", e.message);
-		return 1;
-	}
-	loop.run();
-	return 0;
+	return app.run(args);
 }

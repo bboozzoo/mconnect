@@ -65,7 +65,8 @@ mconnect_SOURCES = \
 	src/mconnect/battery.vala \
 	src/mconnect/telephony.vala \
 	src/mconnect/mousepad.vala \
-	src/mconnect/config.vala
+	src/mconnect/config.vala \
+	src/mconnect/application.vala
 
 mconnect_LDADD = \
 	libmconn-crypt.la \
