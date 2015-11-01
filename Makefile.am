@@ -62,7 +62,7 @@ test_mconn_crypt_vala_SOURCES = test/mconn-crypt-vala-test.vala
 test_mconn_crypt_vala_LDADD = $(MCONNECT_LIBS) libmconn-crypt.la
 test_mconn_crypt_vala_CFLAGS = $(MCONNECT_CFLAGS) -Isrc -I.
 
-VALAFLAGS = $(MCONNECT_VALAFLAGS) --vapidir=. --pkg=mconn-crypt
+VALAFLAGS = -g $(MCONNECT_VALAFLAGS) --vapidir=. --pkg=mconn-crypt
 
 mconn-crypt.gir: libmconn-crypt.la
 	rm -f $@
