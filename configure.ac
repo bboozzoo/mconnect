@@ -51,8 +51,6 @@ PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
 AC_SUBST(MCONNECT_CFLAGS)
 AC_SUBST(MCONNECT_LIBS)
 
-AC_SUBST(G_IR_SCANNER,$($PKG_CONFIG gobject-introspection-1.0 --variable=g_ir_scanner))
-
 # Files to generate
 AC_CONFIG_FILES([Makefile])
 
