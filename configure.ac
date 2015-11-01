@@ -53,11 +53,6 @@ AC_SUBST(MCONNECT_LIBS)
 
 AC_SUBST(G_IR_SCANNER,$($PKG_CONFIG gobject-introspection-1.0 --variable=g_ir_scanner))
 
-AC_PATH_PROG([VALA_API_GEN], [vapigen])
-if test -z "$VALA_API_GEN"; then
-  AC_MSG_ERROR([vapigen is needed])
-fi
-
 # Files to generate
 AC_CONFIG_FILES([Makefile])
 
