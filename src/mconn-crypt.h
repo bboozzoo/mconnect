@@ -25,77 +25,77 @@
 
 G_BEGIN_DECLS
 
-#define M_CONN_TYPE_CRYPT                        \
-   (m_conn_crypt_get_type())
-#define M_CONN_CRYPT(obj)                                                \
+#define MCONN_TYPE_CRYPT                        \
+   (mconn_crypt_get_type())
+#define MCONN_CRYPT(obj)                                                \
    (G_TYPE_CHECK_INSTANCE_CAST ((obj),                                  \
-                                M_CONN_TYPE_CRYPT,                       \
-                                MConnCrypt))
-#define M_CONN_CRYPT_CLASS(klass)                                        \
+                                MCONN_TYPE_CRYPT,                       \
+                                MconnCrypt))
+#define MCONN_CRYPT_CLASS(klass)                                        \
    (G_TYPE_CHECK_CLASS_CAST ((klass),                                   \
-                             M_CONN_TYPE_CRYPT,                          \
-                             MConnCryptClass))
-#define IS_M_CONN_CRYPT(obj)                                             \
+                             MCONN_TYPE_CRYPT,                          \
+                             MconnCryptClass))
+#define IS_MCONN_CRYPT(obj)                                             \
    (G_TYPE_CHECK_INSTANCE_TYPE ((obj),                                  \
-                                M_CONN_TYPE_CRYPT))
-#define IS_M_CONN_CRYPT_CLASS(klass)                                     \
+                                MCONN_TYPE_CRYPT))
+#define IS_MCONN_CRYPT_CLASS(klass)                                     \
    (G_TYPE_CHECK_CLASS_TYPE ((klass),                                   \
-                             M_CONN_TYPE_CRYPT))
-#define M_CONN_CRYPT_GET_CLASS(obj)                                      \
+                             MCONN_TYPE_CRYPT))
+#define MCONN_CRYPT_GET_CLASS(obj)                                      \
    (G_TYPE_INSTANCE_GET_CLASS ((obj),                                   \
-                               M_CONN_TYPE_CRYPT,                        \
-                               MConnCryptClass))
+                               MCONN_TYPE_CRYPT,                        \
+                               MconnCryptClass))
 
-typedef struct _MConnCrypt      MConnCrypt;
-typedef struct _MConnCryptClass MConnCryptClass;
-struct _MConnCryptClass
+typedef struct _MconnCrypt      MconnCrypt;
+typedef struct _MconnCryptClass MconnCryptClass;
+struct _MconnCryptClass
 {
     GObjectClass parent_class;
 };
 
-GType m_conn_crypt_get_type (void) G_GNUC_CONST;
+GType mconn_crypt_get_type (void) G_GNUC_CONST;
 
 /**
- * m_conn_crypt_new_for_key_path: (constructor)
+ * mconn_crypt_new_for_key_path: (constructor)
  * @path: key path
  *
  * Returns: (transfer full): new object
  */
-MConnCrypt *m_conn_crypt_new_for_key_path(const char *path);
+MconnCrypt *mconn_crypt_new_for_key_path(const char *path);
 
 /**
- * m_conn_crypt_unref:
+ * mconn_crypt_unref:
  * @crypt: crypt object
  */
-void m_conn_crypt_unref(MConnCrypt *crypt);
+void mconn_crypt_unref(MconnCrypt *crypt);
 
 /**
- * m_conn_crypt_ref:
+ * mconn_crypt_ref:
  * @crypt: crypt object
  *
  * Take reference to crypt object
  * Returns: (transfer none): reffed object
  */
-MConnCrypt *m_conn_crypt_ref(MConnCrypt *crypt);
+MconnCrypt *mconn_crypt_ref(MconnCrypt *crypt);
 
 /**
- * m_conn_crypt_decrypt:
+ * mconn_crypt_decrypt:
  * @crypt: crypt object
  * @data: (type GBytes): data
  * @error: return location for a GError or NULL
  *
  * Returns: (transfer full): a new #GByteArray with decoded data
  */
-GByteArray * m_conn_crypt_decrypt(MConnCrypt *crypt, GBytes *data, GError **error);
+GByteArray * mconn_crypt_decrypt(MconnCrypt *crypt, GBytes *data, GError **error);
 
 /**
- * m_conn_crypt_get_public_key_pem:
+ * mconn_crypt_get_public_key_pem:
  * @crypt: crypt object
  *
  * Returns: (transfer full): allocated string with public key in PEM format
  */
-gchar * m_conn_crypt_get_public_key_pem(MConnCrypt *crypt);
+gchar * mconn_crypt_get_public_key_pem(MconnCrypt *crypt);
 
 G_END_DECLS
 
-#endif /* __M_CONN_CRYPT_H__ */
+#endif /* __MCONN_CRYPT_H__ */
