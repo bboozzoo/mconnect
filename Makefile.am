@@ -37,6 +37,7 @@ noinst_LTLIBRARIES = \
 	libmconn-crypt.la
 
 VALAFLAGS = \
+	--no-color \
 	-g \
 	--pkg=json-glib-1.0 \
 	--pkg=gee-0.8 \
