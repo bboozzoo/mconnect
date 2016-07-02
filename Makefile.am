@@ -39,6 +39,8 @@ noinst_LTLIBRARIES = \
 VALAFLAGS = \
 	--no-color \
 	-g \
+	--vapidir=vapi \
+	--pkg=gio-2.0 \
 	--pkg=json-glib-1.0 \
 	--pkg=gee-0.8 \
 	--pkg=libnotify \
