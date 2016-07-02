@@ -65,9 +65,11 @@ class DeviceManager : GLib.Object
 			string[] groups = kf.get_groups();
 
 			foreach (string group in groups) {
-				var dev = new Device.from_cache(kf, group);
-				debug("device %s from cache", dev.to_string());
-				found_device(dev);
+				var dev = Device.new_from_cache(kf, group);
+				if (dev != null) {
+					debug("device %s from cache", dev.to_string());
+					found_device(dev);
+				}
 			}
 		} catch (Error e) {
 			debug("error loading cache file: %s", e.message);
