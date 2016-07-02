@@ -73,23 +73,32 @@ class Device : Object {
 	 * @cache: device cache file
 	 * @name: device name
 	 */
-	public Device.from_cache(KeyFile cache, string name) {
+	public static Device? new_from_cache(KeyFile cache, string name) {
 		debug("device from cache group %s", name);
 
-		this.device_id = cache.get_string(name, "deviceId");
-		this.device_name = cache.get_string(name, "deviceName");
-		this.device_type = cache.get_string(name, "deviceType");
-		this.protocol_version = cache.get_integer(name, "protocolVersion");
-		this.tcp_port = (uint) cache.get_integer(name, "tcpPort");
-		var last_ip_str = cache.get_string(name, "lastIPAddress");
-		debug("last known address: %s:%u", last_ip_str, this.tcp_port);
+		try {
+			var dev = new Device();
+			dev.device_id = cache.get_string(name, "deviceId");
+			dev.device_name = cache.get_string(name, "deviceName");
+			dev.device_type = cache.get_string(name, "deviceType");
+			dev.protocol_version = cache.get_integer(name, "protocolVersion");
+			dev.tcp_port = (uint) cache.get_integer(name, "tcpPort");
+			var last_ip_str = cache.get_string(name, "lastIPAddress");
+			debug("last known address: %s:%u", last_ip_str, dev.tcp_port);
 
-		var host = new InetAddress.from_string(last_ip_str);
-		if (host == null) {
-			debug("failed to parse last known IP address (%s) for device %s",
-				  last_ip_str, name);
+			var host = new InetAddress.from_string(last_ip_str);
+			if (host == null) {
+				debug("failed to parse last known IP address (%s) for device %s",
+					  last_ip_str, name);
+				return null;
+			}
+			dev.host = host;
+			return dev;
 		}
-		this.host = host;
+		catch (KeyFileError e) {
+			warning("failed to load device data from cache: %s", e.message);
+			return null;
+		}
 	}
 
 	~Device() {
