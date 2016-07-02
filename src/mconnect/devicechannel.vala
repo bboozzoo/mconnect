@@ -110,8 +110,7 @@ class DeviceChannel : Object {
 		// prep source for monitoring events
 		var source = sock.create_socket_source(IOCondition.IN);
 		source.set_callback((src, cond) => {
-				this._io_ready.begin(cond);
-				return true;
+				return this._io_ready(cond);
 			});
 		// attach source
 		_srcid = source.attach(null);
@@ -174,15 +173,13 @@ class DeviceChannel : Object {
 	 *
 	 * @return false if channel was closed, true otherwise
 	 */
-	public async bool receive() {
+	public bool receive() {
 		size_t line_len;
 		string data = null;
 		// read line up to newline
 		try {
-			data = yield _din.read_upto_async("\n", -1,
-											  Priority.DEFAULT,
-											  null,
-											  out line_len);
+			data = _din.read_upto("\n", -1, out line_len, null);
+
 			// expecting \n\n
 			_din.read_byte();
 			_din.read_byte();
@@ -209,14 +206,15 @@ class DeviceChannel : Object {
 		return true;
 	}
 
-	private async void _io_ready(uint flags) {
+	private bool _io_ready(uint flags) {
 		debug("check for IO, conditions: 0x%x", flags);
-		bool res = yield this.receive();
+		bool res = this.receive();
 
 		if (res == false) {
 			// disconnected
 			disconnected();
 		}
+		return res;
 	}
 
 	private void handle_packet(Packet pkt) {
