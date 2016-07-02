@@ -180,8 +180,7 @@ class DeviceChannel : Object {
 		try {
 			data = _din.read_upto("\n", -1, out line_len, null);
 
-			// expecting \n\n
-			_din.read_byte();
+			// expecting \n
 			_din.read_byte();
 		} catch (IOError ie) {
 			debug("I/O error: %s", ie.message);
