@@ -176,7 +176,7 @@ static gchar *__mconn_get_public_key_as_pem(MconnCryptPrivate *priv)
     /* get PEM as text */
     char *oss_pubkey = NULL;
     long data = BIO_get_mem_data(bm, &oss_pubkey);
-    g_debug("mconn-crypt: public key length: %l", data);
+    g_debug("mconn-crypt: public key length: %ld", data);
     g_assert(data != 0);
     g_assert(oss_pubkey != NULL);
 
