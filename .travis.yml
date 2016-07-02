@@ -16,3 +16,5 @@ before_install:
   - sudo apt-get install -qq gir1.2-notify-0.7 libnotify-dev
 before_script:
   - autoreconf -if
+script:
+  - ./configure && make V=1
