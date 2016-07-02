@@ -51,7 +51,7 @@ class Discovery : GLib.Object
 				throw e;
 			}
 
-			var source = (SocketSource) socket.create_source(IOCondition.IN);
+			var source = socket.create_socket_source(IOCondition.IN);
 			source.set_callback((s, c) => {
 					this.incomingPacket();
 					return true;
