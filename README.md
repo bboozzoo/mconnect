@@ -31,8 +31,8 @@ or see `mconnect.spec` in source tree. Once build deps are in place, run:
 # Configuration
 
 A sample configuration file is provided in source tree, see
-`mconnect.conf`. It will get installed to `${sysconfdir}/mconnect/`
-(usually corresponding to `/etc/mconnect/`) by default. Once
+`mconnect.conf`. It will get installed to `${datadir}/mconnect/`
+(usually corresponding to `/usr/share/mconnect/`) by default. Once
 `mconnect` starts it will pick the default file and make a copy of it
 in user's config directory, specifically `~/.config/mconnect/`.
 
