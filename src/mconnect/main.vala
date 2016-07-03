@@ -39,6 +39,9 @@ public static int main(string[] args)
 
 	if (log_debug == true)
 		Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
+
+	Gdk.init(ref args);
+
 	Notify.init("mconnect");
 
 	var core = Core.instance();

@@ -45,10 +45,12 @@ class PacketHandlers : Object {
 		var notification = NotificationHandler.instance();
 		var battery = BatteryHandler.instance();
 		var telephony = TelephonyHandler.instance();
+		var mousepad = MousepadHandler.instance();
 
 		hnd.append(notification);
 		hnd.append(battery);
 		hnd.append(telephony);
+		hnd.append(mousepad);
 
 		return hnd;
 	}

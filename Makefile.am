@@ -45,6 +45,8 @@ VALAFLAGS = \
 	--pkg=gee-0.8 \
 	--pkg=libnotify \
 	--pkg=posix \
+	--pkg=gdk-3.0 \
+	--pkg=atspi-2 \
 	--vapidir=src/crypt
 
 #-------------------------------------------------------------
@@ -62,6 +64,7 @@ mconnect_SOURCES = \
 	src/mconnect/notification.vala \
 	src/mconnect/battery.vala \
 	src/mconnect/telephony.vala \
+	src/mconnect/mousepad.vala \
 	src/mconnect/config.vala
 
 mconnect_LDADD = \
