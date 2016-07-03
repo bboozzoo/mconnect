@@ -6,9 +6,6 @@ really needed only at build time. OpenSSL does the packet
 encryption/decryption at the protocol level, while Json-glib does
 packet parsing. Libnotify is responsible for displaying shell popups.
 
-Since I'm new ot Vala, I'm treating this as a learning execrise, yet
-with usable results.
-
 # Building
 
 Build dependencies (using package names as found in Fedora):
@@ -20,6 +17,7 @@ Build dependencies (using package names as found in Fedora):
 - json-glib
 - openssl-devel
 - libnotify-devel
+- at-spi2-core-devel (and at-spi2-atk)
 
 or see `mconnect.spec` in source tree. Once build deps are in place, run:
 
