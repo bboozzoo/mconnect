@@ -17,6 +17,7 @@ Build dependencies (using package names as found in Fedora):
 - json-glib
 - openssl-devel
 - libnotify-devel
+- gtk3-devel
 - at-spi2-core-devel (and at-spi2-atk)
 
 or see `mconnect.spec` in source tree. Once build deps are in place, run:
