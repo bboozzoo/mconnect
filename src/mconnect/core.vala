@@ -21,7 +21,7 @@ using Mconn;
 
 class Core : Object {
 
-	public static const string APP_NAME = "mconnect";
+	public const string APP_NAME = "mconnect";
 
 	public Crypt crypt { get; private set; default = null; }
 

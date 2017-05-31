@@ -21,7 +21,7 @@ using Gee;
 
 class DeviceManager : GLib.Object
 {
-	public static const string DEVICES_CACHE_FILE = "devices";
+	public const string DEVICES_CACHE_FILE = "devices";
 
 	private HashMap<string, Device> devices;
 
