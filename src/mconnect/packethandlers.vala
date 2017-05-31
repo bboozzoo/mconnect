@@ -46,11 +46,13 @@ class PacketHandlers : Object {
 		var battery = BatteryHandler.instance();
 		var telephony = TelephonyHandler.instance();
 		var mousepad = MousepadHandler.instance();
+		var fileshare = ShareHandler.instance();
 
 		hnd.append(notification);
 		hnd.append(battery);
 		hnd.append(telephony);
 		hnd.append(mousepad);
+		hnd.append(fileshare);
 
 		return hnd;
 	}

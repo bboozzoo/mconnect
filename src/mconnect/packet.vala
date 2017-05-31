@@ -35,6 +35,8 @@ class Packet : GLib.Object {
 	public string pkt_type { get; private set; default = ""; }
 	public int64 id { get; private set; default = 0; }
 	public Json.Object body { get; private set; default = null; }
+	public int64 payload_size {get; private set; default = 0; }
+	public Json.Object payload_transfer {get; private set; default = null;}
 
 	public Packet(string type, Json.Object body, int64 id = 0) {
 		this.pkt_type = type;
@@ -69,7 +71,20 @@ class Packet : GLib.Object {
 
 			debug("packet type: %s", type);
 
-			return new Packet(type, body, id);
+			// may have payload information
+			int64 payload_size = 0;
+			Json.Object payload = null;
+			if (root_obj.has_member("payloadSize")) {
+				payload_size = root_obj.get_int_member("payloadSize");
+				debug("packet has paylod of size %lld", payload_size);
+				payload = root_obj.get_object_member("payloadTranferInfo");
+			}
+
+			var pkt = new Packet(type, body, id);
+			pkt.payload_size = payload_size;
+			pkt.payload_transfer = payload;
+
+			return pkt;
 		} catch (Error e) {
 			message("failed to parse message: \'%s\', error: %s",
 					data, e.message);
