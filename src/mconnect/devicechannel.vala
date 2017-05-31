@@ -108,7 +108,7 @@ class DeviceChannel : Object {
 		// enable keepalive
 		sock.set_keepalive(true);
 		// prep source for monitoring events
-		var source = sock.create_socket_source(IOCondition.IN);
+		var source = sock.create_source(IOCondition.IN);
 		source.set_callback((src, cond) => {
 				return this._io_ready(cond);
 			});
