@@ -51,7 +51,6 @@ class DeviceManager : GLib.Object
 	/**
 	 * Load known devices from cache and attempt pairing.
 	 */
-	[DBus (visible = false)]
 	public void load_cache() {
 		debug("try loading devices from device cache");
 
@@ -100,7 +99,6 @@ class DeviceManager : GLib.Object
 		}
 	}
 
-	[DBus (visible = false)]
 	public void handle_new_device(Device new_dev) {
 		debug("found device: %s", new_dev.to_string());
 
