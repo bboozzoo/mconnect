@@ -41,6 +41,7 @@ class Device : Object {
 	[DBus (visible = false)]
 	public InetAddress host { get; private set; default = null; }
 	public bool is_paired { get; private set; default = false; }
+	public bool allowed {get; set; default = false; }
 
 	// set to true if pair request was sent
 	private bool _pair_in_progress = false;
@@ -91,6 +92,7 @@ class Device : Object {
 			dev.tcp_port = (uint) cache.get_integer(name, "tcpPort");
 			var last_ip_str = cache.get_string(name, "lastIPAddress");
 			debug("last known address: %s:%u", last_ip_str, dev.tcp_port);
+			dev.allowed = cache.get_boolean(name, "allowed");
 
 			var host = new InetAddress.from_string(last_ip_str);
 			if (host == null) {
@@ -139,6 +141,7 @@ class Device : Object {
 		cache.set_integer(name, "protocolVersion", (int) this.protocol_version);
 		cache.set_integer(name, "tcpPort", (int) this.tcp_port);
 		cache.set_string(name, "lastIPAddress", this.host.to_string());
+		cache.set_boolean(name, "allowed", this.allowed);
 	}
 
 	private async void greet() {
