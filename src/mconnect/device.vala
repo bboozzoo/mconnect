@@ -223,7 +223,7 @@ class Device : Object {
 	/**
 	 * activate_from_device:
 	 *
-	 * Try to activate using a newly discovered device. If device is
+	 * Try to activate using information from device @dev. If device is
 	 * already active, compare the host address to see if it
 	 * changed. If so, close the current connection and activate with
 	 * new address.
@@ -242,8 +242,12 @@ class Device : Object {
 			tcp_port = dev.tcp_port;
 			activate();
 		} else {
-			// same host, assuming no activation needed
-			debug("device %s already active", dev.to_string());
+			if (_channel == null) {
+				activate();
+			} else {
+				// same host, assuming no activation needed
+				debug("device %s already active", dev.to_string());
+			}
 		}
 	}
 
