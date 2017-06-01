@@ -59,6 +59,11 @@ class DeviceManagerDBusProxy : Object
 
 		var dev_proxy = this.devices.@get(path);
 
+		if (dev_proxy == null) {
+			warning("no device under path %s", path);
+			return;
+		}
+
 		this.manager.allow_device(dev_proxy.device);
 	}
 
