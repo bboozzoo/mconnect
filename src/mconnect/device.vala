@@ -267,7 +267,6 @@ class Device : Object {
 				paired(true);
 			}
 
-			debug("signal packet");
 			// emit signal
 			message(pkt);
 		}
