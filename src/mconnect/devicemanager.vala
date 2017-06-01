@@ -143,15 +143,12 @@ class DeviceManager : GLib.Object
 	private void activate_device(Device dev) {
 		info("activating device %s", dev.to_string());
 
-		dev.paired.connect((d, p) => {
-				device_paired(d, p);
-			});
+		if (!dev.is_active) {
+			dev.paired.connect(this.device_paired);
+			dev.disconnected.connect(this.device_disconnected);
 
-		dev.disconnected.connect((d) => {
-				device_disconnected(d);
-			});
-
-		dev.activate_from_device(dev);
+			dev.activate_from_device(dev);
+		}
 	}
 
 	/**
@@ -175,11 +172,17 @@ class DeviceManager : GLib.Object
 		info("device %s pair status change: %s",
 			 dev.to_string(), status.to_string());
 
+		var core = Core.instance();
+
 		if (status == true) {
-			var core = Core.instance();
 			// register message handlers
 			core.handlers.use_device(dev);
 		} else {
+			core.handlers.release_device(dev);
+
+			// we're no longer interested in paired singnal
+			dev.paired.disconnect(this.device_paired);
+
 			// we're not paired anymore, deactivate if needed
 			dev.deactivate();
 		}
@@ -188,6 +191,7 @@ class DeviceManager : GLib.Object
 
 	private void device_disconnected(Device dev) {
 		debug("device %s got disconnected", dev.to_string());
+		dev.disconnected.disconnect(this.device_disconnected);
 	}
 
 	/**
