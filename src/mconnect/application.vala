@@ -71,6 +71,8 @@ namespace Mconn {
 
 		protected override void activate() {
 			debug("activate");
+			// reload devices from cache
+			manager.load_cache();
 			hold();
 		}
 

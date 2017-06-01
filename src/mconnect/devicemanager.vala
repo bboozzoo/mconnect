@@ -44,10 +44,6 @@ class DeviceManager : GLib.Object
 		debug("device manager..");
 
 		this.devices = new HashMap<string, Device>();
-
-		// TODO: check for network connectivity first, possibly pass
-		// this through the main loop
-		load_cache();
 	}
 
 	/**
@@ -68,7 +64,8 @@ class DeviceManager : GLib.Object
 	/**
 	 * Load known devices from cache and attempt pairing.
 	 */
-	private void load_cache() {
+	[DBus (visible = false)]
+	public void load_cache() {
 		debug("try loading devices from device cache");
 
 		var cache_file = get_cache_file();
