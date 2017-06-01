@@ -36,7 +36,7 @@ class DeviceManagerDBusProxy : Object
 		this.bus = bus;
 		this.devices = new HashMap<string, DeviceDBusProxy>();
 
-		manager.found_device.connect((d) => {
+		manager.found_new_device.connect((d) => {
 				this.add_device(d);
 			});
 	}

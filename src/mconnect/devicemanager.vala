@@ -21,7 +21,7 @@ using Gee;
 
 class DeviceManager : GLib.Object
 {
-	public signal void found_device(Device dev);
+	public signal void found_new_device(Device dev);
 
 	public const string DEVICES_CACHE_FILE = "devices";
 
@@ -67,7 +67,7 @@ class DeviceManager : GLib.Object
 				var dev = Device.new_from_cache(kf, group);
 				if (dev != null) {
 					debug("device %s from cache", dev.to_string());
-					found_device(dev);
+					handle_new_device(dev);
 				}
 			}
 		} catch (Error e) {
@@ -132,6 +132,11 @@ class DeviceManager : GLib.Object
 			activate_device(dev);
 		} else {
 			message("skipping device %s activation, device not allowed", dev.to_string());
+		}
+
+		// notify everyone that a new device appeared
+		if (is_new) {
+			found_new_device(dev);
 		}
 	}
 
