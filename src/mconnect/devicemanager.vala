@@ -178,4 +178,24 @@ class DeviceManager : GLib.Object
 		debug("device %s got disconnected", dev.to_string());
 	}
 
+	/**
+	 * allow_device:
+	 * @path: device object path
+	 *
+	 * Allow given device
+	 */
+	public void allow_device(string path) {
+
+	}
+
+	/**
+	 * list_devices:
+	 *
+	 * Returns a list of DBus paths of all known devices
+	 */
+	public ObjectPath[] list_devices() {
+		ObjectPath[] devices = {};
+		return devices;
+	}
+
 }
