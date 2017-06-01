@@ -201,10 +201,9 @@ class Device : Object {
 	 * Deactivate device
 	 */
 	public void deactivate() {
-		if (_channel != null)
-			_channel.close.begin((c) => {
-					channel_closed_cleanup();
-				});
+		if (_channel != null) {
+			close_and_cleanup();
+		}
 	}
 
 	/**
@@ -285,6 +284,10 @@ class Device : Object {
 		assert(pkt.pkt_type == Packet.PAIR);
 
 		bool pair = pkt.body.get_boolean_member("pair");
+
+		debug("pair in progress: %s is paired: %s pair: %s",
+			  _pair_in_progress.to_string(), this.is_paired.to_string(),
+			  pair.to_string());
 		if (_pair_in_progress == true) {
 			// response to host initiated pairing
 			if (pair == true) {
@@ -319,9 +322,12 @@ class Device : Object {
 	private void handle_disconnect() {
 		// channel got disconnected
 		debug("channel disconnected");
-		_channel.close.begin((c) => {
-				channel_closed_cleanup();
-			});
+		close_and_cleanup();
+	}
+
+	private void close_and_cleanup() {
+		_channel.close();
+		channel_closed_cleanup();
 	}
 
 	/**

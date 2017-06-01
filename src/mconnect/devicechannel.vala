@@ -118,7 +118,7 @@ class DeviceChannel : Object {
 		return true;
 	}
 
-	public async void close() {
+	public void close() {
 		debug("closing connection");
 
 		if (_srcid > 0) {
