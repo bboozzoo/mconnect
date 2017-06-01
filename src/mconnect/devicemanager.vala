@@ -114,6 +114,8 @@ class DeviceManager : GLib.Object
 			this.devices.@set(unique, new_dev);
 
 			is_new = true;
+		} else {
+			debug("device %s already present", unique);
 		}
 
 		var dev = this.devices.@get(unique);
