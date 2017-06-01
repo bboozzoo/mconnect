@@ -24,18 +24,45 @@
 [DBus (name = "org.mconnect.Device")]
 class DeviceDBusProxy : Object {
 
-	public string device_id { get; private set; default = ""; }
-	public string device_name { get; private set; default = ""; }
-	public string device_type { get; private set; default = ""; }
-	public uint protocol_version {get; private set; default = 5; }
+	public string id {
+		get { return device.device_id; }
+		private set {}
+		default = "";
+	}
+	public string name {
+		get { return device.device_name; }
+		private set {}
+		default = "";
+	}
+	public string device_type {
+		get { return device.device_type; }
+		private set {}
+		default = "";
+	}
+	public uint protocol_version {
+		get { return device.protocol_version; }
+		private set {}
+		default = 5;
+	}
 	public string address { get; private set; default = ""; }
-	public bool is_paired { get; private set; default = false; }
-	public bool allowed {get; set; default = false; }
+
+	public bool is_paired {
+		get { return device.is_paired; }
+		private set {}
+		default = false;
+	}
+	public bool allowed {
+		get { return device.allowed; }
+		private set {}
+		default = false;
+	}
 
 	[DBus (visible = false)]
 	public Device device {get; private set; default = null; }
 
 	public DeviceDBusProxy.for_device(Device device) {
 		this.device = device;
+		this.address = "%s:%u".printf(device.host.to_string(),
+									  device.tcp_port);
 	}
 }
