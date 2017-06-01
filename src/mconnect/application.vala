@@ -31,12 +31,20 @@ namespace Mconn {
 			{null}
 		};
 
+		private Discovery discovery = null;
+		private DeviceManager manager = null;
+
 		public Application() {
-			Object(application_id: "org.bboozzoo.mconnect");
+			Object(application_id: "org.mconnect");
 			add_main_option_entries(options);
+
+			discovery = new Discovery();
+			manager = new DeviceManager();
 		}
 
 		protected override void startup() {
+			debug("startup");
+
 			base.startup();
 
 			if (log_debug == true)
@@ -51,9 +59,6 @@ namespace Mconn {
 
 			Notify.init("mconnect");
 
-			var discovery = new Discovery();
-			var manager = new DeviceManager();
-
 			discovery.device_found.connect((disc, dev) => {
 					manager.found_device(dev);
 				});
@@ -65,7 +70,21 @@ namespace Mconn {
 		}
 
 		protected override void activate() {
+			debug("activate");
 			hold();
+		}
+
+		public override bool dbus_register(DBusConnection conn, string object_path) throws Error {
+			base.dbus_register(conn, object_path);
+			debug("dbus register, path %s", object_path);
+
+			conn.register_object("/org/mconnect/manager", manager);
+			return true;
+		}
+
+		public override void dbus_unregister(DBusConnection conn, string object_path) {
+			base.dbus_unregister(conn, object_path);
+			debug("dbus unregister, path %s", object_path);
 		}
 	}
 }
