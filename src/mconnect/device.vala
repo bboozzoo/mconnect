@@ -21,11 +21,16 @@
 /**
  * General device wrapper.
  */
+[DBus (name = "org.mconnect.Device")]
 class Device : Object {
 
+	[DBus (visible = false)]
 	public signal void paired(bool pair);
+	[DBus (visible = false)]
 	public signal void connected();
+	[DBus (visible = false)]
 	public signal void disconnected();
+	[DBus (visible = false)]
 	public signal void message(Packet pkt);
 
 	public string device_id { get; private set; default = ""; }
@@ -33,6 +38,7 @@ class Device : Object {
 	public string device_type { get; private set; default = ""; }
 	public uint protocol_version {get; private set; default = 5; }
 	public uint tcp_port {get; private set; default = 1714; }
+	[DBus (visible = false)]
 	public InetAddress host { get; private set; default = null; }
 	public bool is_paired { get; private set; default = false; }
 
@@ -108,10 +114,12 @@ class Device : Object {
 	/**
 	 * Generates a unique string for this device
 	 */
+	[DBus (visible = false)]
 	public string to_unique_string() {
 		return this.to_string().replace(" ", "-");
 	}
 
+	[DBus (visible = false)]
 	public string to_string() {
 		return "%s-%s-%s-%u".printf(this.device_id, this.device_name,
 									this.device_type, this.protocol_version);
@@ -123,6 +131,7 @@ class Device : Object {
 	 * @cache: device cache
 	 * @name: group name
 	 */
+	[DBus (visible = false)]
 	public void to_cache(KeyFile cache, string name) {
 		cache.set_string(name, "deviceId", this.device_id);
 		cache.set_string(name, "deviceName", this.device_name);
@@ -150,6 +159,7 @@ class Device : Object {
 	 *
 	 * @param expect_response se to true if expecting a response
 	 */
+	[DBus (visible = false)]
 	public async void pair(bool expect_response = true) {
 		if (this.host != null) {
 			debug("start pairing");
@@ -164,6 +174,7 @@ class Device : Object {
 		}
 	}
 
+	[DBus (visible = false)]
 	public void pair_if_needed() {
 		if (is_paired == false && _pair_in_progress == false)
 			this.pair.begin();
@@ -175,6 +186,7 @@ class Device : Object {
 	 * Activate device. Triggers sending of #paired signal after
 	 * successfuly opening a connection.
 	 */
+	[DBus (visible = false)]
 	public void activate() {
 		assert(_channel == null);
 
@@ -197,6 +209,7 @@ class Device : Object {
 	 *
 	 * Deactivate device
 	 */
+	[DBus (visible = false)]
 	public void deactivate() {
 		if (_channel != null)
 			_channel.close.begin((c) => {
@@ -214,6 +227,7 @@ class Device : Object {
 	 *
 	 * @param dev device
 	 */
+	[DBus (visible = false)]
 	public void activate_from_device(Device dev) {
 		if (host == null) {
 			host = dev.host;

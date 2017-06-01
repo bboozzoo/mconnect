@@ -19,11 +19,26 @@
  */
 using Gee;
 
+[DBus (name = "org.mconnect.DeviceManager")]
 class DeviceManager : GLib.Object
 {
 	public const string DEVICES_CACHE_FILE = "devices";
 
 	private HashMap<string, Device> devices;
+
+	/**
+	 * DBus wrapper for devices
+	 */
+	private struct DeviceWrapper {
+        ObjectPath object_path;
+        Device device;
+
+        DeviceWrapper (string path, Device device) {
+            this.object_path = new ObjectPath(path);
+            this.device = device;
+        }
+    }
+
 
 	public DeviceManager() {
 		debug("device manager..");
@@ -101,6 +116,7 @@ class DeviceManager : GLib.Object
 		}
 	}
 
+	[DBus (visible = false)]
 	public void found_device(Device dev) {
 		debug("found device: %s", dev.to_string());
 
