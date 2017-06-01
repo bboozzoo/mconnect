@@ -46,15 +46,20 @@ class MousepadHandler : Object, PacketHandlerInterface {
 	}
 
 	public void use_device(Device dev) {
-		debug("use device %s for battery status updates", dev.to_string());
-		dev.message.connect((d, pkt) => {
-				if (pkt.pkt_type == MOUSEPAD) {
-					this.message(pkt);
-				}
-			});
+		debug("use device %s for mouse/keyboard input", dev.to_string());
+		dev.message.connect(this.message);
 	}
 
-	public void message(Packet pkt) {
+	public void release_device(Device dev) {
+		debug("release device %s ", dev.to_string());
+		dev.message.disconnect(this.message);
+	}
+
+	private void message(Device dev, Packet pkt) {
+		if (pkt.pkt_type != MOUSEPAD) {
+			return;
+		}
+
 		debug("got mousepad packet");
 
 		if (_display == null) {

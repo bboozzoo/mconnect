@@ -38,14 +38,17 @@ class NotificationHandler : Object, PacketHandlerInterface {
 	}
 
 	public void use_device(Device dev) {
-		dev.message.connect((d, pkt) => {
-				if (pkt.pkt_type == NOTIFICATION) {
-					this.message(pkt);
-				}
-			});
+		dev.message.connect(this.message);
 	}
 
-	public void message(Packet pkt) {
+	public void release_device(Device dev) {
+		dev.message.disconnect(this.message);
+	}
+
+	public void message(Device dev, Packet pkt) {
+		if (pkt.pkt_type != NOTIFICATION) {
+			return;
+		}
 		debug("got notification packet");
 
 		// get application ID

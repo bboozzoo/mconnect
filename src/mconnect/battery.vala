@@ -36,14 +36,19 @@ class BatteryHandler : Object, PacketHandlerInterface {
 
 	public void use_device(Device dev) {
 		debug("use device %s for battery status updates", dev.to_string());
-		dev.message.connect((d, pkt) => {
-				if (pkt.pkt_type == BATTERY) {
-					this.message(pkt);
-				}
-			});
+		dev.message.connect(this.message);
 	}
 
-	public void message(Packet pkt) {
+	public void release_device(Device dev) {
+		debug("release device %s", dev.to_string());
+		dev.message.disconnect(this.message);
+	}
+
+	public void message(Device dev, Packet pkt) {
+		if (pkt.pkt_type != BATTERY) {
+			return;
+		}
+
 		debug("got battery packet");
 
 		int64 level = pkt.body.get_int_member("currentCharge");

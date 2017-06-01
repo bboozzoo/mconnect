@@ -69,4 +69,10 @@ class PacketHandlers : Object {
 				h.use_device(dev);
 			});
 	}
+
+	public void release_device(Device dev) {
+		_handlers.foreach((h) => {
+				h.release_device(dev);
+			});
+	}
 }
