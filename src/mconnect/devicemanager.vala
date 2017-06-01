@@ -119,39 +119,51 @@ class DeviceManager : GLib.Object
 
 		if (device_allowed(dev) == false) {
 			message("device %s not on whitelist", dev.to_string());
-			return;
 		}
 
+		var is_new = false;
 		string unique = dev.to_unique_string();
 		debug("device key: %s", unique);
+
 		if (this.devices.has_key(unique) == false) {
 			debug("adding new device with key: %s", unique);
 			this.devices.@set(unique, dev);
-
-			dev.paired.connect((d, p) => {
-					device_paired(d, p);
-				});
-
-			dev.disconnected.connect((d) => {
-					device_disconnected(d);
-				});
-			dev.activate();
-		} else {
-			debug("activate from device");
-			var known_dev = this.devices.@get(unique);
-			known_dev.activate_from_device(dev);
+			is_new = true;
 		}
 
-		// device in whitelist and added to currently used devices, so
-		// it's ok to update the device cache
+		// update devices cache
 		update_cache();
+
+		if (dev.allowed) {
+			// device is allowed
+
+			if (is_new) {
+				dev.paired.connect((d, p) => {
+						device_paired(d, p);
+					});
+
+				dev.disconnected.connect((d) => {
+						device_disconnected(d);
+					});
+				dev.activate();
+			} else {
+				debug("activate from device");
+				var known_dev = this.devices.@get(unique);
+				known_dev.activate_from_device(dev);
+			}
+		}
 	}
 
 	private bool device_allowed(Device dev) {
-		var core = Core.instance();
-		return core.config.is_device_allowed(dev.device_name,
-											 dev.device_type);
+		if (dev.allowed)
+			return true;
 
+		var core = Core.instance();
+
+		var in_config = core.config.is_device_allowed(dev.device_name,
+													  dev.device_type);
+		dev.allowed = in_config;
+		return in_config;
 	}
 
 	private void device_paired(Device dev, bool status) {
