@@ -340,8 +340,8 @@ class Device : Object {
 	 * Single cleanup point after channel has been closed
 	 */
 	private void channel_closed_cleanup() {
+		debug("close cleanup");
 		_channel = null;
-		_host = null;
 		// emit disconnected
 		disconnected();
 	}
