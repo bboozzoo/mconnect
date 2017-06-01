@@ -120,7 +120,9 @@ class DeviceManager : GLib.Object
 
 		var dev = this.devices.@get(unique);
 
-		if (device_allowed(dev)) {
+		info("allowed? %s", dev.allowed.to_string());
+		// check if device is whitelisted in configuration
+		if (!dev.allowed && device_allowed_in_config(dev)) {
 			dev.allowed = true;
 		}
 
@@ -154,7 +156,13 @@ class DeviceManager : GLib.Object
 		dev.activate_from_device(dev);
 	}
 
-	private bool device_allowed(Device dev) {
+	/**
+	 * device_allowed_in_config:
+	 * @dev device
+	 *
+	 * Returns true if a matching device is enabled via configuration file.
+	 */
+	private bool device_allowed_in_config(Device dev) {
 		if (dev.allowed)
 			return true;
 
