@@ -36,6 +36,11 @@ class Device : Object {
 	public InetAddress host { get; private set; default = null; }
 	public bool is_paired { get; private set; default = false; }
 	public bool allowed {get; set; default = false; }
+	public bool is_active {
+		get { return (_channel != null); }
+		set {}
+		default = false;
+	}
 
 	// set to true if pair request was sent
 	private bool _pair_in_progress = false;
