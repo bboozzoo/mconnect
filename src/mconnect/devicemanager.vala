@@ -24,7 +24,8 @@ class DeviceManager : GLib.Object
 {
 	public const string DEVICES_CACHE_FILE = "devices";
 
-	private HashMap<string, Device> devices;
+	private HashMap<string, DeviceWrapper?> devices;
+	private int device_idx = 0;
 
 	/**
 	 * DBus wrapper for devices
@@ -43,7 +44,7 @@ class DeviceManager : GLib.Object
 	public DeviceManager() {
 		debug("device manager..");
 
-		this.devices = new HashMap<string, Device>();
+		this.devices = new HashMap<string, DeviceWrapper?>();
 	}
 
 	/**
@@ -99,7 +100,8 @@ class DeviceManager : GLib.Object
 
 		var kf = new KeyFile();
 
-		foreach (Device dev in devices.values) {
+		foreach (var wrapper in devices.values) {
+			var dev = wrapper.device;
 			dev.to_cache(kf, dev.device_name);
 		}
 
@@ -113,13 +115,23 @@ class DeviceManager : GLib.Object
 		}
 	}
 
+	/**
+	 * make_device_path:
+	 *
+	 * return device path string that can be used as ObjectPath
+	 */
+	private string make_device_path() {
+		var path =  "/org/mconnect/device/%d".printf(this.device_idx);
+
+		// bump device index
+		device_idx++;
+
+		return path;
+	}
+
 	[DBus (visible = false)]
 	public void found_device(Device dev) {
 		debug("found device: %s", dev.to_string());
-
-		if (device_allowed(dev) == false) {
-			message("device %s not on whitelist", dev.to_string());
-		}
 
 		var is_new = false;
 		string unique = dev.to_unique_string();
@@ -127,8 +139,16 @@ class DeviceManager : GLib.Object
 
 		if (this.devices.has_key(unique) == false) {
 			debug("adding new device with key: %s", unique);
-			this.devices.@set(unique, dev);
+			this.devices.@set(unique,
+							  DeviceWrapper(make_device_path(), dev));
 			is_new = true;
+		} else {
+			var wrapper = this.devices.@get(unique);
+			dev = wrapper.device;
+		}
+
+		if (device_allowed(dev)) {
+			dev.allowed = true;
 		}
 
 		// update devices cache
@@ -136,22 +156,24 @@ class DeviceManager : GLib.Object
 
 		if (dev.allowed) {
 			// device is allowed
-
-			if (is_new) {
-				dev.paired.connect((d, p) => {
-						device_paired(d, p);
-					});
-
-				dev.disconnected.connect((d) => {
-						device_disconnected(d);
-					});
-				dev.activate();
-			} else {
-				debug("activate from device");
-				var known_dev = this.devices.@get(unique);
-				known_dev.activate_from_device(dev);
-			}
+			activate_device(dev);
+		} else {
+			message("skipping device %s activation, device not allowed", dev.to_string());
 		}
+	}
+
+	private void activate_device(Device dev) {
+		info("activating device %s", dev.to_string());
+
+		dev.paired.connect((d, p) => {
+				device_paired(d, p);
+			});
+
+		dev.disconnected.connect((d) => {
+				device_disconnected(d);
+			});
+
+		dev.activate_from_device(dev);
 	}
 
 	private bool device_allowed(Device dev) {
@@ -162,16 +184,22 @@ class DeviceManager : GLib.Object
 
 		var in_config = core.config.is_device_allowed(dev.device_name,
 													  dev.device_type);
-		dev.allowed = in_config;
 		return in_config;
 	}
 
 	private void device_paired(Device dev, bool status) {
+		info("device %s pair status change: %s",
+			 dev.to_string(), status.to_string());
+
 		if (status == true) {
 			var core = Core.instance();
 			// register message handlers
 			core.handlers.use_device(dev);
+		} else {
+			// we're not paired anymore, deactivate if needed
+			dev.deactivate();
 		}
+
 	}
 
 	private void device_disconnected(Device dev) {
@@ -185,7 +213,26 @@ class DeviceManager : GLib.Object
 	 * Allow given device
 	 */
 	public void allow_device(string path) {
+		debug("allow device %s", path);
 
+		Device dev = null;
+		foreach (var dw in this.devices.values) {
+			if (dw.object_path == path)
+				dev = dw.device;
+		}
+
+		if (dev == null) {
+			warning("device with path %s not found", path);
+			return;
+		}
+
+		dev.allowed = true;
+
+		// update device cache
+		update_cache();
+
+		// maybe activate if needed
+		activate_device(dev);
 	}
 
 	/**
@@ -195,7 +242,10 @@ class DeviceManager : GLib.Object
 	 */
 	public ObjectPath[] list_devices() {
 		ObjectPath[] devices = {};
+
+		foreach (var dw in this.devices.values) {
+			devices += dw.object_path;
+		}
 		return devices;
 	}
-
 }
