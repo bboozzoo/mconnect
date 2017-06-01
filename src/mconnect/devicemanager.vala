@@ -19,32 +19,18 @@
  */
 using Gee;
 
-[DBus (name = "org.mconnect.DeviceManager")]
 class DeviceManager : GLib.Object
 {
+	public signal void found_device(Device dev);
+
 	public const string DEVICES_CACHE_FILE = "devices";
 
-	private HashMap<string, DeviceWrapper?> devices;
-	private int device_idx = 0;
-
-	/**
-	 * DBus wrapper for devices
-	 */
-	private struct DeviceWrapper {
-        ObjectPath object_path;
-        Device device;
-
-        DeviceWrapper (string path, Device device) {
-            this.object_path = new ObjectPath(path);
-            this.device = device;
-        }
-    }
-
+	private HashMap<string, Device> devices;
 
 	public DeviceManager() {
 		debug("device manager..");
 
-		this.devices = new HashMap<string, DeviceWrapper?>();
+		this.devices = new HashMap<string, Device>();
 	}
 
 	/**
@@ -100,8 +86,7 @@ class DeviceManager : GLib.Object
 
 		var kf = new KeyFile();
 
-		foreach (var wrapper in devices.values) {
-			var dev = wrapper.device;
+		foreach (var dev in devices.values) {
 			dev.to_cache(kf, dev.device_name);
 		}
 
@@ -115,37 +100,23 @@ class DeviceManager : GLib.Object
 		}
 	}
 
-	/**
-	 * make_device_path:
-	 *
-	 * return device path string that can be used as ObjectPath
-	 */
-	private string make_device_path() {
-		var path =  "/org/mconnect/device/%d".printf(this.device_idx);
-
-		// bump device index
-		device_idx++;
-
-		return path;
-	}
-
 	[DBus (visible = false)]
-	public void found_device(Device dev) {
-		debug("found device: %s", dev.to_string());
+	public void handle_new_device(Device new_dev) {
+		debug("found device: %s", new_dev.to_string());
 
 		var is_new = false;
-		string unique = dev.to_unique_string();
+		string unique = new_dev.to_unique_string();
 		debug("device key: %s", unique);
 
 		if (this.devices.has_key(unique) == false) {
 			debug("adding new device with key: %s", unique);
-			this.devices.@set(unique,
-							  DeviceWrapper(make_device_path(), dev));
+
+			this.devices.@set(unique, new_dev);
+
 			is_new = true;
-		} else {
-			var wrapper = this.devices.@get(unique);
-			dev = wrapper.device;
 		}
+
+		var dev = this.devices.@get(unique);
 
 		if (device_allowed(dev)) {
 			dev.allowed = true;
@@ -212,20 +183,7 @@ class DeviceManager : GLib.Object
 	 *
 	 * Allow given device
 	 */
-	public void allow_device(string path) {
-		debug("allow device %s", path);
-
-		Device dev = null;
-		foreach (var dw in this.devices.values) {
-			if (dw.object_path == path)
-				dev = dw.device;
-		}
-
-		if (dev == null) {
-			warning("device with path %s not found", path);
-			return;
-		}
-
+	public void allow_device(Device dev) {
 		dev.allowed = true;
 
 		// update device cache
@@ -233,19 +191,5 @@ class DeviceManager : GLib.Object
 
 		// maybe activate if needed
 		activate_device(dev);
-	}
-
-	/**
-	 * list_devices:
-	 *
-	 * Returns a list of DBus paths of all known devices
-	 */
-	public ObjectPath[] list_devices() {
-		ObjectPath[] devices = {};
-
-		foreach (var dw in this.devices.values) {
-			devices += dw.object_path;
-		}
-		return devices;
 	}
 }

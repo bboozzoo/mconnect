@@ -56,7 +56,9 @@ mconnect_SOURCES = \
 	src/mconnect/discovery.vala \
 	src/mconnect/packet.vala \
 	src/mconnect/device.vala \
+	src/mconnect/device-proxy.vala \
 	src/mconnect/devicemanager.vala \
+	src/mconnect/devicemanager-proxy.vala \
 	src/mconnect/devicechannel.vala \
 	src/mconnect/core.vala \
 	src/mconnect/packethandlerinterface.vala \

@@ -33,6 +33,7 @@ namespace Mconn {
 
 		private Discovery discovery = null;
 		private DeviceManager manager = null;
+		private DeviceManagerDBusProxy bus_manager = null;
 
 		public Application() {
 			Object(application_id: "org.mconnect");
@@ -60,8 +61,9 @@ namespace Mconn {
 			Notify.init("mconnect");
 
 			discovery.device_found.connect((disc, dev) => {
-					manager.found_device(dev);
+					manager.handle_new_device(dev);
 				});
+
 			try {
 				discovery.listen();
 			} catch (Error e) {
@@ -76,15 +78,21 @@ namespace Mconn {
 			hold();
 		}
 
-		public override bool dbus_register(DBusConnection conn, string object_path) throws Error {
+		public override bool dbus_register(DBusConnection conn,
+										   string object_path) throws Error {
+
+			this.bus_manager = new DeviceManagerDBusProxy.with_manager(conn,
+																	   this.manager);
+			this.bus_manager.publish();
 			base.dbus_register(conn, object_path);
 			debug("dbus register, path %s", object_path);
 
-			conn.register_object("/org/mconnect/manager", manager);
 			return true;
 		}
 
-		public override void dbus_unregister(DBusConnection conn, string object_path) {
+		public override void dbus_unregister(DBusConnection conn,
+											 string object_path) {
+
 			base.dbus_unregister(conn, object_path);
 			debug("dbus unregister, path %s", object_path);
 		}
