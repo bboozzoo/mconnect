@@ -298,7 +298,7 @@ class Device : Object {
 				debug("device is paired, pairing complete");
 				this.is_paired = true;
 			} else {
-				critical("pairing rejected by device");
+				warning("pairing rejected by device");
 				this.is_paired = false;
 			}
 			// pair completed
