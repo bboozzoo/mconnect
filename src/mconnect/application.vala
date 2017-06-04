@@ -60,8 +60,8 @@ namespace Mconn {
 
 			Notify.init("mconnect");
 
-			discovery.device_found.connect((disc, dev) => {
-					manager.handle_new_device(dev);
+			discovery.device_found.connect((disc, discdev) => {
+					manager.handle_discovered_device(discdev);
 				});
 
 			try {

@@ -22,10 +22,10 @@ class Discovery : GLib.Object
 {
 	private Socket socket = null;
 
-	public signal void device_found(Device dev);
+	public signal void device_found(DiscoveredDevice dev);
 
 	public Discovery() {
-		}
+	}
 
 	~Discovery() {
 		debug("cleaning up discovery...");
@@ -91,7 +91,7 @@ class Discovery : GLib.Object
 				return;
 			}
 
-			var dev = new Device.from_identity(pkt, host);
+			var dev = new DiscoveredDevice.from_identity(pkt, host);
 			message("connection from device: \'%s\', responds at: %s:%u",
 				  dev.device_name, host.to_string(), dev.tcp_port);
 

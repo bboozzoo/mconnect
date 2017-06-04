@@ -57,19 +57,15 @@ class Device : Object {
 	 * @param pkt identity packet
 	 * @param host source host that the packet came from
 	 */
-	public Device.from_identity(Packet pkt, InetAddress host) {
+	public Device.from_discovered_device(DiscoveredDevice disc) {
+		this.host = disc.host;
+		this.device_name = disc.device_name;
+		this.device_id = disc.device_id;
+		this.device_type = disc.device_type;
+		this.protocol_version = disc.protocol_version;
+		this.tcp_port = disc.tcp_port;
 
-		debug("got packet: %s", pkt.to_string());
-
-		var body = pkt.body;
-		this.host = host;
-		this.device_name = body.get_string_member("deviceName");
-		this.device_id = body.get_string_member("deviceId");
-		this.device_type = body.get_string_member("deviceType");
-		this.protocol_version = (int) body.get_int_member("protocolVersion");
-		this.tcp_port = (uint) body.get_int_member("tcpPort");
-
-		debug("added new device: %s", this.to_string());
+		debug("new device: %s", this.to_string());
 	}
 
 	/**

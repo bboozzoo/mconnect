@@ -99,9 +99,15 @@ class DeviceManager : GLib.Object
 		}
 	}
 
-	public void handle_new_device(Device new_dev) {
-		debug("found device: %s", new_dev.to_string());
+	public void handle_discovered_device(DiscoveredDevice discovered_dev) {
+		debug("found device: %s", discovered_dev.to_string());
 
+		var new_dev = new Device.from_discovered_device(discovered_dev);
+
+		handle_new_device(new_dev);
+	}
+
+	public void handle_new_device(Device new_dev) {
 		var is_new = false;
 		string unique = new_dev.to_unique_string();
 		debug("device key: %s", unique);
