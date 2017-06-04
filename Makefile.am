@@ -142,6 +142,16 @@ git-source-dist:
 
 #-------------------------------------------------------------
 
+run-gdb: gdb-script install
+	gdb -x gdb-script
+
+.PHONY: run-gdb
+
+gdb-script: gdb-script.in
+	sed -e 's,[@]bindir[@],${bindir},g' < $< > $@
+
+#-------------------------------------------------------------
+
 GEN_FROM_VALA = $(filter %.vala,$(mconnect_SOURCES))
 BUILT_SOURCES = \
 	mconnect.desktop \
