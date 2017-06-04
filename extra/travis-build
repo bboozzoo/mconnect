@@ -1,0 +1,118 @@
+#!/bin/bash -xe
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# AUTHORS
+# Maciek Borzecki <maciek.borzecki (at] gmail.com>
+
+# Travis build script. The script reexecs itself inside the container (setting
+# IN_CONTAINER=1). The proceeds to install build dependencies and runs through
+# the whole build process. Source tree is bind-mounted at /mnt and the container
+# has its workdir set to /mnt
+#
+# NOTE: it is assumed that the script is run while at the top of source tree
+# (i.e. $PWD is your checked out tree, this crucial for properly mounting the
+# source code into the container).
+
+deps_fedora() {
+    dnf install --best -y --refresh \
+        automake \
+        autoconf \
+        libtool \
+        pkgconfig \
+        gcc \
+        vala \
+        gobject-introspection-devel \
+        json-glib-devel \
+        libgee-devel \
+        openssl-devel \
+        libnotify-devel \
+        at-spi2-core-devel \
+        gtk3-devel
+}
+
+deps_archlinux() {
+    pacman -Syu --noconfirm \
+           base-devel \
+           autoconf \
+           automake \
+           libtool \
+           pkg-config \
+           gcc \
+           vala \
+           glib2 \
+           gobject-introspection \
+           json-glib \
+           libgee \
+           openssl \
+           libnotify \
+           at-spi2-core \
+           gtk3
+}
+
+install_deps() {
+    case "$1" in
+        fedora)
+            deps_fedora
+            ;;
+        archlinux)
+            deps_archlinux
+            ;;
+        *)
+            echo "unsupported distro $1"
+            exit 1
+    esac
+}
+
+build() {
+    autoreconf -if
+    # TODO: out of source builds
+    ./configure
+    make
+    make install
+}
+
+build_in_container() {
+    install_deps $1
+
+    build
+}
+
+spin_container() {
+    case "$1" in
+        fedora)
+            DOCKER_IMG=fedora
+            ;;
+        archlinux)
+            DOCKER_IMG=base/archlinux
+            ;;
+        *)
+            echo "unsupported distro $1"
+            exit 1
+    esac
+
+    # run a container, mount sources at /mnt, st
+    docker run --rm \
+           -v $PWD:/mnt \
+           -w /mnt \
+           -e IN_CONTAINER=1 \
+           $DOCKER_IMG \
+           /mnt/extra/travis-build "$@"
+}
+
+if [ "$IN_CONTAINER" = "1" ]; then
+    build_in_container "$@"
+else
+    spin_container "$@"
+fi
