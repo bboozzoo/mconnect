@@ -178,13 +178,11 @@ class DeviceManager : GLib.Object
 		info("device %s pair status change: %s",
 			 dev.to_string(), status.to_string());
 
-		var core = Core.instance();
-
 		if (status == true) {
 			// register message handlers
-			core.handlers.use_device(dev);
+			this.enable_protocol_handlers(dev);
 		} else {
-			core.handlers.release_device(dev);
+			this.disable_protocol_handlers(dev);
 
 			// we're no longer interested in paired singnal
 			dev.paired.disconnect(this.device_paired);
@@ -195,8 +193,22 @@ class DeviceManager : GLib.Object
 
 	}
 
+	private void enable_protocol_handlers(Device dev) {
+		var core = Core.instance();
+		core.handlers.use_device(dev);
+	}
+
+	private void disable_protocol_handlers(Device dev) {
+		var core = Core.instance();
+		core.handlers.release_device(dev);
+	}
+
 	private void device_disconnected(Device dev) {
 		debug("device %s got disconnected", dev.to_string());
+
+		this.disable_protocol_handlers(dev);
+
+		dev.paired.disconnect(this.device_paired);
 		dev.disconnected.disconnect(this.device_disconnected);
 	}
 
