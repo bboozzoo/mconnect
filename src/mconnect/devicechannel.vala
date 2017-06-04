@@ -59,7 +59,7 @@ class DeviceChannel : Object {
 			_conn = yield client.connect_async(_isa);
 		} catch (Error e) {
 			//
-			critical("failed to connect to %s:%u: %s",
+			warning("failed to connect to %s:%u: %s",
 					 _isa.address.to_string(), _isa.port,
 					 e.message);
 			// emit disconnected
@@ -130,19 +130,19 @@ class DeviceChannel : Object {
 			if (_din != null)
 				_din.close();
 		} catch (Error e) {
-			critical("failed to close data input: %s", e.message);
+			warning("failed to close data input: %s", e.message);
 		}
 		try {
 			if (_dout != null)
 				_dout.close();
 		} catch (Error e) {
-			critical("failed to close data output: %s", e.message);
+			warning("failed to close data output: %s", e.message);
 		}
 		try {
 			if (_conn != null)
 				_conn.close();
 		} catch (Error e) {
-			critical("failed to close connection: %s", e.message);
+			warning("failed to close connection: %s", e.message);
 		}
 		_din = null;
 		_dout = null;
@@ -162,7 +162,7 @@ class DeviceChannel : Object {
 		try {
 			_dout.put_string(to_send);
 		} catch (IOError e) {
-			critical("failed to send message: %s", e.message);
+			warning("failed to send message: %s", e.message);
 			// TODO disconnect?
 		}
 	}
@@ -183,7 +183,7 @@ class DeviceChannel : Object {
 			// expecting \n
 			_din.read_byte();
 		} catch (IOError ie) {
-			debug("I/O error: %s", ie.message);
+			warning("I/O error: %s", ie.message);
 		}
 
 		if (data == null) {
@@ -195,7 +195,7 @@ class DeviceChannel : Object {
 
 		Packet pkt = Packet.new_from_data(data);
 		if (pkt == null) {
-			critical("failed to build packet from data");
+			warning("failed to build packet from data");
 			// data was received, hence connection is still alive
 			return true;
 		}
@@ -233,7 +233,7 @@ class DeviceChannel : Object {
 		// method.
 		Json.Array arr = pkt.body.get_array_member("data");
 		if (arr == null) {
-			critical("missing data member in encrypted packet");
+			warning("missing data member in encrypted packet");
 			return;
 		}
 
@@ -253,7 +253,7 @@ class DeviceChannel : Object {
 					debug("data length: %zu", decrypted.data.length);
 					msgbytes.append(decrypted.data);
 				} catch (Error e) {
-					critical("decryption failed: %s", e.message);
+					warning("decryption failed: %s", e.message);
 					failed = true;
 				}
 			});
@@ -266,7 +266,7 @@ class DeviceChannel : Object {
 
 		Packet dec_pkt = Packet.new_from_data(decrypted_data);
 		if (dec_pkt == null) {
-			critical("failed to parse decrypted packet");
+			warning("failed to parse decrypted packet");
 		} else {
 			packet_received(dec_pkt);
 		}
