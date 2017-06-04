@@ -27,7 +27,8 @@ mconnectdata_DATA = \
 	mconnect.conf
 
 bin_PROGRAMS = \
-	mconnect
+	mconnect \
+	mconnectctl
 
 noinst_PROGRAMS = \
 	test-mconn-crypt \
@@ -122,6 +123,18 @@ test_mconn_crypt_vala_CFLAGS = \
 
 test_mconn_crypt_vala_VALAFLAGS = \
 	--pkg=mconn-crypt
+
+#-------------------------------------------------------------
+
+mconnectctl_SOURCES = \
+src/mconnectctl/main.vala
+
+mconnectctl_LDADD = \
+	$(MCONNECT_LIBS)
+
+mconnectctl_CFLAGS = \
+	$(MCONNECT_CFLAGS)
+
 
 #-------------------------------------------------------------
 
