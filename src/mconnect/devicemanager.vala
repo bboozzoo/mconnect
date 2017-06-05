@@ -147,7 +147,8 @@ class DeviceManager : GLib.Object
 	}
 
 	private void activate_device(Device dev) {
-		info("activating device %s", dev.to_string());
+		info("activating device %s, active: %s", dev.to_string(),
+			 dev.is_active.to_string());
 
 		if (!dev.is_active) {
 			dev.paired.connect(this.device_paired);
