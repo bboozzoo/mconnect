@@ -123,6 +123,8 @@ class DeviceManager : GLib.Object
 		}
 
 		var dev = this.devices.@get(unique);
+		// update device information
+		dev.update_from_device(new_dev);
 
 		info("allowed? %s", dev.allowed.to_string());
 		// check if device is whitelisted in configuration

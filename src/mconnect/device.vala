@@ -361,4 +361,14 @@ class Device : Object {
 		return outgoing_capabilities.contains(capability) ||
 			incoming_capabilities.contains(capability);
 	}
+
+	public void update_from_device(Device other_dev) {
+		outgoing_capabilities = other_dev.outgoing_capabilities;
+		incoming_capabilities = other_dev.incoming_capabilities;
+		foreach (var cap in outgoing_capabilities) {
+			warning("updated cap: %s", cap);
+		}
+		host = other_dev.host;
+		tcp_port = other_dev.tcp_port;
+	}
 }
