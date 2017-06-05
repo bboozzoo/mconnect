@@ -39,6 +39,7 @@ class DeviceManagerDBusProxy : Object
 		manager.found_new_device.connect((d) => {
 				this.add_device(d);
 			});
+		manager.device_capability_added.connect(this.add_device_capability);
 	}
 
 	[DBus (visible = false)]
@@ -95,6 +96,29 @@ class DeviceManagerDBusProxy : Object
 			warning("failed to register DBus object for device %s under path %s",
 					dev.to_string(), path);
 		}
+	}
+
+	private void add_device_capability(Device dev,
+									   string capability,
+									   PacketHandlerInterface iface) {
+
+		ObjectPath path = null;
+		foreach (var entry in this.devices.entries) {
+			if (entry.value.device == dev) {
+				path = new ObjectPath(entry.key);
+				break;
+			}
+		}
+
+		if (path == null) {
+			warning("no path for device?");
+			return;
+		}
+
+		info("add capability handler %s for device at path %s",
+				capability, path.to_string());
+		// TODO:
+		// PacketHandlersProxy.register_capability(path, capability, iface);
 	}
 
 	/**
