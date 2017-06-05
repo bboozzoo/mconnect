@@ -56,6 +56,11 @@ class DeviceDBusProxy : Object {
 		private set {}
 		default = false;
 	}
+	public bool is_active {
+		get { return device.is_active; }
+		private set {}
+		default = false;
+	}
 
 	[DBus (visible = false)]
 	public Device device {get; private set; default = null; }

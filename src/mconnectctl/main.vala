@@ -39,6 +39,7 @@ namespace Mconnect {
 		public abstract string address  { owned get;}
 		public abstract bool is_paired  { owned get;}
 		public abstract bool allowed { owned get;}
+		public abstract bool is_active { owned get;}
 	}
 
 	public class Client {
@@ -194,13 +195,15 @@ namespace Mconnect {
 								  "  Address: %s\n" +
 								  "  Type: %s\n" +
 								  "  Allowed: %s\n" +
-								  "  Paired: %s\n",
+								  "  Paired: %s\n" +
+								  "  Connected: %s\n",
 								  dp.name,
 								  dp.id,
 								  dp.address,
 								  dp.device_type,
 								  dp.allowed.to_string(),
-								  dp.is_paired.to_string());
+								  dp.is_paired.to_string(),
+								  dp.is_active.to_string());
 					return 0;
 				});
 		}
