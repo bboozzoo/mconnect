@@ -168,8 +168,13 @@ namespace Mconnect {
 					var devs = manager.ListDevices();
 					print_paths(devs, "Devices",
 								(path) => {
-									var dp = get_device(path);
-									return "%s - %s".printf(dp.id, dp.name);
+									try {
+										var dp = get_device(path);
+										return "%s - %s".printf(dp.id, dp.name);
+									} catch (IOError e) {
+										warning("error occurred: %s", e.message);
+										return "(error)";
+									}
 								});
 					return 0;
 				});
@@ -238,15 +243,16 @@ namespace Mconnect {
 		 *
 		 * @return null or interface
 		 */
-		private T? get_mconnect_obj_proxy<T>(ObjectPath path) {
+		private T? get_mconnect_obj_proxy<T>(ObjectPath path) throws IOError {
 			T proxy_out = null;
 			try {
 				proxy_out = Bus.get_proxy_sync(bus_type,
 											   "org.mconnect",
 											   path);
-			} catch (Error e) {
+			} catch (IOError e) {
 				warning("failed to obtain proxy to mconnect service: %s",
 						e.message);
+				throw e;
 			}
 			return proxy_out;
 		}
@@ -258,7 +264,7 @@ namespace Mconnect {
 		 *
 		 * @return interface or null
 		 */
-		private DeviceManagerIface? get_manager() {
+		private DeviceManagerIface? get_manager() throws IOError {
 			return get_mconnect_obj_proxy(
 				new ObjectPath(DeviceManagerIface.OBJECT_PATH));
 		}
@@ -271,7 +277,7 @@ namespace Mconnect {
 		 *
 		 * @return interface or null
 		 */
-		private DeviceIface? get_device(ObjectPath path) {
+		private DeviceIface? get_device(ObjectPath path) throws IOError {
 			return get_mconnect_obj_proxy(path);
 		}
 
