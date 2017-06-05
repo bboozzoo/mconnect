@@ -29,6 +29,8 @@ class DiscoveredDevice : Object {
 	public uint protocol_version {get; private set; default = 5; }
 	public uint tcp_port {get; private set; default = 1714; }
 	public InetAddress host { get; private set; default = null; }
+	public string[] outgoing_capabilities { get; private set; default = null; }
+	public string[] incoming_capabilities { get; private set; default = null; }
 
 	/**
 	 * Constructs DiscoveredDevice based on identity packet.
@@ -47,6 +49,18 @@ class DiscoveredDevice : Object {
 		this.device_type = body.get_string_member("deviceType");
 		this.protocol_version = (int) body.get_int_member("protocolVersion");
 		this.tcp_port = (uint) body.get_int_member("tcpPort");
+
+		var incoming = body.get_array_member("incomingCapabilities");
+		var outgoing = body.get_array_member("outgoingCapabilities");
+		this.outgoing_capabilities = new string[outgoing.get_length()];
+		this.incoming_capabilities = new string[incoming.get_length()];
+
+		incoming.foreach_element((a, i, n) => {
+				this.incoming_capabilities[i] = n.get_string();
+			});
+		outgoing.foreach_element((a, i, n) => {
+				this.outgoing_capabilities[i] = n.get_string();
+			});
 
 		debug("discovered new device: %s", this.to_string());
 	}

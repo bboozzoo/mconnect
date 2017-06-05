@@ -62,18 +62,49 @@ class DeviceDBusProxy : Object {
 		default = false;
 	}
 
+	public string[] incoming_capabilities {
+		get;
+		private set;
+	}
+
+	public string[] outgoing_capabilities {
+		get;
+		private set;
+	}
+
 	[DBus (visible = false)]
 	public Device device {get; private set; default = null; }
 
 	public DeviceDBusProxy.for_device(Device device) {
 		this.device = device;
 		this.update_address();
+		this.update_capabilities();
 		this.device.notify.connect(this.param_changed);
+	}
+
+	private void update_capabilities() {
+		string[] caps = {};
+		foreach (var cap in device.incoming_capabilities) {
+			caps += cap;
+		}
+		this.incoming_capabilities = caps;
+
+		caps = {};
+
+		foreach (var cap in device.outgoing_capabilities) {
+			caps += cap;
+		}
+		this.outgoing_capabilities = caps;
 	}
 
 	private void update_address() {
 		this.address = "%s:%u".printf(device.host.to_string(),
 									  device.tcp_port);
+		this.device.notify.connect(this.update_properties);
+	}
+
+	private void update_properties(ParamSpec param) {
+		debug("param %s changed", param.name);
 	}
 
 	private void param_changed(ParamSpec param) {
@@ -91,6 +122,10 @@ class DeviceDBusProxy : Object {
 			break;
 		case "is-paired":
 			this.is_paired = device.is_paired;
+			break;
+		case "incoming-capabilities":
+		case "outgoing-capabilities":
+			this.update_capabilities();
 			break;
 		}
 	}
