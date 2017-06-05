@@ -107,10 +107,6 @@ namespace Mconnect {
 
 			var cl = new Client();
 
-			debug("remaining args");
-			foreach (var s in remaining) {
-				debug("remaininig: %s", s);
-			}
 			Command[] commands = {
 				Command("list-devices", 0, cl.cmd_list_devices),
 				Command("allow-device", 1, cl.cmd_allow_device),
