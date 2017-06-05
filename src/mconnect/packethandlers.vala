@@ -64,9 +64,35 @@ class PacketHandlers : Object {
 		// return interfaces;
 	}
 
-	public void use_device(Device dev) {
+	/**
+	 * SupportedCapabilityFunc:
+	 * @capability: capability name
+	 * @handler: packet handler
+	 *
+	 * User provided callback called when enabling @capability handled
+	 * by @handler for a particular device.
+	 */
+	public delegate void SupportedCapabilityFunc(string capability,
+												 PacketHandlerInterface handler);
+
+	/**
+	 * use_device:
+	 * @dev: device
+	 * @cb: callback see @SupportedCapabilityFunc to details
+	 *
+	 * Enable protocol handlers supported by device
+	 */
+	public void use_device(Device dev, SupportedCapabilityFunc? cb) {
 		_handlers.foreach((h) => {
-				h.use_device(dev);
+				var cap = h.get_pkt_type();
+				if (dev.supports_capability(cap)) {
+					h.use_device(dev);
+					if (cb != null) {
+						cb(cap, h);
+					}
+				} else {
+					warning("capability %s not supported by device", cap);
+				}
 			});
 	}
 
