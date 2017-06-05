@@ -22,6 +22,9 @@ using Gee;
 class DeviceManager : GLib.Object
 {
 	public signal void found_new_device(Device dev);
+	public signal void device_capability_added(Device dev,
+											   string capability,
+											   PacketHandlerInterface handler);
 
 	public const string DEVICES_CACHE_FILE = "devices";
 
@@ -198,7 +201,9 @@ class DeviceManager : GLib.Object
 
 	private void enable_protocol_handlers(Device dev) {
 		var core = Core.instance();
-		core.handlers.use_device(dev);
+		core.handlers.use_device(dev, (cap, handler) => {
+				device_capability_added(dev, cap, handler);
+			});
 	}
 
 	private void disable_protocol_handlers(Device dev) {
