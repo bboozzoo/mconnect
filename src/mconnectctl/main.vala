@@ -69,7 +69,7 @@ namespace Mconnect {
 			string command;		// textual command, ex. list, show, etc.
 			int arg_count;		// number of required parameters, not including
 								// command
-			CommandFunc clbk; // callback
+			unowned CommandFunc clbk; // callback
 
 			Command(string command, int arg_count, CommandFunc clbk) {
 				this.command = command;
