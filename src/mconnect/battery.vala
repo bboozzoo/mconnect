@@ -54,7 +54,10 @@ class BatteryHandler : Object, PacketHandlerInterface {
 		int64 level = pkt.body.get_int_member("currentCharge");
 		bool charging = pkt.body.get_boolean_member("isCharging");
 
-		GLib.message("battery level: %u %s", (uint) level,
-					 (charging == true) ? "charging" : "");
+		debug("battery level: %u %s", (uint) level,
+			  (charging == true) ? "charging" : "");
+		battery(dev, (uint)level, charging);
 	}
+
+	public signal void battery(Device dev, uint level, bool charging);
 }
