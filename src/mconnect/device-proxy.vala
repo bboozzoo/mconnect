@@ -67,7 +67,31 @@ class DeviceDBusProxy : Object {
 
 	public DeviceDBusProxy.for_device(Device device) {
 		this.device = device;
+		this.update_address();
+		this.device.notify.connect(this.param_changed);
+	}
+
+	private void update_address() {
 		this.address = "%s:%u".printf(device.host.to_string(),
 									  device.tcp_port);
+	}
+
+	private void param_changed(ParamSpec param) {
+		debug("parameter %s changed", param.name);
+		switch (param.name) {
+		case "host":
+		case "tcp-port":
+			this.update_address();
+			break;
+		case "allowed":
+			this.allowed = device.allowed;
+			break;
+		case "is-active":
+			this.is_active = device.is_active;
+			break;
+		case "is-paired":
+			this.is_paired = device.is_paired;
+			break;
+		}
 	}
 }
