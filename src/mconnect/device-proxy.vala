@@ -62,6 +62,16 @@ class DeviceDBusProxy : Object {
 		default = false;
 	}
 
+	public string[] incoming_capabilities {
+		get { return device.incoming_capabilities; }
+		private set {}
+	}
+
+	public string[] outgoing_capabilities {
+		get { return device.outgoing_capabilities; }
+		private set {}
+	}
+
 	[DBus (visible = false)]
 	public Device device {get; private set; default = null; }
 
@@ -69,5 +79,10 @@ class DeviceDBusProxy : Object {
 		this.device = device;
 		this.address = "%s:%u".printf(device.host.to_string(),
 									  device.tcp_port);
+		this.device.notify.connect(this.update_properties);
+	}
+
+	private void update_properties(ParamSpec param) {
+		debug("param %s changed", param.name);
 	}
 }

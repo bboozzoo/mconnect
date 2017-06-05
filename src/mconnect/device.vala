@@ -41,6 +41,8 @@ class Device : Object {
 		set {}
 		default = false;
 	}
+	public string[] outgoing_capabilities { get; private set; default = null; }
+	public string[] incoming_capabilities { get; private set; default = null; }
 
 	// set to true if pair request was sent
 	private bool _pair_in_progress = false;
@@ -64,6 +66,8 @@ class Device : Object {
 		this.device_type = disc.device_type;
 		this.protocol_version = disc.protocol_version;
 		this.tcp_port = disc.tcp_port;
+		this.outgoing_capabilities = disc.outgoing_capabilities;
+		this.incoming_capabilities = disc.incoming_capabilities;
 
 		debug("new device: %s", this.to_string());
 	}
