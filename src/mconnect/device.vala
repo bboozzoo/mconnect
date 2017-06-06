@@ -179,7 +179,7 @@ class Device : Object {
 												Environment.get_host_name(),
 												core.handlers.interfaces,
 												core.handlers.interfaces));
-		this.pair_if_needed();
+		this.maybe_pair();
 	}
 
 	/**
@@ -220,9 +220,19 @@ class Device : Object {
 		return false;
 	}
 
-	public void pair_if_needed() {
-		if (is_paired == false && _pair_in_progress == false)
-			this.pair.begin();
+	/**
+	 * maybe_pair:
+	 *
+	 * Trigger pairing or call handle_pair() if already paired.
+	 */
+	public void maybe_pair() {
+		if (is_paired == false) {
+			if (_pair_in_progress == false)
+				this.pair.begin();
+		} else {
+			// we are already paired
+			handle_pair(true, this.public_key);
+		}
 	}
 
 	/**
