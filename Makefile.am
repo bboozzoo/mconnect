@@ -68,6 +68,7 @@ mconnect_SOURCES = \
 	src/mconnect/packethandlers.vala \
 	src/mconnect/notification.vala \
 	src/mconnect/battery.vala \
+	src/mconnect/battery-proxy.vala \
 	src/mconnect/telephony.vala \
 	src/mconnect/mousepad.vala \
 	src/mconnect/ping.vala \
