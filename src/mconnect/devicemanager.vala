@@ -184,6 +184,8 @@ class DeviceManager : GLib.Object
 		info("device %s pair status change: %s",
 			 dev.to_string(), status.to_string());
 
+		update_cache();
+
 		if (status == true) {
 			// register message handlers
 			this.enable_protocol_handlers(dev);
