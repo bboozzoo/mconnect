@@ -274,10 +274,11 @@ class Device : Object {
 			// we sent a pair request, but got another packet,
 			// supposedly meaning we're alredy paired since the device
 			// is sending us data
-			if (_pair_in_progress == true) {
-				_pair_in_progress = false;
-				// just to be clear, send paired signal
-				paired(true);
+			if (this.is_paired == false) {
+				warning("not paired and still got a packet, " +
+						"assuming device is paired",
+						Packet.PAIR);
+				handle_pair(true, "");
 			}
 
 			// emit signal
@@ -332,13 +333,19 @@ class Device : Object {
 			// pair completed
 			_pair_in_progress = false;
 		} else {
-			debug("unsolicited pair change from device");
+			debug("unsolicited pair change from device, pair status: %s",
+				  pair.to_string());
 			if (pair == false) {
 				// unpair from device
 				this.is_paired = false;
 			} else {
-				// pair request from device
+				// split brain, pair was not initiated by us, but we were called
+				// with information that we are paired, assume we are paired and
+				// send a pair packet, but not expecting a response this time
+
 				this.pair.begin(false);
+
+				this.is_paired = true;
 			}
 		}
 
