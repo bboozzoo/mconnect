@@ -81,7 +81,7 @@ class DeviceManager : GLib.Object
 	 * Update contents of device cache
 	 */
 	private void update_cache() {
-		debug("update devices cache");
+		// debug("update devices cache");
 
 		if (devices.size == 0)
 			return;
@@ -93,12 +93,12 @@ class DeviceManager : GLib.Object
 		}
 
 		try {
-			debug("saving to cache");
+			// debug("saving to cache");
 			FileUtils.set_contents(get_cache_file(),
 								   kf.to_data());
 		} catch (FileError e) {
-			debug("failed to save to cache file %s: %s",
-				  get_cache_file(), e.message);
+			warning("failed to save to cache file %s: %s",
+					get_cache_file(), e.message);
 		}
 	}
 
