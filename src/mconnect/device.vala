@@ -25,6 +25,8 @@ using Gee;
  */
 class Device : Object {
 
+	public const uint PAIR_TIMEOUT = 30;
+
 	public signal void paired(bool pair);
 	public signal void connected();
 	public signal void disconnected();
@@ -53,9 +55,11 @@ class Device : Object {
 		private set;
 		default = null;
 	}
+	public string public_key {get; private set; default = ""; }
 
 	// set to true if pair request was sent
 	private bool _pair_in_progress = false;
+	private uint _pair_timeout_source = 0;
 
 	private DeviceChannel _channel = null;
 
@@ -179,8 +183,25 @@ class Device : Object {
 
 			if (expect_response == true)
 				_pair_in_progress = true;
+
+			// pairing timeout
+			_pair_timeout_source = Timeout.add_seconds(PAIR_TIMEOUT,
+													   this.pair_timeout);
+			// send request
 			yield _channel.send(Packet.new_pair(pubkey));
 		}
+	}
+
+	private bool pair_timeout() {
+		warning("pair request timeout");
+
+		_pair_timeout_source = 0;
+
+		// handle failed pairing
+		handle_pair(false, "");
+
+		// remove timeout source
+		return false;
 	}
 
 	public void pair_if_needed() {
@@ -299,6 +320,26 @@ class Device : Object {
 		assert(pkt.pkt_type == Packet.PAIR);
 
 		bool pair = pkt.body.get_boolean_member("pair");
+		string public_key = "";
+		if (pair) {
+			public_key = pkt.body.get_string_member("publicKey");
+		}
+
+		handle_pair(pair, public_key);
+	}
+
+	/**
+	 * handle_pair:
+	 * @pair: pairing status
+	 * @public_key: device public key
+	 *
+	 * Update device pair status.
+	 */
+	private void handle_pair(bool pair, string public_key) {
+		if (this._pair_timeout_source != 0) {
+			Source.remove(_pair_timeout_source);
+			this._pair_timeout_source = 0;
+		}
 
 		debug("pair in progress: %s is paired: %s pair: %s",
 			  _pair_in_progress.to_string(), this.is_paired.to_string(),
@@ -323,6 +364,13 @@ class Device : Object {
 				// pair request from device
 				this.pair.begin(false);
 			}
+		}
+
+		if (pair) {
+			// update public key
+			this.public_key = public_key;
+		} else {
+			this.public_key = "";
 		}
 
 		// emit signal
