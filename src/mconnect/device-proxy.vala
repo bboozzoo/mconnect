@@ -18,6 +18,8 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
+using Gee;
+
 /**
  * General device wrapper.
  */
@@ -72,11 +74,14 @@ class DeviceDBusProxy : Object {
 		private set;
 	}
 
+	private ArrayList<PacketHandlerInterfaceProxy> handlers;
+
 	[DBus (visible = false)]
 	public Device device {get; private set; default = null; }
 
 	public DeviceDBusProxy.for_device(Device device) {
 		this.device = device;
+		this.handlers = new ArrayList<PacketHandlerInterfaceProxy>();
 		this.update_address();
 		this.update_capabilities();
 		this.device.notify.connect(this.param_changed);
@@ -84,6 +89,7 @@ class DeviceDBusProxy : Object {
 
 	private void update_capabilities() {
 		string[] caps = {};
+
 		foreach (var cap in device.incoming_capabilities) {
 			caps += cap;
 		}
@@ -128,5 +134,10 @@ class DeviceDBusProxy : Object {
 			this.update_capabilities();
 			break;
 		}
+	}
+
+	[DBus (visible = false)]
+	public void add_handler(PacketHandlerInterfaceProxy h) {
+		this.handlers.add(h);
 	}
 }
