@@ -220,7 +220,9 @@ class Device : Object {
 	 * successfuly opening a connection.
 	 */
 	public void activate() {
-		assert(_channel == null);
+		if (_channel != null) {
+			debug("device %s already active", this.to_string());
+		}
 
 		var core = Core.instance();
 		_channel = new DeviceChannel(this.host, this.tcp_port,
@@ -244,36 +246,6 @@ class Device : Object {
 	public void deactivate() {
 		if (_channel != null) {
 			close_and_cleanup();
-		}
-	}
-
-	/**
-	 * activate_from_device:
-	 *
-	 * Try to activate using information from device @dev. If device is
-	 * already active, compare the host address to see if it
-	 * changed. If so, close the current connection and activate with
-	 * new address.
-	 *
-	 * @param dev device
-	 */
-	public void activate_from_device(Device dev) {
-		if (host == null) {
-			host = dev.host;
-			tcp_port = dev.tcp_port;
-			activate();
-		} else if (dev.host.to_string() != host.to_string()) {
-			deactivate();
-			host = dev.host;
-			tcp_port = dev.tcp_port;
-			activate();
-		} else {
-			if (_channel == null) {
-				activate();
-			} else {
-				// same host, assuming no activation needed
-				debug("device %s already active", dev.to_string());
-			}
 		}
 	}
 
@@ -417,10 +389,14 @@ class Device : Object {
 	public void update_from_device(Device other_dev) {
 		outgoing_capabilities = other_dev.outgoing_capabilities;
 		incoming_capabilities = other_dev.incoming_capabilities;
-		foreach (var cap in outgoing_capabilities) {
-			warning("updated cap: %s", cap);
+		if (this.host != null && this.host.to_string() != other_dev.host.to_string()) {
+			debug("host address changed from %s to %s",
+				  this.host.to_string(), other_dev.host.to_string());
+			// deactivate first
+			this.deactivate();
+
+			host = other_dev.host;
+			tcp_port = other_dev.tcp_port;
 		}
-		host = other_dev.host;
-		tcp_port = other_dev.tcp_port;
 	}
 }

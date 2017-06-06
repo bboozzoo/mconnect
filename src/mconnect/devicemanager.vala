@@ -159,7 +159,7 @@ class DeviceManager : GLib.Object
 			dev.paired.connect(this.device_paired);
 			dev.disconnected.connect(this.device_disconnected);
 
-			dev.activate_from_device(dev);
+			dev.activate();
 		}
 	}
 
