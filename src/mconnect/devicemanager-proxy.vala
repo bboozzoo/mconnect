@@ -103,9 +103,11 @@ class DeviceManagerDBusProxy : Object
 									   PacketHandlerInterface iface) {
 
 		ObjectPath path = null;
+		DeviceDBusProxy dp = null;
 		foreach (var entry in this.devices.entries) {
 			if (entry.value.device == dev) {
 				path = new ObjectPath(entry.key);
+				dp = entry.value;
 				break;
 			}
 		}
@@ -117,8 +119,14 @@ class DeviceManagerDBusProxy : Object
 
 		info("add capability handler %s for device at path %s",
 				capability, path.to_string());
-		// TODO:
-		// PacketHandlersProxy.register_capability(path, capability, iface);
+
+		var h = PacketHandlersProxy.new_device_capability_handler(dev,
+																  capability,
+																  iface);
+		if (h != null) {
+			h.bus_register(this.bus, path);
+			dp.add_handler(h);
+		}
 	}
 
 	/**

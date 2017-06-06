@@ -66,6 +66,7 @@ mconnect_SOURCES = \
 	src/mconnect/packethandlerinterface.vala \
 	src/mconnect/packethandlerinterface-proxy.vala \
 	src/mconnect/packethandlers.vala \
+	src/mconnect/packethandlers-proxy.vala \
 	src/mconnect/notification.vala \
 	src/mconnect/battery.vala \
 	src/mconnect/battery-proxy.vala \
