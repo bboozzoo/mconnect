@@ -185,12 +185,12 @@ class Device : Object {
 			string pubkey = core.crypt.get_public_key_pem();
 			debug("public key: %s", pubkey);
 
-			if (expect_response == true)
+			if (expect_response == true) {
 				_pair_in_progress = true;
-
-			// pairing timeout
-			_pair_timeout_source = Timeout.add_seconds(PAIR_TIMEOUT,
-													   this.pair_timeout);
+				// pairing timeout
+				_pair_timeout_source = Timeout.add_seconds(PAIR_TIMEOUT,
+														   this.pair_timeout);
+			}
 			// send request
 			yield _channel.send(Packet.new_pair(pubkey));
 		}
