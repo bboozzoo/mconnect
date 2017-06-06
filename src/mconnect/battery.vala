@@ -20,7 +20,7 @@
 
 class BatteryHandler : Object, PacketHandlerInterface {
 
-	private const string BATTERY = "kdeconnect.battery";
+	public const string BATTERY = "kdeconnect.battery";
 
 	public string get_pkt_type() {
 		return BATTERY;

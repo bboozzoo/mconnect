@@ -20,7 +20,7 @@
 
 class PingHandler : Object, PacketHandlerInterface {
 
-	private const string PING = "kdeconnect.ping";
+	public const string PING = "kdeconnect.ping";
 
 	public string get_pkt_type() {
 		return PING;
