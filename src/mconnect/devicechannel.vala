@@ -217,7 +217,7 @@ class DeviceChannel : Object {
 	}
 
 	private void handle_packet(Packet pkt) {
-		debug("handle packet of type: %s", pkt.pkt_type);
+		// debug("handle packet of type: %s", pkt.pkt_type);
 		if (pkt.pkt_type == Packet.ENCRYPTED) {
 			handle_encrypted_packet(pkt);
 		} else {

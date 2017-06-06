@@ -71,7 +71,8 @@ mconnect_SOURCES = \
 	src/mconnect/mousepad.vala \
 	src/mconnect/ping.vala \
 	src/mconnect/config.vala \
-	src/mconnect/application.vala
+	src/mconnect/application.vala \
+	src/mconnect/utils.vala
 
 mconnect_LDADD = \
 	libmconn-crypt.la \
