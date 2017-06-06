@@ -64,6 +64,7 @@ mconnect_SOURCES = \
 	src/mconnect/devicechannel.vala \
 	src/mconnect/core.vala \
 	src/mconnect/packethandlerinterface.vala \
+	src/mconnect/packethandlerinterface-proxy.vala \
 	src/mconnect/packethandlers.vala \
 	src/mconnect/notification.vala \
 	src/mconnect/battery.vala \
