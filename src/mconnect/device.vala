@@ -81,8 +81,10 @@ class Device : Object {
 		this.device_type = disc.device_type;
 		this.protocol_version = disc.protocol_version;
 		this.tcp_port = disc.tcp_port;
-		this.outgoing_capabilities = new ArrayList<string>.wrap(disc.outgoing_capabilities);
-		this.incoming_capabilities = new ArrayList<string>.wrap(disc.incoming_capabilities);
+		this.outgoing_capabilities = new ArrayList<string>.wrap(
+			disc.outgoing_capabilities);
+		this.incoming_capabilities = new ArrayList<string>.wrap(
+			disc.incoming_capabilities);
 
 		debug("new device: %s", this.to_string());
 	}
@@ -109,6 +111,12 @@ class Device : Object {
 			dev.allowed = cache.get_boolean(name, "allowed");
 			dev.is_paired = cache.get_boolean(name, "paired");
 			dev.public_key = cache.get_string(name, "public_key");
+			dev.outgoing_capabilities =	new ArrayList<string>.wrap(
+				cache.get_string_list(name,
+									  "outgoing_capabilities"));
+			dev.incoming_capabilities =	new ArrayList<string>.wrap(
+				cache.get_string_list(name,
+									  "incoming_capabilities"));
 
 			var host = new InetAddress.from_string(last_ip_str);
 			if (host == null) {
@@ -157,6 +165,10 @@ class Device : Object {
 		cache.set_boolean(name, "allowed", this.allowed);
 		cache.set_boolean(name, "paired", this.is_paired);
 		cache.set_string(name, "public_key", this.public_key);
+		cache.set_string_list(name, "outgoing_capabilities",
+							  array_list_to_list(this.outgoing_capabilities));
+		cache.set_string_list(name, "incoming_capabilities",
+							  array_list_to_list(this.incoming_capabilities));
 	}
 
 	private async void greet() {
