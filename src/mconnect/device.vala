@@ -107,6 +107,8 @@ class Device : Object {
 			var last_ip_str = cache.get_string(name, "lastIPAddress");
 			debug("last known address: %s:%u", last_ip_str, dev.tcp_port);
 			dev.allowed = cache.get_boolean(name, "allowed");
+			dev.is_paired = cache.get_boolean(name, "paired");
+			dev.public_key = cache.get_string(name, "public_key");
 
 			var host = new InetAddress.from_string(last_ip_str);
 			if (host == null) {
@@ -153,6 +155,8 @@ class Device : Object {
 		cache.set_integer(name, "tcpPort", (int) this.tcp_port);
 		cache.set_string(name, "lastIPAddress", this.host.to_string());
 		cache.set_boolean(name, "allowed", this.allowed);
+		cache.set_boolean(name, "paired", this.is_paired);
+		cache.set_string(name, "public_key", this.public_key);
 	}
 
 	private async void greet() {
