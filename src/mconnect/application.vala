@@ -25,9 +25,13 @@ namespace Mconn {
 		private Core core = null;
 
 		private static bool log_debug = false;
+		private static bool log_debug_verbose = false;
 
 		private const GLib.OptionEntry[] options = {
-			{"debug", 'd', 0, OptionArg.NONE, ref log_debug, "Show debug output", null},
+			{"debug", 'd', 0, OptionArg.NONE, ref log_debug,
+			 "Show debug output", null},
+			{"verbose-debug", 0, 0, OptionArg.NONE, ref log_debug_verbose,
+			 "Show verbose debug output", null},
 			{null}
 		};
 
@@ -50,6 +54,9 @@ namespace Mconn {
 
 			if (log_debug == true)
 				Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
+
+			if (log_debug_verbose == true)
+				enable_vdebug();
 
 			core = Core.instance();
 			if (core == null)
