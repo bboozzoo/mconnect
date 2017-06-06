@@ -191,7 +191,7 @@ class DeviceChannel : Object {
 			return false;
 		}
 
-		debug("received line: %s", data);
+		vdebug("received line: %s", data);
 
 		Packet pkt = Packet.new_from_data(data);
 		if (pkt == null) {
@@ -244,13 +244,13 @@ class DeviceChannel : Object {
 				if (failed == true)
 					return;
 
-				debug("node data: %s", node.get_string());
+				vdebug("node data: %s", node.get_string());
 				// encrypted data is base64 encoded
 				uchar[] data = Base64.decode(node.get_string());
 				var dbytes = new Bytes.take(data);
 				try {
 					ByteArray decrypted = this._crypt.decrypt(dbytes);
-					debug("data length: %zu", decrypted.data.length);
+					vdebug("data length: %zu", decrypted.data.length);
 					msgbytes.append(decrypted.data);
 				} catch (Error e) {
 					warning("decryption failed: %s", e.message);
@@ -258,11 +258,11 @@ class DeviceChannel : Object {
 				}
 			});
 		// data should be complete now
-		debug("total length of packet data: %zu", msgbytes.len);
+		vdebug("total length of packet data: %zu", msgbytes.len);
 		// make sure there is \0 at the end
 		msgbytes.append({'\0'});
 		string decrypted_data = ((string)msgbytes.data).dup();
-		debug("decrypted data: %s", decrypted_data);
+		vdebug("decrypted data: %s", decrypted_data);
 
 		Packet dec_pkt = Packet.new_from_data(decrypted_data);
 		if (dec_pkt == null) {

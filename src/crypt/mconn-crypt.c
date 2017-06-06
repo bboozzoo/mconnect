@@ -129,7 +129,7 @@ GByteArray * mconn_crypt_decrypt(MconnCrypt *self, GBytes *data, GError **err)
     g_assert(IS_MCONN_CRYPT(self));
     g_assert(self->priv->key);
 
-    g_debug("decrypt: %zu bytes of data", g_bytes_get_size(data));
+    /* g_debug("decrypt: %zu bytes of data", g_bytes_get_size(data)); */
 
     g_assert_cmpint(g_bytes_get_size(data), ==, RSA_size(self->priv->key));
 
@@ -143,7 +143,7 @@ GByteArray * mconn_crypt_decrypt(MconnCrypt *self, GBytes *data, GError **err)
                                    (unsigned char *)out_data->data,
                                    self->priv->key,
                                    MCONN_CRYPT_RSA_PADDING);
-    g_debug("decrypted size: %d", dec_size);
+    /* g_debug("decrypted size: %d", dec_size); */
     g_assert(dec_size != -1);
 
     g_byte_array_set_size(out_data, dec_size);

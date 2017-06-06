@@ -266,7 +266,7 @@ class Device : Object {
 	}
 
 	private void packet_received(Packet pkt) {
-		debug("got packet");
+		vdebug("got packet");
 		if (pkt.pkt_type == Packet.PAIR) {
 			// pairing
 			handle_pair_packet(pkt);

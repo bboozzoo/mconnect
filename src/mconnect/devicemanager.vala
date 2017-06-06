@@ -42,7 +42,7 @@ class DeviceManager : GLib.Object
 	private string get_cache_file() {
 		var cache_file = Path.build_filename(Core.get_cache_dir(),
 											 DEVICES_CACHE_FILE);
-		debug("cache file: %s", cache_file);
+		vdebug("cache file: %s", cache_file);
 
 		// make sure that cache dir exists
 		DirUtils.create_with_parents(Core.get_cache_dir(),
@@ -55,9 +55,9 @@ class DeviceManager : GLib.Object
 	 * Load known devices from cache and attempt pairing.
 	 */
 	public void load_cache() {
-		debug("try loading devices from device cache");
-
 		var cache_file = get_cache_file();
+
+		debug("try loading devices from device cache %s", cache_file);
 
 		var kf = new KeyFile();
 		try {
@@ -113,7 +113,7 @@ class DeviceManager : GLib.Object
 	public void handle_new_device(Device new_dev) {
 		var is_new = false;
 		string unique = new_dev.to_unique_string();
-		debug("device key: %s", unique);
+		vdebug("device key: %s", unique);
 
 		if (this.devices.has_key(unique) == false) {
 			debug("adding new device with key: %s", unique);
@@ -129,7 +129,7 @@ class DeviceManager : GLib.Object
 		// update device information
 		dev.update_from_device(new_dev);
 
-		info("allowed? %s", dev.allowed.to_string());
+		debug("allowed? %s", dev.allowed.to_string());
 		// check if device is whitelisted in configuration
 		if (!dev.allowed && device_allowed_in_config(dev)) {
 			dev.allowed = true;
@@ -142,7 +142,8 @@ class DeviceManager : GLib.Object
 			// device is allowed
 			activate_device(dev);
 		} else {
-			message("skipping device %s activation, device not allowed", dev.to_string());
+			warning("skipping device %s activation, device not allowed",
+					dev.to_string());
 		}
 
 		// notify everyone that a new device appeared

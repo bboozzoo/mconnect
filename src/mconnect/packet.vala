@@ -67,7 +67,7 @@ class Packet : GLib.Object {
 			int64 id = root_obj.get_int_member("id");
 			Json.Object body = root_obj.get_object_member("body");
 
-			debug("packet type: %s", type);
+			vdebug("packet type: %s", type);
 
 			return new Packet(type, body, id);
 		} catch (Error e) {

@@ -60,7 +60,7 @@ class Discovery : GLib.Object
 		}
 
 	private void incomingPacket() {
-			debug("incoming packet");
+			vdebug("incoming packet");
 
 			uint8 buffer[4096];
 			SocketAddress sa;
@@ -69,14 +69,14 @@ class Discovery : GLib.Object
 			try {
 				ssize_t read = this.socket.receive_from(out sa, buffer);
 				isa = (InetSocketAddress)sa;
-				debug("got %zd bytes from: %s:%u", read,
+				vdebug("got %zd bytes from: %s:%u", read,
 						isa.address.to_string(), isa.port);
 			} catch (Error e) {
-				message("failed to receive packet: %s", e.message);
+				warning("failed to receive packet: %s", e.message);
 				return;
 			}
 
-			debug("message data: %s", (string)buffer);
+			vdebug("message data: %s", (string)buffer);
 
 			this.parsePacketFromHost((string) buffer, isa.address);
 		}
