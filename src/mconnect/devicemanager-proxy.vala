@@ -112,6 +112,11 @@ class DeviceManagerDBusProxy : Object
 
 		if (dp == null) {
 			warning("no bus proxy for device %s", dev.to_string());
+			return;
+		}
+
+		if (dp.has_handler(capability)) {
+			return;
 		}
 
 		info("add capability handler %s for device at path %s",

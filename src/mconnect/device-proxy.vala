@@ -74,7 +74,7 @@ class DeviceDBusProxy : Object {
 		private set;
 	}
 
-	private ArrayList<PacketHandlerInterfaceProxy> handlers;
+	private HashMap<string,PacketHandlerInterfaceProxy> handlers;
 
 	private uint register_id = 0;
 
@@ -87,7 +87,7 @@ class DeviceDBusProxy : Object {
 	public DeviceDBusProxy.for_device_with_path(Device device, ObjectPath path) {
 		this.device = device;
 		this.object_path = path;
-		this.handlers = new ArrayList<PacketHandlerInterfaceProxy>();
+		this.handlers = new HashMap<string, PacketHandlerInterfaceProxy>();
 		this.update_address();
 		this.update_capabilities();
 		this.device.notify.connect(this.param_changed);
@@ -143,8 +143,8 @@ class DeviceDBusProxy : Object {
 	}
 
 	[DBus (visible = false)]
-	public void add_handler(PacketHandlerInterfaceProxy h) {
-		this.handlers.add(h);
+	public bool has_handler(string cap) {
+		return this.handlers.has_key(cap);
 	}
 
 	[DBus (visible = false)]
@@ -164,4 +164,26 @@ class DeviceDBusProxy : Object {
 		}
 		this.register_id = 0;
 	}
+
+	[DBus (visible = false)]
+	public void bus_register_handler(DBusConnection conn,
+									 string cap,
+									 PacketHandlerInterfaceProxy handler) {
+
+		handler.bus_register(conn, this.object_path);
+		this.handlers.@set(cap, handler);
+	}
+
+	[DBus (visible = false)]
+	public void bus_unregister_handler(DBusConnection conn,
+									   string cap) {
+		PacketHandlerInterfaceProxy handler;
+
+		this.handlers.@unset(cap, out handler);
+		if (handler != null) {
+			handler.bus_unregister(conn);
+		}
+	}
+
+
 }
