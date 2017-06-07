@@ -83,49 +83,45 @@ class DeviceManagerDBusProxy : Object
 	}
 
 	private void add_device(Device dev) {
-		var device_proxy = new DeviceDBusProxy.for_device(dev);
 		var path = make_device_path();
+		var device_proxy = new DeviceDBusProxy.for_device_with_path(dev,
+																	new ObjectPath(path));
 
 		this.devices.@set(path, device_proxy);
 
 		info("register device %s under path %s",
 			 dev.to_string(), path);
-		try {
-			this.bus.register_object(path, device_proxy);
-		} catch (IOError err) {
-			warning("failed to register DBus object for device %s under path %s",
-					dev.to_string(), path);
+		device_proxy.bus_register(this.bus);
+	}
+
+	private DeviceDBusProxy? find_proxy_for_device(Device dev) {
+		DeviceDBusProxy dp = null;
+		foreach (var entry in this.devices.entries) {
+			if (entry.value.device == dev) {
+				dp = entry.value;
+				break;
+			}
 		}
+		return dp;
 	}
 
 	private void add_device_capability(Device dev,
 									   string capability,
 									   PacketHandlerInterface iface) {
+		DeviceDBusProxy dp = find_proxy_for_device(dev);
 
-		ObjectPath path = null;
-		DeviceDBusProxy dp = null;
-		foreach (var entry in this.devices.entries) {
-			if (entry.value.device == dev) {
-				path = new ObjectPath(entry.key);
-				dp = entry.value;
-				break;
-			}
-		}
-
-		if (path == null) {
-			warning("no path for device?");
-			return;
+		if (dp == null) {
+			warning("no bus proxy for device %s", dev.to_string());
 		}
 
 		info("add capability handler %s for device at path %s",
-				capability, path.to_string());
+				capability, dp.object_path.to_string());
 
 		var h = PacketHandlersProxy.new_device_capability_handler(dev,
 																  capability,
 																  iface);
 		if (h != null) {
-			h.bus_register(this.bus, path);
-			dp.add_handler(h);
+			h.bus_register(this.bus, dp.object_path);
 		}
 	}
 

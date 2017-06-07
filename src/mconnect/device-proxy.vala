@@ -76,11 +76,17 @@ class DeviceDBusProxy : Object {
 
 	private ArrayList<PacketHandlerInterfaceProxy> handlers;
 
+	private uint register_id = 0;
+
+	[DBus (visible = false)]
+	public ObjectPath object_path = null;
+
 	[DBus (visible = false)]
 	public Device device {get; private set; default = null; }
 
-	public DeviceDBusProxy.for_device(Device device) {
+	public DeviceDBusProxy.for_device_with_path(Device device, ObjectPath path) {
 		this.device = device;
+		this.object_path = path;
 		this.handlers = new ArrayList<PacketHandlerInterfaceProxy>();
 		this.update_address();
 		this.update_capabilities();
@@ -139,5 +145,23 @@ class DeviceDBusProxy : Object {
 	[DBus (visible = false)]
 	public void add_handler(PacketHandlerInterfaceProxy h) {
 		this.handlers.add(h);
+	}
+
+	[DBus (visible = false)]
+	public void bus_register(DBusConnection conn) {
+		try {
+			this.register_id = conn.register_object(this.object_path, this);
+		} catch (IOError err) {
+			warning("failed to register DBus object for device %s under path %s",
+					this.device.to_string(), this.object_path.to_string());
+		}
+	}
+
+	[DBus (visible = false)]
+	public void bus_unregister(DBusConnection conn) {
+		if (this.register_id != 0) {
+			conn.unregister_object(this.register_id);
+		}
+		this.register_id = 0;
 	}
 }
