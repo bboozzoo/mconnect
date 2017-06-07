@@ -23,6 +23,7 @@ class BatteryHandlerProxy : Object, PacketHandlerInterfaceProxy {
 
 	private Device device = null;
 	private BatteryHandler battery_handler = null;
+	private uint register_id = 0;
 
 	public BatteryHandlerProxy.for_device_handler(Device dev,
 												  PacketHandlerInterface iface) {
@@ -42,12 +43,15 @@ class BatteryHandlerProxy : Object, PacketHandlerInterfaceProxy {
 
 	[DBus (visible = false)]
 	public void bus_register(DBusConnection conn, string path) throws IOError {
-		conn.register_object(path, this);
+		if (this.register_id == 0)
+			this.register_id = conn.register_object(path, this);
 	}
 
 	[DBus (visible = false)]
 	public void bus_unregister(DBusConnection conn) throws IOError {
-		//conn.unregister_object(this);
+		if (this.register_id != 0)
+			conn.unregister_object(this.register_id);
+		this.register_id = 0;
 	}
 
 	public signal void battery(uint level, bool charging);
