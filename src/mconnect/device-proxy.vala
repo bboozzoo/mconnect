@@ -164,4 +164,19 @@ class DeviceDBusProxy : Object {
 		}
 		this.register_id = 0;
 	}
+
+	[DBus (visible = false)]
+	public void bus_register_handler(DBusConnection conn,
+									 PacketHandlerInterfaceProxy handler) {
+
+		// handler.bus_register(conn, this.path);
+	}
+
+	[DBus (visible = false)]
+	public void bus_unregister_handler(DBusConnection conn,
+									   PacketHandlerInterfaceProxy handler) {
+		// handler.bus_unregister();
+	}
+
+
 }
