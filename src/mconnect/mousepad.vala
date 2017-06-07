@@ -20,7 +20,8 @@
 
 class MousepadHandler : Object, PacketHandlerInterface {
 
-	public const string MOUSEPAD = "kdeconnect.mousepad";
+	public const string MOUSEPAD = "kdeconnect.mousepad.request";
+	public const string MOUSEPAD_PACKET = "kdeconnect.mousepad";
 
 	private Gdk.Display _display;
 
@@ -56,7 +57,7 @@ class MousepadHandler : Object, PacketHandlerInterface {
 	}
 
 	private void message(Device dev, Packet pkt) {
-		if (pkt.pkt_type != MOUSEPAD) {
+		if (pkt.pkt_type != MOUSEPAD_PACKET) {
 			return;
 		}
 
