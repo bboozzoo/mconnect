@@ -40,6 +40,8 @@ namespace Mconnect {
 		public abstract bool is_paired  { owned get;}
 		public abstract bool allowed { owned get;}
 		public abstract bool is_active { owned get;}
+		public abstract string[] outgoing_capabilities { owned get;}
+		public abstract string[] incoming_capabilities { owned get;}
 	}
 
 	public class Client {
@@ -186,6 +188,14 @@ namespace Mconnect {
 				});
 		}
 
+		private void print_sorted_caps(string[] caps, string format) {
+			qsort_with_data<string>(caps, sizeof(string),
+									(a, b) => GLib.strcmp(a, b));
+			foreach (var cap in caps) {
+				stdout.printf(format, cap);
+			}
+		}
+
 		private int cmd_show_device(string[] args) {
 			return checked_dbus_call(() => {
 					var dp = get_device(new ObjectPath(args[0]));
@@ -205,6 +215,10 @@ namespace Mconnect {
 								  dp.allowed.to_string(),
 								  dp.is_paired.to_string(),
 								  dp.is_active.to_string());
+					stdout.printf("  Capabilities (out):\n");
+					print_sorted_caps(dp.outgoing_capabilities, "    %s\n");
+					stdout.printf("  Capabilities (in):\n");
+					print_sorted_caps(dp.incoming_capabilities, "    %s\n");
 					return 0;
 				});
 		}
