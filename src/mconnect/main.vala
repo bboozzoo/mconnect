@@ -21,5 +21,8 @@ public static int main(string[] args)
 {
 	var app = new Mconn.Application();
 
+	// needed for mousepad protocol handler
+	Gdk.init(ref args);
+
 	return app.run(args);
 }
