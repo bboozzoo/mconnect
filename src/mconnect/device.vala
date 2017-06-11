@@ -31,6 +31,20 @@ class Device : Object {
 	public signal void connected();
 	public signal void disconnected();
 	public signal void message(Packet pkt);
+	/**
+	 * capability_added:
+	 * @cap: device capability, eg. kdeconnect.notification
+	 *
+	 * Device capability was added
+	 */
+	public signal void capability_added(string cap);
+	/**
+	 * capability_removed:
+	 * @cap: device capability, eg. kdeconnect.notification
+	 *
+	 * Device capability was removed
+	 */
+	public signal void capability_removed(string cap);
 
 	public string device_id { get; private set; default = ""; }
 	public string device_name { get; private set; default = ""; }
@@ -55,6 +69,8 @@ class Device : Object {
 		private set;
 		default = null;
 	}
+	private HashSet<string> _capabilities = null;
+
 	public string public_key {get; private set; default = ""; }
 
 	// set to true if pair request was sent
@@ -63,9 +79,14 @@ class Device : Object {
 
 	private DeviceChannel _channel = null;
 
+	// registered packet handlers
+	private HashMap<string, PacketHandlerInterface> _handlers;
+
 	private Device() {
 		incoming_capabilities = new ArrayList<string>();
 		outgoing_capabilities = new ArrayList<string>();
+		_capabilities = new HashSet<string>();
+		_handlers = new HashMap<string, PacketHandlerInterface>();
 	}
 
 	/**
@@ -75,6 +96,8 @@ class Device : Object {
 	 * @param host source host that the packet came from
 	 */
 	public Device.from_discovered_device(DiscoveredDevice disc) {
+		this();
+
 		this.host = disc.host;
 		this.device_name = disc.device_name;
 		this.device_id = disc.device_id;
@@ -125,6 +148,7 @@ class Device : Object {
 				return null;
 			}
 			dev.host = host;
+
 			return dev;
 		}
 		catch (KeyFileError e) {
@@ -413,14 +437,115 @@ class Device : Object {
 		disconnected();
 	}
 
-	public bool supports_capability(string capability) {
-		return outgoing_capabilities.contains(capability) ||
-			incoming_capabilities.contains(capability);
+	/**
+	 * register_capability_handler:
+	 * @cap: capability, eg. kdeconnect.notification
+	 * @h: packet handler
+	 *
+	 * Keep track of capability handler @h that supports capability @cap.
+	 * Register oneself with capability handler.
+	 */
+	public void register_capability_handler(string cap,
+											PacketHandlerInterface h) {
+		assert(this.has_capability_handler(cap) == false);
+
+		this._handlers.@set(cap, h);
+		// make handler connect to device
+		h.use_device(this);
 	}
 
+	/**
+	 * has_capability_handler:
+	 * @cap: capability, eg. kdeconnect.notification
+	 *
+	 * Returns true if there is a handler of capability @cap registed for this
+	 * device.
+	 */
+	public bool has_capability_handler(string cap) {
+		return this._handlers.has_key(cap);
+	}
+
+	/**
+	 * unregister_capability_handler:
+	 * @cap: capability, eg. kdeconnect.notification
+	 *
+	 * Unregisters a handler for capability @cap.
+	 */
+	private void unregister_capability_handler(string cap) {
+		PacketHandlerInterface handler;
+		this._handlers.unset(cap, out handler);
+		if (handler != null) {
+			// make handler release the device
+			handler.release_device(this);
+		}
+	}
+
+	/**
+	 * merge_capabilities:
+	 * @added[out]: capabilities that were added
+	 * @removed[out]: capabilities that were removed
+	 *
+	 * Merge and update existing `outgoing_capabilities` and
+	 * `incoming_capabilities`. Returns lists of added and removed capabilities.
+	 */
+	private void merge_capabilities(out HashSet<string> added,
+									out HashSet<string> removed) {
+
+		var caps = new HashSet<string>();
+		caps.add_all(this.outgoing_capabilities);
+		caps.add_all(this.incoming_capabilities);
+
+		if (added == null) {
+			added = new HashSet<string>();
+			added.add_all(caps);
+
+			// TODO: simplify capability names, eg kdeconnect.telephony.request ->
+			// kdeconnect.telephony
+			added.remove_all(this._capabilities);
+		}
+
+		if (removed == null) {
+			removed = new HashSet<string>();
+			removed.add_all(this._capabilities);
+			removed.remove_all(caps);
+		}
+
+		this._capabilities = caps;
+	}
+
+	/**
+	 * update_from_device:
+	 * @other_dev: other device
+	 *
+	 * Update information/state of this device using data from @other_dev. This
+	 * may happen in case when a discovery packet was received, or a device got
+	 * connected. In such case, a `this` device (which was likely created from
+	 * cached data) needs to be updated.
+	 *
+	 * As a side effect, updating capabilities will emit @capability_added
+	 * and @capability_removed signals.
+	 */
 	public void update_from_device(Device other_dev) {
-		outgoing_capabilities = other_dev.outgoing_capabilities;
-		incoming_capabilities = other_dev.incoming_capabilities;
+		this.outgoing_capabilities = other_dev.outgoing_capabilities;
+		this.incoming_capabilities = other_dev.incoming_capabilities;
+
+		HashSet<string> added;
+		HashSet<string> removed;
+		this.merge_capabilities(out added, out removed);
+
+		foreach (var c in added) {
+			debug("added: %s", c);
+			capability_added(c);
+		}
+
+		foreach (var c in removed) {
+			debug("removed: %s", c);
+			capability_removed(c);
+			// remove capability handlers
+			this.unregister_capability_handler(c);
+		}
+
+
 		if (this.host != null && this.host.to_string() != other_dev.host.to_string()) {
 			debug("host address changed from %s to %s",
 				  this.host.to_string(), other_dev.host.to_string());
