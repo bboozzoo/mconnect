@@ -17,30 +17,24 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
+using Gee;
 
 class PacketHandlers : Object {
 
-	private List<PacketHandlerInterface> _handlers = null;
+	private HashMap<string, PacketHandlerInterface> _handlers;
 
-	public List<PacketHandlerInterface> handlers {
-		get {
-			return _handlers;
-		}
-		private set {
-			_handlers = handlers.copy();
-		}
+	public string[] interfaces {
+		owned get { return _handlers.keys.to_array(); }
+		private set {}
 	}
-	public string[] interfaces { get; private set; default = null; }
 
 	public PacketHandlers() {
 		_handlers = load_handlers();
-		string [] ifaces;
-		list_handlers(out ifaces);
-		interfaces = ifaces;
 	}
 
-	private static List<PacketHandlerInterface> load_handlers() {
-		List<PacketHandlerInterface> hnd = new List<PacketHandlerInterface>();
+	private static HashMap<string, PacketHandlerInterface> load_handlers() {
+		HashMap<string, PacketHandlerInterface> hnd =
+			new HashMap<string, PacketHandlerInterface>();
 
 		var notification = NotificationHandler.instance();
 		var battery = BatteryHandler.instance();
@@ -48,22 +42,13 @@ class PacketHandlers : Object {
 		var mousepad = MousepadHandler.instance();
 		var ping = PingHandler.instance();
 
-		hnd.append(notification);
-		hnd.append(battery);
-		hnd.append(telephony);
-		hnd.append(mousepad);
-		hnd.append(ping);
+		hnd.@set(notification.get_pkt_type(), notification);
+		hnd.@set(battery.get_pkt_type(), battery);
+		hnd.@set(telephony.get_pkt_type(), telephony);
+		hnd.@set(mousepad.get_pkt_type(), mousepad);
+		hnd.@set(ping.get_pkt_type(), ping);
 
 		return hnd;
-	}
-
-	public void list_handlers(out string[] interfaces) {
-		interfaces = new string[_handlers.length()];
-		// string[] interfaces = new string[_handlers.length()];
-		for (int i = 0; i < _handlers.length(); i++) {
-			interfaces[i] = _handlers.nth_data(i).get_pkt_type();
-		}
-		// return interfaces;
 	}
 
 	/**
@@ -77,30 +62,15 @@ class PacketHandlers : Object {
 	public delegate void SupportedCapabilityFunc(string capability,
 												 PacketHandlerInterface handler);
 
-	/**
-	 * use_device:
-	 * @dev: device
-	 * @cb: callback see @SupportedCapabilityFunc to details
-	 *
-	 * Enable protocol handlers supported by device
-	 */
-	public void use_device(Device dev, SupportedCapabilityFunc? cb) {
-		_handlers.foreach((h) => {
-				var cap = h.get_pkt_type();
-				if (dev.supports_capability(cap)) {
-					h.use_device(dev);
-					if (cb != null) {
-						cb(cap, h);
-					}
-				} else {
-					warning("capability %s not supported by device", cap);
-				}
-			});
+	public PacketHandlerInterface? get_capability_handler(string cap) {
+		// all handlers are singletones for now
+		var h = this._handlers.@get(cap);
+		return h;
 	}
 
-	public void release_device(Device dev) {
-		_handlers.foreach((h) => {
-				h.release_device(dev);
-			});
+	public static string to_capability(string pkttype) {
+		if (pkttype.has_suffix(".request"))
+			return pkttype.replace(".request", "");
+		return pkttype;
 	}
 }

@@ -121,11 +121,17 @@ class DeviceManager : GLib.Object
 			this.devices.@set(unique, new_dev);
 
 			is_new = true;
+
 		} else {
 			debug("device %s already present", unique);
 		}
 
 		var dev = this.devices.@get(unique);
+
+		if (is_new) {
+			dev.capability_added.connect(this.device_capability_added_cb);
+			dev.capability_removed.connect(this.device_capability_removed_cb);
+		}
 		// update device information
 		dev.update_from_device(new_dev);
 
@@ -187,12 +193,7 @@ class DeviceManager : GLib.Object
 
 		update_cache();
 
-		if (status == true) {
-			// register message handlers
-			this.enable_protocol_handlers(dev);
-		} else {
-			this.disable_protocol_handlers(dev);
-
+		if (status == false) {
 			// we're no longer interested in paired singnal
 			dev.paired.disconnect(this.device_paired);
 
@@ -202,22 +203,28 @@ class DeviceManager : GLib.Object
 
 	}
 
-	private void enable_protocol_handlers(Device dev) {
+	private void device_capability_added_cb(Device dev, string cap) {
+		info("capability %s added to device %s", cap, dev.to_string());
+
+		if (dev.has_capability_handler(cap)) {
+			return;
+		}
+
 		var core = Core.instance();
-		core.handlers.use_device(dev, (cap, handler) => {
-				device_capability_added(dev, cap, handler);
-			});
+		var h = core.handlers.get_capability_handler(cap);
+		if (h != null) {
+			dev.register_capability_handler(cap, h);
+		} else {
+			warning("no handler for capability %s", cap);
+		}
 	}
 
-	private void disable_protocol_handlers(Device dev) {
-		var core = Core.instance();
-		core.handlers.release_device(dev);
+	private void device_capability_removed_cb(Device dev, string cap) {
+		info("capability %s removed from device %s", cap, dev.to_string());
 	}
 
 	private void device_disconnected(Device dev) {
 		debug("device %s got disconnected", dev.to_string());
-
-		this.disable_protocol_handlers(dev);
 
 		dev.paired.disconnect(this.device_paired);
 		dev.disconnected.disconnect(this.device_disconnected);
