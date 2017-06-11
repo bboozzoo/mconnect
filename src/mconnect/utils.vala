@@ -55,3 +55,31 @@ void vdebug(string format, ...) {
 	}
 }
 
+/**
+ * make_unique_device_string:
+ * @id: device ID
+ * @name: device name
+ * @type: device type
+ * @pv: protocol version
+ *
+ * Generate device string that can be used as map index
+ */
+string make_unique_device_string(string id, string name,
+								 string type, uint pv) {
+	return make_device_string(id, name, type, pv).replace(" ", "-");
+}
+
+/**
+ * make_device_string:
+ * @id: device ID
+ * @name: device name
+ * @type: device type
+ * @pv: protocol version
+ *
+ * Generate device string
+ */
+string make_device_string(string id, string name,
+						  string type, uint pv) {
+	return "%s-%s-%s-%u".printf(id, name, type, pv);
+
+}

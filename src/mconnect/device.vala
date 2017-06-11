@@ -141,12 +141,15 @@ class Device : Object {
 	 * Generates a unique string for this device
 	 */
 	public string to_unique_string() {
-		return this.to_string().replace(" ", "-");
+		return make_unique_device_string(this.device_id,
+										 this.device_name,
+										 this.device_type,
+										 this.protocol_version);
 	}
 
 	public string to_string() {
-		return "%s-%s-%s-%u".printf(this.device_id, this.device_name,
-									this.device_type, this.protocol_version);
+		return make_device_string(this.device_id, this.device_name,
+								  this.device_type, this.protocol_version);
 	}
 
 	/**

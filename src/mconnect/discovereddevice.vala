@@ -72,4 +72,11 @@ class DiscoveredDevice : Object {
 											   this.protocol_version);
 	}
 
+	public string to_unique_string() {
+		return make_unique_device_string(this.device_id,
+										 this.device_name,
+										 this.device_type,
+										 this.protocol_version);
+	}
+
 }
