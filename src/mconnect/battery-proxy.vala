@@ -25,6 +25,9 @@ class BatteryHandlerProxy : Object, PacketHandlerInterfaceProxy {
 	private BatteryHandler battery_handler = null;
 	private uint register_id = 0;
 
+	public uint level { get; private set; default = 0; }
+	public bool charging { get; private set; default = false; }
+
 	public BatteryHandlerProxy.for_device_handler(Device dev,
 												  PacketHandlerInterface iface) {
 		this.device = dev;
@@ -37,6 +40,9 @@ class BatteryHandlerProxy : Object, PacketHandlerInterfaceProxy {
 	private void battery_change(Device dev, uint level, bool charging) {
 		if (this.device != dev)
 			return;
+
+		this.level = level;
+		this.charging = charging;
 
 		battery(level, charging);
 	}
