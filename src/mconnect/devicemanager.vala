@@ -128,6 +128,14 @@ class DeviceManager : GLib.Object
 
 		var dev = this.devices.@get(unique);
 
+		// notify everyone that a new device appeared
+		if (is_new) {
+			// make sure that this happens before we update device data so that
+			// all subscribeds of found_new_device() signal have a chance to
+			// setup eveything they need
+			found_new_device(dev);
+		}
+
 		if (is_new) {
 			dev.capability_added.connect(this.device_capability_added_cb);
 			dev.capability_removed.connect(this.device_capability_removed_cb);
@@ -152,10 +160,6 @@ class DeviceManager : GLib.Object
 					dev.to_string());
 		}
 
-		// notify everyone that a new device appeared
-		if (is_new) {
-			found_new_device(dev);
-		}
 	}
 
 	private void activate_device(Device dev) {
@@ -214,6 +218,9 @@ class DeviceManager : GLib.Object
 		var h = core.handlers.get_capability_handler(cap);
 		if (h != null) {
 			dev.register_capability_handler(cap, h);
+
+			device_capability_added(dev, cap, h);
+
 		} else {
 			warning("no handler for capability %s", cap);
 		}
