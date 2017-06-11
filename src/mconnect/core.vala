@@ -49,8 +49,8 @@ class Core : Object {
 			core.crypt = crypt;
 			core.handlers = handlers;
 
-			info("supported interfaces: %s", string.joinv(", ",
-														  handlers.interfaces));
+			info("supported interfaces: %s",
+				 string.joinv(", ", handlers.interfaces));
 			Core._instance = core;
 		}
 
