@@ -18,6 +18,7 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 #include <glib.h>
+#include <glib/gstdio.h>
 #include "mconn-crypt.h"
 
 static void test_simple(void)
