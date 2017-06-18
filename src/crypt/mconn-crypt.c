@@ -224,26 +224,46 @@ static gboolean __mconn_load_key(MconnCryptPrivate *priv, const char *path)
 
 static gboolean __mconn_generate_key_at_path(const char *path)
 {
-	gboolean ret = TRUE;
+	gboolean ret = FALSE;
 	RSA *rsa = NULL;
+	BIO *bf = NULL;
+	BIGNUM *e = NULL;
+	int res = 0;
 
-	BIO *bf = BIO_new_file(path, "w");
+	rsa = RSA_new();
+	g_return_val_if_fail(rsa != NULL, FALSE);
+
+	e = BN_new();
+	if (e == NULL)
+	{
+		goto cleanup;
+	}
+
+	BN_set_word(e, RSA_3);
+
+	if (RSA_generate_key_ex(rsa, 2048, e, NULL) != 1) {
+		g_critical("mconn-crypt: failed to generate RSA key");
+		goto cleanup;
+	}
+
+	bf = BIO_new_file(path, "w");
 	if (bf == NULL)
 	{
 		g_error("mconn-crypt: failed to open file");
-		return FALSE;
+		goto cleanup;
 	}
-
-	rsa = RSA_generate_key(2048, RSA_3, NULL, NULL);
 
 	if (PEM_write_bio_RSAPrivateKey(bf, rsa, NULL, NULL, 0, NULL, NULL) == 0)
 	{
 		g_critical("mconn-crypt: failed to private write key to file");
-		ret = FALSE;
+		goto cleanup;
 	}
 
-	RSA_free(rsa);
+	ret = TRUE;
 
+ cleanup:
+	BN_free(e);
+	RSA_free(rsa);
 	BIO_free(bf);
 
 	return ret;
