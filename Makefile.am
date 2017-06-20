@@ -76,7 +76,8 @@ mconnect_SOURCES = \
 	src/mconnect/ping-proxy.vala \
 	src/mconnect/config.vala \
 	src/mconnect/application.vala \
-	src/mconnect/utils.vala
+	src/mconnect/utils.vala \
+	src/mconnect/property-proxy.vala
 
 mconnect_LDADD = \
 	libmconn-crypt.la \
