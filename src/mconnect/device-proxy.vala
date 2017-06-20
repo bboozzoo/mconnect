@@ -78,6 +78,8 @@ class DeviceDBusProxy : Object {
 
 	private uint register_id = 0;
 
+	private DBusPropertyNotifier prop_notifier = null;
+
 	[DBus (visible = false)]
 	public ObjectPath object_path = null;
 
@@ -91,6 +93,7 @@ class DeviceDBusProxy : Object {
 		this.update_address();
 		this.update_capabilities();
 		this.device.notify.connect(this.param_changed);
+		this.notify.connect(this.update_properties);
 	}
 
 	private void update_capabilities() {
@@ -112,11 +115,48 @@ class DeviceDBusProxy : Object {
 	private void update_address() {
 		this.address = "%s:%u".printf(device.host.to_string(),
 									  device.tcp_port);
-		this.device.notify.connect(this.update_properties);
 	}
 
 	private void update_properties(ParamSpec param) {
 		debug("param %s changed", param.name);
+
+		string name = param.name;
+		Variant v = null;
+		switch (param.name) {
+		case "address":
+			v = this.address;
+			break;
+		case "id":
+			v = this.id;
+			break;
+		case "name":
+			v = this.name;
+			break;
+		case "device-type":
+			name = "DeviceType";
+			v = this.device_type;
+			break;
+		case "potocol-version":
+			name = "ProtocolVersion";
+			v = this.protocol_version;
+			break;
+		case "is-paired":
+			name = "IsPaired";
+			v = this.is_paired;
+			break;
+		case "allowed":
+			v = this.allowed;
+			break;
+		case "is-active":
+			name = "IsActive";
+			v = this.is_active;
+			break;
+		}
+
+		if (v == null)
+			return;
+
+		this.prop_notifier.queue_property_change(name, v);
 	}
 
 	private void param_changed(ParamSpec param) {
@@ -151,6 +191,9 @@ class DeviceDBusProxy : Object {
 	public void bus_register(DBusConnection conn) {
 		try {
 			this.register_id = conn.register_object(this.object_path, this);
+			this.prop_notifier = new DBusPropertyNotifier(conn,
+														  "org.mconnect.Device",
+														  this.object_path);
 		} catch (IOError err) {
 			warning("failed to register DBus object for device %s under path %s",
 					this.device.to_string(), this.object_path.to_string());
@@ -163,6 +206,7 @@ class DeviceDBusProxy : Object {
 			conn.unregister_object(this.register_id);
 		}
 		this.register_id = 0;
+		this.prop_notifier = null;
 	}
 
 	[DBus (visible = false)]
