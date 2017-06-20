@@ -45,8 +45,6 @@ class BatteryHandlerProxy : Object, PacketHandlerInterfaceProxy {
 
 		this.level = level;
 		this.charging = charging;
-
-		battery(level, charging);
 	}
 
 	[DBus (visible = false)]
@@ -70,8 +68,6 @@ class BatteryHandlerProxy : Object, PacketHandlerInterfaceProxy {
 		this.notify.disconnect(this.send_property_change);
 		this.notify_id = 0;
 	}
-
-	public signal void battery(uint level, bool charging);
 
 	private void send_property_change(ParamSpec p) {
 		assert(this.prop_notifier != null);
