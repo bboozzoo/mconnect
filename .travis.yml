@@ -5,6 +5,7 @@ env:
   matrix:
     - DISTRO=fedora
     - DISTRO=archlinux
+    - DISTRO=opensuse
 
 script:
   - ./extra/travis-build "${DISTRO}"

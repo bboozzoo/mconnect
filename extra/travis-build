@@ -42,6 +42,24 @@ deps_fedora() {
         gtk3-devel
 }
 
+deps_opensuse() {
+    zypper install -y \
+        make \
+        automake \
+        autoconf \
+        libtool \
+        pkgconfig \
+        gcc \
+        vala \
+        gobject-introspection-devel \
+        json-glib-devel \
+        libgee-devel \
+        openssl-devel \
+        libnotify-devel \
+        at-spi2-core-devel \
+        gtk3-devel
+}
+
 deps_archlinux() {
     pacman -Syu --noconfirm \
            base-devel \
@@ -65,6 +83,9 @@ install_deps() {
     case "$1" in
         fedora)
             deps_fedora
+            ;;
+        opensuse)
+            deps_opensuse
             ;;
         archlinux)
             deps_archlinux
@@ -96,6 +117,9 @@ spin_container() {
             ;;
         archlinux)
             DOCKER_IMG=base/archlinux
+            ;;
+        opensuse)
+            DOCKER_IMG=opensuse:tumbleweed
             ;;
         *)
             echo "unsupported distro $1"
