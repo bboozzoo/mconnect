@@ -63,6 +63,7 @@ class DeviceDBusProxy : Object {
 		private set {}
 		default = false;
 	}
+	public bool is_connected { get; private set; default = false; }
 
 	public string[] incoming_capabilities {
 		get;
@@ -93,6 +94,12 @@ class DeviceDBusProxy : Object {
 		this.update_address();
 		this.update_capabilities();
 		this.device.notify.connect(this.param_changed);
+		this.device.connected.connect(() => {
+				this.is_connected = true;
+			});
+		this.device.disconnected.connect(() => {
+				this.is_connected = false;
+			});
 		this.notify.connect(this.update_properties);
 	}
 
@@ -150,6 +157,10 @@ class DeviceDBusProxy : Object {
 		case "is-active":
 			name = "IsActive";
 			v = this.is_active;
+			break;
+		case "is-connected":
+			name = "IsConnected";
+			v = this.is_connected;
 			break;
 		}
 
