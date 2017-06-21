@@ -47,6 +47,7 @@ namespace Mconnect {
 	public class Client {
 
 		private static bool log_debug = false;
+		private static bool verbose = false;
 		// some hints for valac about the array holding remaining args
 		[CCode (array_length = false, array_null_terminated = true)]
 		private static string[] remaining;
@@ -55,6 +56,8 @@ namespace Mconnect {
 		private const OptionEntry[] options = {
 			{"debug", 'd', 0, OptionArg.NONE, ref log_debug,
 			 "Show debug output", null},
+			{"verbose", 'v', 0, OptionArg.NONE, ref verbose,
+			 "Be verbose", null},
 			// there's no Vala const for G_OPTION_REMAINING (which is a #define
 			// for "")
 			{"", 0, 0, OptionArg.STRING_ARRAY, ref remaining, null,
@@ -215,10 +218,12 @@ namespace Mconnect {
 								  dp.allowed.to_string(),
 								  dp.is_paired.to_string(),
 								  dp.is_active.to_string());
-					stdout.printf("  Capabilities (out):\n");
-					print_sorted_caps(dp.outgoing_capabilities, "    %s\n");
-					stdout.printf("  Capabilities (in):\n");
-					print_sorted_caps(dp.incoming_capabilities, "    %s\n");
+					if (verbose) {
+						stdout.printf("  Capabilities (out):\n");
+						print_sorted_caps(dp.outgoing_capabilities, "    %s\n");
+						stdout.printf("  Capabilities (in):\n");
+						print_sorted_caps(dp.incoming_capabilities, "    %s\n");
+					}
 					return 0;
 				});
 		}
