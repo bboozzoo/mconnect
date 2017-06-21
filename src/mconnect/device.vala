@@ -306,6 +306,9 @@ class Device : Object {
 	 */
 	private void channel_openend(bool result) {
 		debug("channel openend: %s", result.to_string());
+
+		connected();
+
 		if (result == true) {
 			greet.begin();
 		} else {
