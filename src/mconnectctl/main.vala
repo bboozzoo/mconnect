@@ -40,6 +40,7 @@ namespace Mconnect {
 		public abstract bool is_paired  { owned get;}
 		public abstract bool allowed { owned get;}
 		public abstract bool is_active { owned get;}
+		public abstract bool is_connected { owned get;}
 		public abstract string[] outgoing_capabilities { owned get;}
 		public abstract string[] incoming_capabilities { owned get;}
 	}
@@ -217,7 +218,7 @@ namespace Mconnect {
 								  dp.device_type,
 								  dp.allowed.to_string(),
 								  dp.is_paired.to_string(),
-								  dp.is_active.to_string());
+								  dp.is_connected.to_string());
 					if (verbose) {
 						stdout.printf("  Capabilities (out):\n");
 						print_sorted_caps(dp.outgoing_capabilities, "    %s\n");
