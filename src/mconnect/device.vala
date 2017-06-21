@@ -54,11 +54,8 @@ class Device : Object {
 	public InetAddress host { get; private set; default = null; }
 	public bool is_paired { get; private set; default = false; }
 	public bool allowed {get; set; default = false; }
-	public bool is_active {
-		get { return (_channel != null); }
-		set {}
-		default = false;
-	}
+	public bool is_active { get; private set; default = false; }
+
 	public ArrayList<string> outgoing_capabilities {
 		get;
 		private set;
@@ -285,6 +282,8 @@ class Device : Object {
 		_channel.open.begin((c, res) => {
 				this.channel_openend(_channel.open.end(res));
 			});
+
+		this.is_active = true;
 	}
 
 	/**
@@ -436,6 +435,9 @@ class Device : Object {
 	private void channel_closed_cleanup() {
 		debug("close cleanup");
 		_channel = null;
+
+		this.is_active = false;
+
 		// emit disconnected
 		disconnected();
 	}
