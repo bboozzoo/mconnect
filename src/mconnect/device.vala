@@ -500,20 +500,16 @@ class Device : Object {
 		caps.add_all(this.outgoing_capabilities);
 		caps.add_all(this.incoming_capabilities);
 
-		if (added == null) {
-			added = new HashSet<string>();
-			added.add_all(caps);
+		added = new HashSet<string>();
+		added.add_all(caps);
 
-			// TODO: simplify capability names, eg kdeconnect.telephony.request ->
-			// kdeconnect.telephony
-			added.remove_all(this._capabilities);
-		}
+		// TODO: simplify capability names, eg kdeconnect.telephony.request ->
+		// kdeconnect.telephony
+		added.remove_all(this._capabilities);
 
-		if (removed == null) {
-			removed = new HashSet<string>();
-			removed.add_all(this._capabilities);
-			removed.remove_all(caps);
-		}
+		removed = new HashSet<string>();
+		removed.add_all(this._capabilities);
+		removed.remove_all(caps);
 
 		this._capabilities = caps;
 	}
