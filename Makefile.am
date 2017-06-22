@@ -77,6 +77,7 @@ mconnect_SOURCES = \
 	src/mconnect/mousepad.vala \
 	src/mconnect/ping.vala \
 	src/mconnect/ping-proxy.vala \
+	src/mconnect/share.vala \
 	src/mconnect/config.vala \
 	src/mconnect/application.vala \
 	src/mconnect/utils.vala \
