@@ -26,6 +26,20 @@ public errordomain PacketError {
 
 class Packet : GLib.Object {
 
+	/**
+	 * Payload:
+	 * Wrapper for payload transfer information
+	 */
+	public struct Payload {
+		public uint64 size;
+		public uint port;
+
+		Payload() {
+			this.size = 0;
+			this.port = 0;
+		}
+	}
+
 	public const int PROTOCOL_VERSION = 5;
 
 	public const string IDENTITY = "kdeconnect.identity";
@@ -35,6 +49,7 @@ class Packet : GLib.Object {
 	public string pkt_type { get; private set; default = ""; }
 	public int64 id { get; private set; default = 0; }
 	public Json.Object body { get; private set; default = null; }
+	public Payload? payload { get; private set; default = null; }
 
 	public Packet(string type, Json.Object body, int64 id = 0) {
 		this.pkt_type = type;
@@ -69,7 +84,31 @@ class Packet : GLib.Object {
 
 			vdebug("packet type: %s", type);
 
-			return new Packet(type, body, id);
+			var pkt = new Packet(type, body, id);
+
+			// ignore payload info for encrypted packets
+			if (type != ENCRYPTED) {
+				if (root_obj.has_member("payloadSize") &&
+					root_obj.has_member("payloadTransferInfo")) {
+
+
+					var size = root_obj.get_int_member("payloadSize");
+
+					var pti = root_obj.get_object_member("payloadTransferInfo");
+					int64 port = 0;
+					if (pti == null) {
+						warning("no payload transfer info?");
+					} else {
+						port = (int) pti.get_int_member("port");
+					}
+
+					if (size != 0 && port != 0) {
+						pkt.payload = {(uint64) size, (uint) port};
+					}
+				}
+			}
+
+			return pkt;
 		} catch (Error e) {
 			message("failed to parse message: \'%s\', error: %s",
 					data, e.message);
