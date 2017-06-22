@@ -211,6 +211,7 @@ namespace Mconnect {
 								  "  Type: %s\n" +
 								  "  Allowed: %s\n" +
 								  "  Paired: %s\n" +
+								  "  Active: %s\n" +
 								  "  Connected: %s\n",
 								  dp.name,
 								  dp.id,
@@ -218,6 +219,7 @@ namespace Mconnect {
 								  dp.device_type,
 								  dp.allowed.to_string(),
 								  dp.is_paired.to_string(),
+								  dp.is_active.to_string(),
 								  dp.is_connected.to_string());
 					if (verbose) {
 						stdout.printf("  Capabilities (out):\n");
