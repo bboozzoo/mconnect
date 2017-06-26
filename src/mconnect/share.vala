@@ -20,6 +20,7 @@ class ShareHandler : Object, PacketHandlerInterface {
 
 	private const string SHARE = "kdeconnect.share.request";
 	private const string SHARE_PKT = "kdeconnect.share";
+	private static string DOWNLOADS = null;
 
 	public void use_device(Device dev) {
 		debug("use device %s for sharing", dev.to_string());
@@ -30,7 +31,26 @@ class ShareHandler : Object, PacketHandlerInterface {
 	}
 
 	public static ShareHandler instance() {
+		if (ShareHandler.DOWNLOADS == null) {
+
+			GLib.warning("tutaj");
+			ShareHandler.DOWNLOADS = Path.build_filename(
+				Environment.get_user_special_dir(UserDirectory.DOWNLOAD),
+				"mconnect");
+			try {
+				DirUtils.create_with_parents(ShareHandler.DOWNLOADS,
+											 0700);
+			} catch (IOError e) {
+				warning("failed to create downloads directory: %s", e.message);
+			}
+		}
+
+		info("downloads will be saved to %s", ShareHandler.DOWNLOADS);
 		return new ShareHandler();
+	}
+
+	private static string make_downloads_path(string name) {
+		return Path.build_filename(ShareHandler.DOWNLOADS, name);
 	}
 
 	public string get_pkt_type() {
@@ -56,5 +76,13 @@ class ShareHandler : Object, PacketHandlerInterface {
 
 		string name = pkt.body.get_string_member("filename");
 		debug("file: %s size: %lld", name, pkt.payload.size);
+
+		var t = new DownloadTransfer(
+			new InetSocketAddress(dev.host,
+								  (uint16) pkt.payload.port),
+			pkt.payload.size,
+			make_downloads_path(name));
+
+		t.start();
 	}
 }
