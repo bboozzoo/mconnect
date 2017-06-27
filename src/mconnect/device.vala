@@ -206,9 +206,9 @@ class Device : Object {
 		cache.set_boolean(name, "paired", this.is_paired);
 		cache.set_string(name, "certificate", this.certificate);
 		cache.set_string_list(name, "outgoing_capabilities",
-							  array_list_to_list(this.outgoing_capabilities));
+							  this.outgoing_capabilities.to_array());
 		cache.set_string_list(name, "incoming_capabilities",
-							  array_list_to_list(this.incoming_capabilities));
+							  this.incoming_capabilities.to_array());
 	}
 
 	private async void greet() {
