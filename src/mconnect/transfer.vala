@@ -47,10 +47,10 @@ class Transfer : Object {
 				chunk_size = max_chunk_size;
 		}
 
-		debug("transfer done, got %llu bytes", bytes_done);
 		this.from.close();
 		this.to.close();
 
+		debug("transfer done, got %llu bytes", format_size(bytes_done));
 		return bytes_done;
 	}
 

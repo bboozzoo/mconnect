@@ -70,9 +70,11 @@ class DownloadTransfer : Object {
 	private void start_transfer() {
 		this.transfer = new Transfer(this.conn.input_stream,
 									 this.foutstream);
-		this.transfer.progress.connect((t, p) => {
-				int percent = (int) (100.0 * ((double)p / (double)this.size));
-				debug("progress: %llu/%llu %d %%", p, this.size, percent);
+		this.transfer.progress.connect((t, done) => {
+				int percent = (int) (100.0 * ((double)done / (double)this.size));
+				debug("progress: %s/%s %d%%",
+					  format_size(done), format_size(this.size), percent);
+				this.transferred = done;
 			});
 		this.transfer.transfer_async.begin(this.cancel,
 										   this.transfer_complete);
@@ -82,7 +84,7 @@ class DownloadTransfer : Object {
 		info("transfer finished");
 		try {
 			var rcvd_bytes = this.transfer.transfer_async.end(res);
-			debug("transfer done, got %llu bytes", rcvd_bytes);
+			debug("transfer done, got %s", format_size(rcvd_bytes));
 
 			this.cleanup_success();
 
