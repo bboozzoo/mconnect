@@ -88,7 +88,7 @@ class DownloadTransfer : Object {
 
 			this.cleanup_success();
 
-		} catch (IOError err) {
+		} catch (Error err) {
 			warning("transfer failed: %s", err.message);
 
 			this.cleanup_error(err.message);
@@ -96,11 +96,27 @@ class DownloadTransfer : Object {
 	}
 
 	private void cleanup() {
-		if (this.foutstream != null)
-			this.foutstream.close();
+		if (this.foutstream != null) {
+			try {
+				this.foutstream.close();
+			} catch (IOError e) {
+				warning("failed to close file output: %s",
+						e.message);
+			}
+		}
+
+		if (this.conn != null) {
+			try {
+				this.conn.close();
+			} catch (IOError e) {
+				warning("failed to close connection: %s",
+						e.message);
+			}
+		}
 
 		this.file = null;
 		this.foutstream = null;
+		this.conn = null;
 		this.transfer = null;
 	}
 
