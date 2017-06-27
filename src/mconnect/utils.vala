@@ -19,27 +19,6 @@
  */
 using Posix;
 
-namespace DebugLog{
-	public bool Verbose = false;
-}
-
-void enable_vdebug() {
-	DebugLog.Verbose = true;
-}
-
-/**
- * vdebug:
- * @format: format string
- *
- * Same as debug() but looks at verbose debug flag
- */
-void vdebug(string format, ...) {
-	if (DebugLog.Verbose == true) {
-		var l = va_list();
-		logv(null, LogLevelFlags.LEVEL_DEBUG, format, l);
-	}
-}
-
 /**
  * make_unique_device_string:
  * @id: device ID
