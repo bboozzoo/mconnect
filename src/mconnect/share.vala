@@ -75,7 +75,7 @@ class ShareHandler : Object, PacketHandlerInterface {
 		}
 
 		string name = pkt.body.get_string_member("filename");
-		debug("file: %s size: %lld", name, pkt.payload.size);
+		debug("file: %s size: %s", name, format_size(pkt.payload.size));
 
 		var t = new DownloadTransfer(
 			new InetSocketAddress(dev.host,
