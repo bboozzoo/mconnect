@@ -26,7 +26,15 @@ class Transfer : Object {
 		this.to = to;
 	}
 
-	public async uint64 transfer_async(Cancellable? cancel) throws IOError {
+	/**
+	 * transfer_async:
+	 * @cancel: cancellable
+	 *
+	 * Starty asynchronous transfer of data from @from stream to @to stream.
+	 *
+	 * @return number of bytes transferred if no error occurred
+	 */
+	public async uint64 transfer_async(Cancellable? cancel) throws Error {
 		uint64 bytes_done = 0;
 		var chunk_size = 4096;
 		var max_chunk_size = 64 * 1024;
@@ -47,12 +55,15 @@ class Transfer : Object {
 				chunk_size = max_chunk_size;
 		}
 
-		this.from.close();
-		this.to.close();
-
 		debug("transfer done, got %llu bytes", format_size(bytes_done));
 		return bytes_done;
 	}
 
+	/**
+	 * progress:
+	 * @bytes_down: number of bytes transferred
+	 *
+	 * Indicate transfer progress
+	 */
 	public signal void progress(uint64 bytes_done);
 }
