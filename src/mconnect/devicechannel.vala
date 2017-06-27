@@ -161,7 +161,7 @@ class DeviceChannel : Object {
 				this.peer_certificate = peer_cert;
 
 				if (expected_peer != null) {
-					if (DebugLog.Verbose) {
+					if (Logging.VERBOSE) {
 						vdebug("verify certificate, expecting: %s, got: %s",
 							   expected_peer.certificate_pem,
 							   peer_cert.certificate_pem);
