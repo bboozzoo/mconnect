@@ -19,22 +19,6 @@
  */
 using Posix;
 
-/**
- * @array_list_to_list:
- * @al: Gee.ArrayList<T>
- *
- * Convert Gee.ArrayList<T> to T[]
- */
-T[] array_list_to_list<T>(Gee.ArrayList<T> al) {
-	T[] out_list = new T[al.size];
-	int i = 0;
-	foreach(var v in al) {
-		out_list[i] = v;
-		i++;
-	}
-	return out_list;
-}
-
 namespace DebugLog{
 	public bool Verbose = false;
 }
