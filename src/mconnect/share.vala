@@ -37,11 +37,11 @@ class ShareHandler : Object, PacketHandlerInterface {
 			ShareHandler.DOWNLOADS = Path.build_filename(
 				Environment.get_user_special_dir(UserDirectory.DOWNLOAD),
 				"mconnect");
-			try {
-				DirUtils.create_with_parents(ShareHandler.DOWNLOADS,
-											 0700);
-			} catch (IOError e) {
-				warning("failed to create downloads directory: %s", e.message);
+
+			if (DirUtils.create_with_parents(ShareHandler.DOWNLOADS,
+											 0700) == -1) {
+				warning("failed to create downloads directory: %s",
+						Posix.strerror(Posix.errno));
 			}
 		}
 
