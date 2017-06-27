@@ -17,6 +17,9 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
+
+namespace Utils {
+
 using Posix;
 
 /**
@@ -86,4 +89,6 @@ void socket_set_keepalive(Socket sock) {
 
 	// enable keepalive
 	sock.set_keepalive(true);
+}
+
 }

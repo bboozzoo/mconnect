@@ -49,7 +49,7 @@ class DeviceChannel : Object {
 	}
 
 	private static void fixup_socket(Socket sock) {
-		socket_set_keepalive(sock);
+		Utils.socket_set_keepalive(sock);
 	}
 
 	private void replace_streams(InputStream input, OutputStream output) {
