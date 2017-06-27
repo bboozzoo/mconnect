@@ -57,7 +57,7 @@ class DownloadTransfer : Object {
 			this.conn = sc.connect_async.end(res);
 
 			var sock = this.conn.get_socket();
-			socket_set_keepalive(sock);
+			Utils.socket_set_keepalive(sock);
 			this.start_transfer();
 
 		} catch (Error e) {
