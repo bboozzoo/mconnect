@@ -130,8 +130,6 @@ class DownloadTransfer : Object {
 	}
 
 	private void cleanup_success() {
-
-		var failed = false;
 		try {
 			var dest = File.new_for_path(this.destination);
 			this.file.move(dest, FileCopyFlags.OVERWRITE);
