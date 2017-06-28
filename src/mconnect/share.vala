@@ -67,8 +67,6 @@ class ShareHandler : Object, PacketHandlerInterface {
 			return;
 		}
 
-		warning("share packet");
-
 		if (pkt.payload == null) {
 			warning("missing payload info");
 			return;
