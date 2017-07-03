@@ -69,6 +69,25 @@ class DeviceManagerDBusProxy : Object
 	}
 
 	/**
+	 * disallow_device:
+	 * @path: device object path
+	 *
+	 * Disallow given device
+	 */
+	public void disallow_device(string path) {
+		debug("disallow device %s", path);
+
+		var dev_proxy = this.devices.@get(path);
+
+		if (dev_proxy == null) {
+			warning("no device under path %s", path);
+			return;
+		}
+
+		this.manager.disallow_device(dev_proxy.device);
+	}
+
+	/**
 	 * list_devices:
 	 *
 	 * Returns a list of DBus paths of all known devices

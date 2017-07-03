@@ -252,4 +252,17 @@ class DeviceManager : GLib.Object
 		// maybe activate if needed
 		activate_device(dev);
 	}
+
+	/**
+	 * disallow_device:
+	 * @path: device object path
+	 *
+	 * Disallow given device
+	 */
+	public void disallow_device(Device dev) {
+		dev.allowed = false;
+
+		// update device cache
+		update_cache();
+	}
 }
