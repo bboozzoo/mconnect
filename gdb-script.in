@@ -1,0 +1,4 @@
+set environment G_MESSAGES_DEBUG = all
+set environment G_DEBUG = fatal-criticals
+file @bindir@/mconnect
+run

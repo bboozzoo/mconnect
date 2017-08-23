@@ -22,10 +22,10 @@ class Discovery : GLib.Object
 {
 	private Socket socket = null;
 
-	public signal void device_found(Device dev);
+	public signal void device_found(DiscoveredDevice dev);
 
 	public Discovery() {
-		}
+	}
 
 	~Discovery() {
 		debug("cleaning up discovery...");
@@ -51,7 +51,7 @@ class Discovery : GLib.Object
 				throw e;
 			}
 
-			var source = socket.create_socket_source(IOCondition.IN);
+			var source = socket.create_source(IOCondition.IN);
 			source.set_callback((s, c) => {
 					this.incomingPacket();
 					return true;
@@ -60,7 +60,7 @@ class Discovery : GLib.Object
 		}
 
 	private void incomingPacket() {
-			debug("incoming packet");
+			vdebug("incoming packet");
 
 			uint8 buffer[4096];
 			SocketAddress sa;
@@ -69,14 +69,14 @@ class Discovery : GLib.Object
 			try {
 				ssize_t read = this.socket.receive_from(out sa, buffer);
 				isa = (InetSocketAddress)sa;
-				debug("got %zd bytes from: %s:%u", read,
+				vdebug("got %zd bytes from: %s:%u", read,
 						isa.address.to_string(), isa.port);
 			} catch (Error e) {
-				message("failed to receive packet: %s", e.message);
+				warning("failed to receive packet: %s", e.message);
 				return;
 			}
 
-			debug("message data: %s", (string)buffer);
+			vdebug("message data: %s", (string)buffer);
 
 			this.parsePacketFromHost((string) buffer, isa.address);
 		}
@@ -91,7 +91,7 @@ class Discovery : GLib.Object
 				return;
 			}
 
-			var dev = new Device.from_identity(pkt, host);
+			var dev = new DiscoveredDevice.from_identity(pkt, host);
 			message("connection from device: \'%s\', responds at: %s:%u",
 				  dev.device_name, host.to_string(), dev.tcp_port);
 

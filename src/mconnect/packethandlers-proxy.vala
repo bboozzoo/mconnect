@@ -17,12 +17,28 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-public static int main(string[] args)
-{
-	var app = new Mconn.Application();
 
-	// needed for mousepad protocol handler
-	Gdk.init(ref args);
+class PacketHandlersProxy : Object {
 
-	return app.run(args);
+	public static PacketHandlerInterfaceProxy? new_device_capability_handler(
+		Device dev,
+		string cap,
+		PacketHandlerInterface iface) {
+
+		switch (iface.get_pkt_type()) {
+		case BatteryHandler.BATTERY: {
+			return new BatteryHandlerProxy.for_device_handler(dev, iface);
+			break;
+		}
+		case PingHandler.PING: {
+			return new PingHandlerProxy.for_device_handler(dev, iface);
+			break;
+		}
+		default:
+			warning("cannot register bus handler for %s",
+					iface.get_pkt_type());
+			break;
+		}
+		return null;
+	}
 }

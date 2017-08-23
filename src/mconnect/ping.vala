@@ -18,24 +18,24 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
-class BatteryHandler : Object, PacketHandlerInterface {
+class PingHandler : Object, PacketHandlerInterface {
 
-	public const string BATTERY = "kdeconnect.battery";
+	public const string PING = "kdeconnect.ping";
 
 	public string get_pkt_type() {
-		return BATTERY;
+		return PING;
 	}
 
-	private BatteryHandler() {
+	private PingHandler() {
 
 	}
 
-	public static BatteryHandler instance() {
-		return new BatteryHandler();
+	public static PingHandler instance() {
+		return new PingHandler();
 	}
 
 	public void use_device(Device dev) {
-		debug("use device %s for battery status updates", dev.to_string());
+		debug("use device %s for ping", dev.to_string());
 		dev.message.connect(this.message);
 	}
 
@@ -45,19 +45,13 @@ class BatteryHandler : Object, PacketHandlerInterface {
 	}
 
 	public void message(Device dev, Packet pkt) {
-		if (pkt.pkt_type != BATTERY) {
+		if (pkt.pkt_type != PING) {
 			return;
 		}
 
-		debug("got battery packet");
-
-		int64 level = pkt.body.get_int_member("currentCharge");
-		bool charging = pkt.body.get_boolean_member("isCharging");
-
-		debug("battery level: %u %s", (uint) level,
-			  (charging == true) ? "charging" : "");
-		battery(dev, (uint)level, charging);
+		GLib.message("ping from device %s", dev.to_string());
+		ping(dev);
 	}
 
-	public signal void battery(Device dev, uint level, bool charging);
+	public signal void ping(Device dev);
 }
