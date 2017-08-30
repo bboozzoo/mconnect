@@ -24,6 +24,10 @@ class DeviceManagerDBusProxy : Object
 {
 	private DeviceManager manager;
 
+	public signal void device_added(string path);
+
+	public signal void device_removed(string path);
+
 	private const string DBUS_PATH = "/org/mconnect/manager";
 	private DBusConnection bus = null;
 	private HashMap<string, DeviceDBusProxy> devices;
@@ -111,6 +115,7 @@ class DeviceManagerDBusProxy : Object
 		info("register device %s under path %s",
 			 dev.to_string(), path);
 		device_proxy.bus_register(this.bus);
+		device_added(path);
 	}
 
 	private DeviceDBusProxy? find_proxy_for_device(Device dev) {
