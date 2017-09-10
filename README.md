@@ -19,16 +19,20 @@ Build dependencies (using package names as found in Fedora):
 - libnotify-devel
 - at-spi2-core-devel (and at-spi2-atk)
 
-or see `mconnect.spec` in source tree. Once build deps are in place, run:
+or see `extra/travis-build` in the source tree for example installation
+commands. Once build deps are in place, run:
 
-	autoreconf -if
+    autoreconf -if
     ./configure --prefix=<your favorite prefix>
     make
     make install
     # or make DESTDIR=<somedir> install if you want to inspect what
     # gets installed
 
+
 # Configuration
+
+**NOTE**: manual configuration file is no longer needed
 
 A sample configuration file is provided in source tree, see
 `mconnect.conf`. It will get installed to `${datadir}/mconnect/`
@@ -43,16 +47,70 @@ Android application, only `name` and `type` are used for matching.
 
 # Usage
 
+mconnect comes are 2 separate programs, the daemon - `mconnect` and a D-Bus
+client `mconnectctl`.
+
+## The daemon
+
 Start it by running:
 
-	mconnect -d
+```
+$ mconnect -d
+```
 
-# Operation
+The daemon starts listens on `0.0.0.0:1714` for incoming UDP packets. Once an
+identity packet (a sort of a handshake) is received, a connection to the
+sender's address will be made. Known devices are cached in
+`~/.cache/mconnect/devices`.
 
-The daemon starts listening on `0.0.0.0:1714` for incoming UDP
-packets. Once an identity packet (a sort of a handshake) is received,
-a connection at the sender's address will be made only if the device
-is listed as `allowed` in `mconnect.conf` (see the sample config).
-Should the device be whitelisted in configuration, pairing will happen
-automatically.
+## The client
 
+List discovered devices:
+
+```
+$ ./mconnectctl list-devices
+Devices:
+    /org/mconnect/device/0    673ac2db27d2a331 - Motorola Moto G Maciek
+```
+
+Accept a device (previously done only through the configuration):
+
+```
+$ ./mconnectctl allow-device /org/mconnect/device/0
+```
+
+Show device details:
+
+```
+$ ./mconnectctl show-device /org/mconnect/device/0
+Device 
+  Name: Motorola Moto G Maciek
+  ID: 673ac2db27d2a331
+  Address: 192.168.1.103:1716
+  Type: phone
+  Allowed: true
+  Paired: true
+  Active: true
+  Connected: true
+```
+
+## DBus API
+
+The API is not documented. Use D-Feet or busctl to introspect and invoke methods
+manually.
+
+## Gnome Shell
+
+A Gnome Shell extension is available here:
+https://github.com/andyholmes/gnome-shell-extension-mconnect or via the GNOME
+extensions page: https://extensions.gnome.org/extension/1272/mconnect/
+
+
+# Firewalls
+
+It may be required to either temporarily disable the firewall or open up UDP
+port 1714.
+
+An example service definition for [firewalld](http://www.firewalld.org/) is
+provided in `extra/firewalld/mconnect.xml` directory. The file needs to be
+copied into `/etc/firewalld/services`.
