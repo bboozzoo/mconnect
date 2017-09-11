@@ -19,7 +19,7 @@
  */
 public class Config : Object {
 
-	public static const string FILE = "mconnect.conf";
+	public const string FILE = "mconnect.conf";
 
 	private KeyFile _kf = null;
 

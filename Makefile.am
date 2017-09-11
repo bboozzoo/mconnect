@@ -27,7 +27,8 @@ mconnectdata_DATA = \
 	mconnect.conf
 
 bin_PROGRAMS = \
-	mconnect
+	mconnect \
+	mconnectctl
 
 noinst_PROGRAMS = \
 	test-mconn-crypt \
@@ -56,16 +57,27 @@ mconnect_SOURCES = \
 	src/mconnect/discovery.vala \
 	src/mconnect/packet.vala \
 	src/mconnect/device.vala \
+	src/mconnect/discovereddevice.vala \
+	src/mconnect/device-proxy.vala \
 	src/mconnect/devicemanager.vala \
+	src/mconnect/devicemanager-proxy.vala \
 	src/mconnect/devicechannel.vala \
 	src/mconnect/core.vala \
 	src/mconnect/packethandlerinterface.vala \
+	src/mconnect/packethandlerinterface-proxy.vala \
 	src/mconnect/packethandlers.vala \
+	src/mconnect/packethandlers-proxy.vala \
 	src/mconnect/notification.vala \
 	src/mconnect/battery.vala \
+	src/mconnect/battery-proxy.vala \
 	src/mconnect/telephony.vala \
 	src/mconnect/mousepad.vala \
-	src/mconnect/config.vala
+	src/mconnect/ping.vala \
+	src/mconnect/ping-proxy.vala \
+	src/mconnect/config.vala \
+	src/mconnect/application.vala \
+	src/mconnect/utils.vala \
+	src/mconnect/property-proxy.vala
 
 mconnect_LDADD = \
 	libmconn-crypt.la \
@@ -121,6 +133,18 @@ test_mconn_crypt_vala_VALAFLAGS = \
 
 #-------------------------------------------------------------
 
+mconnectctl_SOURCES = \
+src/mconnectctl/main.vala
+
+mconnectctl_LDADD = \
+	$(MCONNECT_LIBS)
+
+mconnectctl_CFLAGS = \
+	$(MCONNECT_CFLAGS)
+
+
+#-------------------------------------------------------------
+
 # configure will expand bindir to ${exec_prefix}/bin, we want the
 # whole thing, that's why mconnect.desktop is generated here and not
 # in configure
@@ -136,6 +160,16 @@ git-source-dist:
 	gitsha=`git rev-list $(REV) -1`; \
 	git archive --prefix=mconnect-$${gitsha}/ $(REV) | \
 		gzip -c > mconnect-$${gitsha}.tar.gz
+
+#-------------------------------------------------------------
+
+run-gdb: gdb-script install
+	gdb -x gdb-script
+
+.PHONY: run-gdb
+
+gdb-script: gdb-script.in
+	sed -e 's,[@]bindir[@],${bindir},g' < $< > $@
 
 #-------------------------------------------------------------
 

@@ -21,7 +21,7 @@ using Mconn;
 
 class Core : Object {
 
-	public static const string APP_NAME = "mconnect";
+	public const string APP_NAME = "mconnect";
 
 	public Crypt crypt { get; private set; default = null; }
 
@@ -49,8 +49,8 @@ class Core : Object {
 			core.crypt = crypt;
 			core.handlers = handlers;
 
-			info("supported interfaces: %s", string.joinv(", ",
-														  handlers.interfaces));
+			info("supported interfaces: %s",
+				 string.joinv(", ", handlers.interfaces));
 			Core._instance = core;
 		}
 

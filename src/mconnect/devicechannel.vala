@@ -59,7 +59,7 @@ class DeviceChannel : Object {
 			_conn = yield client.connect_async(_isa);
 		} catch (Error e) {
 			//
-			critical("failed to connect to %s:%u: %s",
+			warning("failed to connect to %s:%u: %s",
 					 _isa.address.to_string(), _isa.port,
 					 e.message);
 			// emit disconnected
@@ -108,7 +108,7 @@ class DeviceChannel : Object {
 		// enable keepalive
 		sock.set_keepalive(true);
 		// prep source for monitoring events
-		var source = sock.create_socket_source(IOCondition.IN);
+		var source = sock.create_source(IOCondition.IN);
 		source.set_callback((src, cond) => {
 				return this._io_ready(cond);
 			});
@@ -118,7 +118,7 @@ class DeviceChannel : Object {
 		return true;
 	}
 
-	public async void close() {
+	public void close() {
 		debug("closing connection");
 
 		if (_srcid > 0) {
@@ -130,19 +130,19 @@ class DeviceChannel : Object {
 			if (_din != null)
 				_din.close();
 		} catch (Error e) {
-			critical("failed to close data input: %s", e.message);
+			warning("failed to close data input: %s", e.message);
 		}
 		try {
 			if (_dout != null)
 				_dout.close();
 		} catch (Error e) {
-			critical("failed to close data output: %s", e.message);
+			warning("failed to close data output: %s", e.message);
 		}
 		try {
 			if (_conn != null)
 				_conn.close();
 		} catch (Error e) {
-			critical("failed to close connection: %s", e.message);
+			warning("failed to close connection: %s", e.message);
 		}
 		_din = null;
 		_dout = null;
@@ -162,7 +162,7 @@ class DeviceChannel : Object {
 		try {
 			_dout.put_string(to_send);
 		} catch (IOError e) {
-			critical("failed to send message: %s", e.message);
+			warning("failed to send message: %s", e.message);
 			// TODO disconnect?
 		}
 	}
@@ -183,7 +183,7 @@ class DeviceChannel : Object {
 			// expecting \n
 			_din.read_byte();
 		} catch (IOError ie) {
-			debug("I/O error: %s", ie.message);
+			warning("I/O error: %s", ie.message);
 		}
 
 		if (data == null) {
@@ -191,11 +191,11 @@ class DeviceChannel : Object {
 			return false;
 		}
 
-		debug("received line: %s", data);
+		vdebug("received line: %s", data);
 
 		Packet pkt = Packet.new_from_data(data);
 		if (pkt == null) {
-			critical("failed to build packet from data");
+			warning("failed to build packet from data");
 			// data was received, hence connection is still alive
 			return true;
 		}
@@ -217,7 +217,7 @@ class DeviceChannel : Object {
 	}
 
 	private void handle_packet(Packet pkt) {
-		debug("handle packet of type: %s", pkt.pkt_type);
+		// debug("handle packet of type: %s", pkt.pkt_type);
 		if (pkt.pkt_type == Packet.ENCRYPTED) {
 			handle_encrypted_packet(pkt);
 		} else {
@@ -233,7 +233,7 @@ class DeviceChannel : Object {
 		// method.
 		Json.Array arr = pkt.body.get_array_member("data");
 		if (arr == null) {
-			critical("missing data member in encrypted packet");
+			warning("missing data member in encrypted packet");
 			return;
 		}
 
@@ -244,29 +244,29 @@ class DeviceChannel : Object {
 				if (failed == true)
 					return;
 
-				debug("node data: %s", node.get_string());
+				vdebug("node data: %s", node.get_string());
 				// encrypted data is base64 encoded
 				uchar[] data = Base64.decode(node.get_string());
 				var dbytes = new Bytes.take(data);
 				try {
 					ByteArray decrypted = this._crypt.decrypt(dbytes);
-					debug("data length: %zu", decrypted.data.length);
+					vdebug("data length: %zu", decrypted.data.length);
 					msgbytes.append(decrypted.data);
 				} catch (Error e) {
-					critical("decryption failed: %s", e.message);
+					warning("decryption failed: %s", e.message);
 					failed = true;
 				}
 			});
 		// data should be complete now
-		debug("total length of packet data: %zu", msgbytes.len);
+		vdebug("total length of packet data: %zu", msgbytes.len);
 		// make sure there is \0 at the end
 		msgbytes.append({'\0'});
 		string decrypted_data = ((string)msgbytes.data).dup();
-		debug("decrypted data: %s", decrypted_data);
+		vdebug("decrypted data: %s", decrypted_data);
 
 		Packet dec_pkt = Packet.new_from_data(decrypted_data);
 		if (dec_pkt == null) {
-			critical("failed to parse decrypted packet");
+			warning("failed to parse decrypted packet");
 		} else {
 			packet_received(dec_pkt);
 		}

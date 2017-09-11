@@ -20,7 +20,8 @@
 
 class MousepadHandler : Object, PacketHandlerInterface {
 
-	private const string MOUSEPAD = "kdeconnect.mousepad";
+	public const string MOUSEPAD = "kdeconnect.mousepad.request";
+	public const string MOUSEPAD_PACKET = "kdeconnect.mousepad";
 
 	private Gdk.Display _display;
 
@@ -46,17 +47,20 @@ class MousepadHandler : Object, PacketHandlerInterface {
 	}
 
 	public void use_device(Device dev) {
-		debug("use device %s for battery status updates", dev.to_string());
-		dev.message.connect((d, pkt) => {
-				debug("message signal");
-				if (pkt.pkt_type == MOUSEPAD) {
-					debug("mousepad packet");
-					this.message(pkt);
-				}
-			});
+		debug("use device %s for mouse/keyboard input", dev.to_string());
+		dev.message.connect(this.message);
 	}
 
-	public void message(Packet pkt) {
+	public void release_device(Device dev) {
+		debug("release device %s ", dev.to_string());
+		dev.message.disconnect(this.message);
+	}
+
+	private void message(Device dev, Packet pkt) {
+		if (pkt.pkt_type != MOUSEPAD_PACKET) {
+			return;
+		}
+
 		debug("got mousepad packet");
 
 		if (_display == null) {
