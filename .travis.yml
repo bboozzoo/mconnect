@@ -6,6 +6,7 @@ env:
     - DISTRO=fedora
     - DISTRO=archlinux
     - DISTRO=opensuse
+    - DISTRO=ubuntu
 
 script:
   - ./extra/travis-build "${DISTRO}"

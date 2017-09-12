@@ -79,6 +79,20 @@ deps_archlinux() {
            gtk3
 }
 
+deps_ubuntu() {
+    apt-get update && \
+    apt-get install -y \
+            autoconf \
+            libtool \
+            valac \
+            libgirepository1.0-dev \
+            libjson-glib-dev \
+            libgee-0.8-dev \
+            libssl-dev \
+            libnotify-dev \
+            libgtk-3-dev
+}
+
 install_deps() {
     case "$1" in
         fedora)
@@ -89,6 +103,9 @@ install_deps() {
             ;;
         archlinux)
             deps_archlinux
+            ;;
+        ubuntu)
+            deps_ubuntu
             ;;
         *)
             echo "unsupported distro $1"
@@ -120,6 +137,9 @@ spin_container() {
             ;;
         opensuse)
             DOCKER_IMG=opensuse:tumbleweed
+            ;;
+        ubuntu)
+            DOCKER_IMG=ubuntu:latest
             ;;
         *)
             echo "unsupported distro $1"
