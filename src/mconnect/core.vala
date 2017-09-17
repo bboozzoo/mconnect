@@ -94,4 +94,19 @@ class Core : Object {
 
 		return config;
 	}
+
+	public static TlsCertificate get_certificate() throws Error {
+		var cert_path = Path.build_filename(get_storage_dir(),
+											"certificate.pem");
+		var key_path = Path.build_filename(get_storage_dir(),
+										   "private.pem");
+		TlsCertificate cert;
+		try {
+			cert = new TlsCertificate.from_files(cert_path, key_path);
+		} catch (Error e) {
+			warning("failed to load certificate or key: %s", e.message);
+			throw e;
+		}
+		return cert;
+	}
 }

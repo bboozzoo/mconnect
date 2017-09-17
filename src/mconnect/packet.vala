@@ -40,7 +40,7 @@ class Packet : GLib.Object {
 		}
 	}
 
-	public const int PROTOCOL_VERSION = 5;
+	public const int PROTOCOL_VERSION = 7;
 
 	public const string IDENTITY = "kdeconnect.identity";
 	public const string PAIR = "kdeconnect.pair";
@@ -116,13 +116,11 @@ class Packet : GLib.Object {
 		return null;
 	}
 
-	public static Packet new_pair(string key, bool pair = true) {
+	public static Packet new_pair(bool pair = true) {
 		var builder = new Json.Builder();
 		builder.begin_object();
 		builder.set_member_name("pair");
 		builder.add_boolean_value(pair);
-		builder.set_member_name("publicKey");
-		builder.add_string_value(key);
 		builder.end_object();
 
 		var data_obj = builder.get_root().get_object();

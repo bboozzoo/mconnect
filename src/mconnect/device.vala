@@ -49,7 +49,7 @@ class Device : Object {
 	public string device_id { get; private set; default = ""; }
 	public string device_name { get; private set; default = ""; }
 	public string device_type { get; private set; default = ""; }
-	public uint protocol_version {get; private set; default = 5; }
+	public uint protocol_version {get; private set; default = 7; }
 	public uint tcp_port {get; private set; default = 1714; }
 	public InetAddress host { get; private set; default = null; }
 	public bool is_paired { get; private set; default = false; }
@@ -68,7 +68,7 @@ class Device : Object {
 	}
 	private HashSet<string> _capabilities = null;
 
-	public string public_key {get; private set; default = ""; }
+	public string certificate { get; private set; default = ""; }
 
 	// set to true if pair request was sent
 	private bool _pair_in_progress = false;
@@ -130,7 +130,7 @@ class Device : Object {
 			debug("last known address: %s:%u", last_ip_str, dev.tcp_port);
 			dev.allowed = cache.get_boolean(name, "allowed");
 			dev.is_paired = cache.get_boolean(name, "paired");
-			dev.public_key = cache.get_string(name, "public_key");
+			dev.certificate = cache.get_string(name, "certificate");
 			dev.outgoing_capabilities =	new ArrayList<string>.wrap(
 				cache.get_string_list(name,
 									  "outgoing_capabilities"));
@@ -188,7 +188,7 @@ class Device : Object {
 		cache.set_string(name, "lastIPAddress", this.host.to_string());
 		cache.set_boolean(name, "allowed", this.allowed);
 		cache.set_boolean(name, "paired", this.is_paired);
-		cache.set_string(name, "public_key", this.public_key);
+		cache.set_string(name, "certificate", this.certificate);
 		cache.set_string_list(name, "outgoing_capabilities",
 							  array_list_to_list(this.outgoing_capabilities));
 		cache.set_string_list(name, "incoming_capabilities",
@@ -203,7 +203,29 @@ class Device : Object {
 												Environment.get_host_name(),
 												core.handlers.interfaces,
 												core.handlers.interfaces));
-		this.maybe_pair();
+
+		TlsCertificate? expected_cert = null;
+		if (this.certificate != "") {
+			try {
+				expected_cert = new TlsCertificate.from_pem(this.certificate,
+															this.certificate.length);
+			} catch (Error e) {
+				warning("failed to parse cached PEM cert of device %s: %s",
+						this.device_id, e.message);
+			}
+		}
+		// switch to secure channel
+		var secure = yield _channel.secure(expected_cert);
+		info("secure: %s", secure.to_string());
+
+		if (secure) {
+			this.certificate = _channel.peer_certificate.certificate_pem;
+
+			this.maybe_pair();
+		} else {
+			warning("failed to enable secure channel");
+			close_and_cleanup();
+		}
 	}
 
 	/**
@@ -217,10 +239,6 @@ class Device : Object {
 		if (this.host != null) {
 			debug("start pairing");
 
-			var core = Core.instance();
-			string pubkey = core.crypt.get_public_key_pem();
-			debug("public key: %s", pubkey);
-
 			if (expect_response == true) {
 				_pair_in_progress = true;
 				// pairing timeout
@@ -228,7 +246,7 @@ class Device : Object {
 														   this.pair_timeout);
 			}
 			// send request
-			yield _channel.send(Packet.new_pair(pubkey));
+			yield _channel.send(Packet.new_pair());
 		}
 	}
 
@@ -238,7 +256,7 @@ class Device : Object {
 		_pair_timeout_source = 0;
 
 		// handle failed pairing
-		handle_pair(false, "");
+		handle_pair(false);
 
 		// remove timeout source
 		return false;
@@ -255,7 +273,7 @@ class Device : Object {
 				this.pair.begin();
 		} else {
 			// we are already paired
-			handle_pair(true, this.public_key);
+			handle_pair(true);
 		}
 	}
 
@@ -329,7 +347,7 @@ class Device : Object {
 				warning("not paired and still got a packet, " +
 						"assuming device is paired",
 						Packet.PAIR);
-				handle_pair(true, "");
+				handle_pair(true);
 			}
 
 			// emit signal
@@ -348,22 +366,17 @@ class Device : Object {
 		assert(pkt.pkt_type == Packet.PAIR);
 
 		bool pair = pkt.body.get_boolean_member("pair");
-		string public_key = "";
-		if (pair) {
-			public_key = pkt.body.get_string_member("publicKey");
-		}
 
-		handle_pair(pair, public_key);
+		handle_pair(pair);
 	}
 
 	/**
 	 * handle_pair:
 	 * @pair: pairing status
-	 * @public_key: device public key
 	 *
 	 * Update device pair status.
 	 */
-	private void handle_pair(bool pair, string public_key) {
+	private void handle_pair(bool pair) {
 		if (this._pair_timeout_source != 0) {
 			Source.remove(_pair_timeout_source);
 			this._pair_timeout_source = 0;
@@ -398,13 +411,6 @@ class Device : Object {
 
 				this.is_paired = true;
 			}
-		}
-
-		if (pair) {
-			// update public key
-			this.public_key = public_key;
-		} else {
-			this.public_key = "";
 		}
 
 		// emit signal
