@@ -171,7 +171,7 @@ class DeviceChannel : Object {
 		// stop monitoring socket events
 		unmonitor_events();
 
-		var cert = Core.get_certificate();
+		var cert = Core.instance().certificate;
 
 		// wrap with TLS
 		var tls_conn = TlsServerConnection.@new(_sock_conn, cert);
