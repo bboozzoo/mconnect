@@ -36,7 +36,7 @@ deps_fedora() {
         gobject-introspection-devel \
         json-glib-devel \
         libgee-devel \
-        openssl-devel \
+        gnutls-devel \
         libnotify-devel \
         at-spi2-core-devel \
         gtk3-devel
@@ -54,7 +54,7 @@ deps_opensuse() {
         gobject-introspection-devel \
         json-glib-devel \
         libgee-devel \
-        openssl-devel \
+        gnutls-devel \
         libnotify-devel \
         at-spi2-core-devel \
         gtk3-devel
@@ -73,10 +73,10 @@ deps_archlinux() {
            gobject-introspection \
            json-glib \
            libgee \
-           openssl \
            libnotify \
            at-spi2-core \
-           gtk3
+           gtk3 \
+           gnutls
 }
 
 deps_ubuntu() {
@@ -88,9 +88,10 @@ deps_ubuntu() {
             libgirepository1.0-dev \
             libjson-glib-dev \
             libgee-0.8-dev \
-            libssl-dev \
+            libgnutls28-dev \
             libnotify-dev \
             libgtk-3-dev
+
 }
 
 install_deps() {
@@ -114,11 +115,11 @@ install_deps() {
 }
 
 build() {
-    autoreconf -if
-    # TODO: out of source builds
-    ./configure
-    make
-    make install
+    autoreconf -if && \
+        ./configure && \
+        make && \
+        make check && \
+        make install
 }
 
 build_in_container() {
