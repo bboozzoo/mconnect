@@ -49,6 +49,7 @@ PKG_CHECK_MODULES(MCONNECT, [glib-2.0,
                              libnotify
                              gdk-3.0
                              atspi-2
+                             gnutls
                              ])
 AC_SUBST(MCONNECT_CFLAGS)
 AC_SUBST(MCONNECT_LIBS)

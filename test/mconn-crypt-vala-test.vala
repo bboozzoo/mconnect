@@ -1,41 +1,79 @@
 using Mconn;
 
-void test_simple() {
-	string file_path = "/tmp/test-key-vala.pem";
-	FileUtils.remove(file_path);
+void test_generate() {
+	string key_path = "/tmp/test-key-vala.pem";
+	string cert_path = "/tmp/test-cert-vala.pem";
+	FileUtils.remove(key_path);
+	FileUtils.remove(cert_path);
 
-	string pubkey1;
-	string pubkey2;
+	assert(FileUtils.test(key_path, FileTest.EXISTS) == false);
+	Crypt.generate_key_cert(key_path, cert_path, "foo");
+	assert(FileUtils.test(key_path, FileTest.EXISTS) == true);
+	assert(FileUtils.test(cert_path, FileTest.EXISTS) == true);
+}
 
-	{
-		assert(FileUtils.test(file_path, FileTest.EXISTS) == false);
-		var c = new Crypt.for_key_path(file_path);
-		assert(FileUtils.test(file_path, FileTest.EXISTS) == true);
-		pubkey1 = c.get_public_key_pem();
-		assert(pubkey1 != null);
+void test_generate_load() {
+	string key_path = "/tmp/test-key-vala.pem";
+	string cert_path = "/tmp/test-cert-vala.pem";
+	FileUtils.remove(key_path);
+	FileUtils.remove(cert_path);
+
+	Crypt.generate_key_cert(key_path, cert_path, "bar");
+
+	try {
+		var cert = new TlsCertificate.from_files(cert_path,
+												 key_path);
+	} catch (Error e) {
+		Test.fail();
+	}
+}
+
+void test_custom_cn() {
+	string key_path = "/tmp/test-key-vala.pem";
+	string cert_path = "/tmp/test-cert-vala.pem";
+	FileUtils.remove(key_path);
+	FileUtils.remove(cert_path);
+
+	Crypt.generate_key_cert(key_path, cert_path, "custom-cn");
+
+	uint8[] data;
+	try {
+		File.new_for_path(cert_path).load_contents(null, out data, null);
+	} catch (Error e) {
+		Test.fail();
 	}
 
-	// file should still exist
-	assert(FileUtils.test(file_path, FileTest.EXISTS) == true);
+	var datum = GnuTLS.Datum() { data=data, size=data.length };
 
-	{
-		assert(FileUtils.test(file_path, FileTest.EXISTS) == true);
-		var c = new Crypt.for_key_path(file_path);
-		assert(FileUtils.test(file_path, FileTest.EXISTS) == true);
-		pubkey2 = c.get_public_key_pem();
-		assert(pubkey2 != null);
-	}
+	var cert = GnuTLS.X509.Certificate.create();
+	var res = cert.import(ref datum, GnuTLS.X509.CertificateFormat.PEM);
+	assert(res == GnuTLS.ErrorCode.SUCCESS);
 
-	debug("public key1:\n%s", pubkey1);
-	debug("public key2:\n%s", pubkey2);
-	assert(pubkey1 == pubkey2);
+	// verify DN
+	var dn = new uint8[1024];
+	size_t sz = dn.length;
+	cert.get_dn(dn, ref sz);
+	debug("dn: %s\n", (string)dn);
+
+	var issuer_dn = new uint8[1024];
+	sz = issuer_dn.length;
+	cert.get_issuer_dn(issuer_dn, ref sz);
+	debug("dn: %s\n", (string)issuer_dn);
+
+	var subject = (string)dn;
+	var issuer = (string)issuer_dn;
+
+	// verify that the certificate is self signed
+	assert(subject == issuer);
+	//
+	assert("CN=custom-cn" in subject);
 }
 
 public static void main(string[] args) {
 	Test.init(ref args);
 
-	Test.add_func("/mconn-crypt-vala/simple", () => {
-			test_simple();
-		});
+	Test.add_func("/mconn-crypt-vala/generated", test_generate);
+	Test.add_func("/mconn-crypt-vala/load", test_generate_load);
+	Test.add_func("/mconn-crypt-vala/verify-cn", test_custom_cn);
 	Test.run();
 }

@@ -31,11 +31,9 @@ bin_PROGRAMS = \
 	mconnectctl
 
 noinst_PROGRAMS = \
-	test-mconn-crypt \
-	test-mconn-crypt-vala
+	test-mconn-crypt
 
-noinst_LTLIBRARIES = \
-	libmconn-crypt.la
+noinst_LTLIBRARIES =
 
 VALAFLAGS = \
 	--no-color \
@@ -49,6 +47,7 @@ VALAFLAGS = \
 	--pkg=posix \
 	--pkg=gdk-3.0 \
 	--pkg=atspi-2 \
+  --pkg=gnutls \
 	--vapidir=src/crypt
 
 #-------------------------------------------------------------
@@ -78,64 +77,37 @@ mconnect_SOURCES = \
 	src/mconnect/config.vala \
 	src/mconnect/application.vala \
 	src/mconnect/utils.vala \
-	src/mconnect/property-proxy.vala
+	src/mconnect/property-proxy.vala \
+	src/crypt/certificate.vala
 
 mconnect_LDADD = \
-	libmconn-crypt.la \
 	$(MCONNECT_LIBS)
 
 mconnect_CFLAGS = \
 	$(MCONNECT_CFLAGS) \
 	-I$(top_srcdir)/src/crypt
 
-mconnect_VALAFLAGS = \
-	--pkg=mconn-crypt
-
-#-------------------------------------------------------------
-
-libmconn_crypt_la_SOURCES = \
-	src/crypt/mconn-crypt.c \
-	src/crypt/mconn-crypt.h
-
-libmconn_crypt_la_CFLAGS = \
-	$(MCONNECT_CFLAGS)
-
-libmconn_crypt_la_LIBADD = \
-	$(MCONNECT_LIBS)
-
 #-------------------------------------------------------------
 
 test_mconn_crypt_SOURCES = \
-	test/mconn-crypt-test.c
-
-test_mconn_crypt_LDADD = \
-	$(MCONNECT_LIBS) \
-	libmconn-crypt.la
-
-test_mconn_crypt_CFLAGS = \
-	$(MCONNECT_CFLAGS) \
-	-I$(top_srcdir)/src/crypt
-
-#-------------------------------------------------------------
-
-test_mconn_crypt_vala_SOURCES = \
+	src/crypt/certificate.vala \
 	test/mconn-crypt-vala-test.vala
 
-test_mconn_crypt_vala_LDADD = \
-	$(MCONNECT_LIBS) \
-	libmconn-crypt.la
+test_mconn_crypt_LDADD = \
+	$(MCONNECT_LIBS)
 
-test_mconn_crypt_vala_CFLAGS = \
-	$(MCONNECT_CFLAGS) \
-	-I$(top_srcdir)/src/crypt
+test_mconn_crypt_CFLAGS = \
+	$(MCONNECT_CFLAGS)
 
-test_mconn_crypt_vala_VALAFLAGS = \
-	--pkg=mconn-crypt
+test_mconn_crypt_VALAFLAGS = \
+	--pkg=gio-2.0 \
+	--pkg=posix \
+	--pkg=gnutls
 
 #-------------------------------------------------------------
 
 mconnectctl_SOURCES = \
-src/mconnectctl/main.vala
+	src/mconnectctl/main.vala
 
 mconnectctl_LDADD = \
 	$(MCONNECT_LIBS)
@@ -174,7 +146,7 @@ gdb-script: gdb-script.in
 
 #-------------------------------------------------------------
 
-GEN_FROM_VALA = $(filter %.vala,$(mconnect_SOURCES))
+GEN_FROM_VALA = $(filter %.vala,$(mconnect_SOURCES) $(test_mconn_crypt_SOURCES))
 BUILT_SOURCES = \
 	mconnect.desktop \
 	$(GEN_FROM_VALA:.vala=.c)
