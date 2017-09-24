@@ -50,6 +50,9 @@ VALAFLAGS = \
   --pkg=gnutls \
 	--vapidir=src/crypt
 
+TESTS = \
+	test-mconn-crypt
+
 #-------------------------------------------------------------
 
 mconnect_SOURCES = \
