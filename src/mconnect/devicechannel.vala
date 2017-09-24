@@ -41,12 +41,8 @@ class DeviceChannel : Object {
 
 	public TlsCertificate peer_certificate = null;
 
-	// channel encryption method
-	private Crypt _crypt = null;
-
-	public DeviceChannel(InetAddress host, uint port, Crypt crypt) {
+	public DeviceChannel(InetAddress host, uint port) {
 		_isa = new InetSocketAddress(host, (uint16) port);
-		_crypt = crypt;
 	}
 
 	~DeviceChannel() {
@@ -336,56 +332,10 @@ class DeviceChannel : Object {
 	private void handle_packet(Packet pkt) {
 		// debug("handle packet of type: %s", pkt.pkt_type);
 		if (pkt.pkt_type == Packet.ENCRYPTED) {
-			handle_encrypted_packet(pkt);
+			warning("received packet with eplicit encryption, this usually indicates a protocol version < 6 type packet, such pacckets are no longer supported, dropping..");
 		} else {
 			// signal that we got a packet
 			packet_received(pkt);
-		}
-	}
-
-	private void handle_encrypted_packet(Packet pkt) {
-		// Ecypted packets have 'data' member in body. The 'data'
-		// member is an array of strings, each string is base64
-		// encoded data, of length appropriate for channel ecryption
-		// method.
-		Json.Array arr = pkt.body.get_array_member("data");
-		if (arr == null) {
-			warning("missing data member in encrypted packet");
-			return;
-		}
-
-		bool failed = false;
-		var msgbytes = new ByteArray();
-		arr.foreach_element((a, i, node) => {
-				// exit early
-				if (failed == true)
-					return;
-
-				vdebug("node data: %s", node.get_string());
-				// encrypted data is base64 encoded
-				uchar[] data = Base64.decode(node.get_string());
-				var dbytes = new Bytes.take(data);
-				try {
-					ByteArray decrypted = this._crypt.decrypt(dbytes);
-					vdebug("data length: %zu", decrypted.data.length);
-					msgbytes.append(decrypted.data);
-				} catch (Error e) {
-					warning("decryption failed: %s", e.message);
-					failed = true;
-				}
-			});
-		// data should be complete now
-		vdebug("total length of packet data: %zu", msgbytes.len);
-		// make sure there is \0 at the end
-		msgbytes.append({'\0'});
-		string decrypted_data = ((string)msgbytes.data).dup();
-		vdebug("decrypted data: %s", decrypted_data);
-
-		Packet dec_pkt = Packet.new_from_data(decrypted_data);
-		if (dec_pkt == null) {
-			warning("failed to parse decrypted packet");
-		} else {
-			packet_received(dec_pkt);
 		}
 	}
 }
