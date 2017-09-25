@@ -46,6 +46,7 @@ class DownloadTransfer : Object {
 			return false;
 		}
 
+		debug("start transfer from %s", this.isa.to_string());
 		var client = new SocketClient();
 		client.connect_async.begin(this.isa, null, this.connected);
 		return true;
@@ -68,6 +69,7 @@ class DownloadTransfer : Object {
 	}
 
 	private void start_transfer() {
+		debug("connected, start transfer");
 		this.transfer = new Transfer(this.conn.input_stream,
 									 this.foutstream);
 		this.transfer.progress.connect((t, done) => {
