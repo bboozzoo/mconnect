@@ -63,7 +63,7 @@ class ShareHandler : Object, PacketHandlerInterface {
 	}
 
 	private void message(Device dev, Packet pkt) {
-		if (pkt.pkt_type != SHARE_PKT) {
+		if (pkt.pkt_type != SHARE_PKT && pkt.pkt_type != SHARE) {
 			return;
 		}
 
