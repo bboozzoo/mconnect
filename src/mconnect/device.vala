@@ -288,7 +288,6 @@ class Device : Object {
 			debug("device %s already active", this.to_string());
 		}
 
-		var core = Core.instance();
 		_channel = new DeviceChannel(this.host, this.tcp_port);
 		_channel.disconnected.connect((c) => {
 				this.handle_disconnect();
