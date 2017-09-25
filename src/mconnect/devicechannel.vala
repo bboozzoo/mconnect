@@ -42,14 +42,14 @@ class DeviceChannel : Object {
 	public TlsCertificate peer_certificate = null;
 
 	public DeviceChannel(InetAddress host, uint port) {
-		_isa = new InetSocketAddress(host, (uint16) port);
+		this._isa = new InetSocketAddress(host, (uint16) port);
 	}
 
 	~DeviceChannel() {
 		debug("channel destroyed");
 	}
 
-	private void fixup_socket(Socket sock) {
+	private static void fixup_socket(Socket sock) {
 #if 0
 		IPPROTO_TCP = 6,	   /* Transmission Control Protocol.  */
 
@@ -83,17 +83,25 @@ class DeviceChannel : Object {
 	}
 
 	private void replace_streams(InputStream input, OutputStream output) {
-		if (_dout != null) {
-			_dout.close();
+		if (this._dout != null) {
+			try {
+				this._dout.close();
+			} catch (Error e) {
+				warning("failed to close output stream: %s", e.message);
+			}
 		}
-		_dout = new DataOutputStream(output);
+		this._dout = new DataOutputStream(output);
 
-		if (_din != null) {
-			_din.close();
+		if (this._din != null) {
+			try {
+				this._din.close();
+			} catch (Error e) {
+				warning("failed to close input stream: %s", e.message);
+			}
 		}
-		_din = new DataInputStream(input);
+		this._din = new DataInputStream(input);
 		// messages end with \n\n
-		_din.set_newline_type(DataStreamNewlineType.LF);
+		this._din.set_newline_type(DataStreamNewlineType.LF);
 	}
 
 	private void monitor_events() {
@@ -102,20 +110,20 @@ class DeviceChannel : Object {
 				return this._io_ready(cond);
 			});
 		// attach source
-		_srcid = source.attach(null);
+		this._srcid = source.attach(null);
 	}
 
 	private void unmonitor_events() {
-		if (_srcid > 0) {
+		if (this._srcid > 0) {
 			Source.remove(_srcid);
-			_srcid = 0;
+			this._srcid = 0;
 		}
 	}
 
 	public async bool open() {
 		GLib.assert(this._isa != null);
 
-		debug("connect to %s:%u", _isa.address.to_string(), _isa.port);
+		debug("connect to %s:%u", this._isa.address.to_string(), this._isa.port);
 
 		var client = new SocketClient();
 		SocketConnection conn;
@@ -124,29 +132,29 @@ class DeviceChannel : Object {
 		} catch (Error e) {
 			//
 			warning("failed to connect to %s:%u: %s",
-					 _isa.address.to_string(), _isa.port,
+					 this._isa.address.to_string(), this._isa.port,
 					 e.message);
 			// emit disconnected
 			return false;
 		}
 
-		debug("connected to %s:%u", _isa.address.to_string(), _isa.port);
+		debug("connected to %s:%u", this._isa.address.to_string(), this._isa.port);
 
-		_socket = conn.get_socket();
+		this._socket = conn.get_socket();
 
 		// fixup socket keepalive
 		fixup_socket(_socket);
 
-		_sock_conn = conn;
+		this._sock_conn = conn;
 
 		// input/output streams will close underlying base stream when .close()
 		// is called on them, make sure that we pass Unix*Stream with which can
 		// skip closing the socket
-		replace_streams(new UnixInputStream(_socket.fd, false),
+		this.replace_streams(new UnixInputStream(_socket.fd, false),
 						new UnixOutputStream(_socket.fd, false));
 
 		// start monitoring socket events
-		monitor_events();
+		this.monitor_events();
 
 		return true;
 	}
@@ -169,12 +177,12 @@ class DeviceChannel : Object {
 		GLib.assert(this._sock_conn != null);
 
 		// stop monitoring socket events
-		unmonitor_events();
+		this.unmonitor_events();
 
 		var cert = Core.instance().certificate;
 
 		// wrap with TLS
-		var tls_conn = TlsServerConnection.@new(_sock_conn, cert);
+		var tls_conn = TlsServerConnection.@new(this._sock_conn, cert);
 		tls_conn.authentication_mode = TlsAuthenticationMode.REQUESTED;
 		tls_conn.accept_certificate.connect((peer_cert, errors) => {
 				info("accept certificate, flags: 0x%x", errors);
@@ -209,50 +217,50 @@ class DeviceChannel : Object {
 			return false;
 		}
 
-		_tls_conn = tls_conn;
+		this._tls_conn = tls_conn;
 		// data will now pass through TLS stream wrapper
-		replace_streams(_tls_conn.input_stream,
-						_tls_conn.output_stream);
+		this.replace_streams(_tls_conn.input_stream,
+							 _tls_conn.output_stream);
 
 		// monitor socket events
-		monitor_events();
+		this.monitor_events();
 		return true;
 	}
 
 	public void close() {
 		debug("closing connection");
 
-		unmonitor_events();
+		this.unmonitor_events();
 
 		try {
-			if (_din != null)
-				_din.close();
+			if (this._din != null)
+				this._din.close();
 		} catch (Error e) {
 			warning("failed to close data input: %s", e.message);
 		}
 		try {
-			if (_dout != null)
-				_dout.close();
+			if (this._dout != null)
+				this._dout.close();
 		} catch (Error e) {
 			warning("failed to close data output: %s", e.message);
 		}
 		try {
-			if (_tls_conn != null)
-				_tls_conn.close();
+			if (this._tls_conn != null)
+				this._tls_conn.close();
 		} catch (Error e) {
 			warning("failed to close TLS connection: %s", e.message);
 		}
 		try {
-			if (_sock_conn != null)
-				_sock_conn.close();
+			if (this._sock_conn != null)
+				this._sock_conn.close();
 		} catch (Error e) {
 			warning("failed to close connection: %s", e.message);
 		}
-		_din = null;
-		_dout = null;
-		_sock_conn = null;
-		_tls_conn = null;
-		_socket = null;
+		this._din = null;
+		this._dout = null;
+		this._sock_conn = null;
+		this._tls_conn = null;
+		this._socket = null;
 
 		this.peer_certificate = null;
 	}
@@ -267,10 +275,10 @@ class DeviceChannel : Object {
 		string to_send = pkt.to_string() + "\n";
 		debug("send data: %s", to_send);
 
-		GLib.assert(_dout != null);
+		GLib.assert(this._dout != null);
 
 		try {
-			_dout.put_string(to_send);
+			this._dout.put_string(to_send);
 		} catch (IOError e) {
 			warning("failed to send message: %s", e.message);
 			// TODO disconnect?
@@ -287,14 +295,14 @@ class DeviceChannel : Object {
 		size_t line_len;
 		string data = null;
 
-		GLib.assert(_din != null);
+		GLib.assert(this._din != null);
 
 		try {
 			// read line up to a newline
-			data = _din.read_upto("\n", -1, out line_len, null);
+			data = this._din.read_upto("\n", -1, out line_len, null);
 
 			// expecting \n
-			_din.read_byte();
+			this._din.read_byte();
 		} catch (IOError ie) {
 			warning("I/O error: %s", ie.message);
 		}
@@ -313,7 +321,7 @@ class DeviceChannel : Object {
 			return true;
 		}
 
-		handle_packet(pkt);
+		this.handle_packet(pkt);
 
 		return true;
 	}
@@ -324,7 +332,7 @@ class DeviceChannel : Object {
 
 		if (res == false) {
 			// disconnected
-			disconnected();
+			this.disconnected();
 		}
 		return res;
 	}
@@ -335,7 +343,7 @@ class DeviceChannel : Object {
 			warning("received packet with eplicit encryption, this usually indicates a protocol version < 6 type packet, such pacckets are no longer supported, dropping..");
 		} else {
 			// signal that we got a packet
-			packet_received(pkt);
+			this.packet_received(pkt);
 		}
 	}
 }
