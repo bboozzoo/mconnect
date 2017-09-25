@@ -7,7 +7,12 @@ void test_generate() {
 	FileUtils.remove(cert_path);
 
 	assert(FileUtils.test(key_path, FileTest.EXISTS) == false);
-	Crypt.generate_key_cert(key_path, cert_path, "foo");
+	try {
+		Crypt.generate_key_cert(key_path, cert_path, "foo");
+	} catch (Error e) {
+		warning("generate failed: %s", e.message);
+		Test.fail();
+	}
 	assert(FileUtils.test(key_path, FileTest.EXISTS) == true);
 	assert(FileUtils.test(cert_path, FileTest.EXISTS) == true);
 }
@@ -18,12 +23,18 @@ void test_generate_load() {
 	FileUtils.remove(key_path);
 	FileUtils.remove(cert_path);
 
-	Crypt.generate_key_cert(key_path, cert_path, "bar");
+	try {
+		Crypt.generate_key_cert(key_path, cert_path, "bar");
+	} catch (Error e) {
+		warning("generate failed: %s", e.message);
+		Test.fail();
+	}
 
 	try {
 		var cert = new TlsCertificate.from_files(cert_path,
 												 key_path);
 	} catch (Error e) {
+		warning("load from files failed: %s", e.message);
 		Test.fail();
 	}
 }
@@ -34,12 +45,18 @@ void test_custom_cn() {
 	FileUtils.remove(key_path);
 	FileUtils.remove(cert_path);
 
-	Crypt.generate_key_cert(key_path, cert_path, "custom-cn");
+	try {
+		Crypt.generate_key_cert(key_path, cert_path, "custom-cn");
+	} catch (Error e) {
+		warning("generate failed: %s", e.message);
+		Test.fail();
+	}
 
 	uint8[] data;
 	try {
 		File.new_for_path(cert_path).load_contents(null, out data, null);
 	} catch (Error e) {
+		warning("load contents failed: %s", e.message);
 		Test.fail();
 	}
 
