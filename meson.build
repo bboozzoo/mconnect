@@ -1,5 +1,6 @@
 project('mconnect', 'vala', 'c')
 
+# dependencies
 glib_dep = dependency('glib-2.0')
 gobject_dep = dependency('gobject-2.0')
 gio_dep = dependency('gio-2.0')
@@ -17,6 +18,7 @@ add_project_arguments(['--vapidir',
                        join_paths(meson.current_source_dir(), 'vapi')],
                       language: 'vala')
 
+# binaries
 mconnect_src = [
   'src/mconnect/main.vala',
 	'src/mconnect/discovery.vala',
@@ -75,3 +77,12 @@ test_mconn_crypt = executable('test-mconn-crypt', test_mconn_crypt_src,
                               ],
                               install: false)
 test('mconn-crypt', test_mconn_crypt)
+
+# other files
+conf = configuration_data()
+conf.set('bindir',
+         join_paths(get_option('prefix'), get_option('bindir')))
+
+configure_file(output: 'mconnect.desktop',
+               input: 'mconnect.desktop.in',
+               configuration: conf)
