@@ -48,14 +48,14 @@ mconnect_src = [
 	'src/crypt/certificate.vala',
 ]
 
-executable('mconnect', mconnect_src,
-           dependencies : [glib_dep, gobject_dep,
-                           gio_dep, gio_unix_dep,
-                           json_glib_dep, gee_dep,
-                           libnotify_dep, gdk_dep,
-                           atspi_dep, gnutls_dep,
-                           posix_dep],
-           install: true)
+mconnect_prog = executable('mconnect', mconnect_src,
+                           dependencies : [glib_dep, gobject_dep,
+                                           gio_dep, gio_unix_dep,
+                                           json_glib_dep, gee_dep,
+                                           libnotify_dep, gdk_dep,
+                                           atspi_dep, gnutls_dep,
+                                           posix_dep],
+                           install: true)
 
 mconnectctl_src = 'src/mconnectctl/main.vala'
 executable('mconnectctl', mconnectctl_src,
@@ -98,3 +98,14 @@ mconnectdatadir = join_paths(get_option('datadir'),
 install_data('mconnect.conf',
              install_dir: mconnectdatadir,
              install_mode: 'rw-r--r--')
+
+# other targets
+
+gdb_conf = configuration_data()
+gdb_conf.set('bindir', meson.build_root())
+gdb_script = configure_file(output: 'gdb-script',
+                            input: 'gdb-script.in',
+                            configuration: gdb_conf)
+run_target('run-gdb',
+           command: ['gdb', '-x', join_paths(meson.build_root(), 'gdb-script')],
+           depends: [mconnect_prog])
