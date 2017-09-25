@@ -33,7 +33,6 @@ class ShareHandler : Object, PacketHandlerInterface {
 	public static ShareHandler instance() {
 		if (ShareHandler.DOWNLOADS == null) {
 
-			GLib.warning("tutaj");
 			ShareHandler.DOWNLOADS = Path.build_filename(
 				Environment.get_user_special_dir(UserDirectory.DOWNLOAD),
 				"mconnect");
