@@ -61,3 +61,17 @@ executable('mconnectctl', mconnectctl_src,
                            json_glib_dep, gee_dep,
                            libnotify_dep, gdk_dep,
                            atspi_dep, gnutls_dep])
+
+# tests
+test_mconn_crypt_src = [
+  'test/mconn-crypt-vala-test.vala',
+  'src/crypt/certificate.vala',
+]
+test_mconn_crypt = executable('test-mconn-crypt', test_mconn_crypt_src,
+                              dependencies: [
+                                glib_dep, gobject_dep,
+                                gio_dep, gio_unix_dep,
+                                gnutls_dep, posix_dep,
+                              ],
+                              install: false)
+test('mconn-crypt', test_mconn_crypt)
