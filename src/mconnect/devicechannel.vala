@@ -211,7 +211,12 @@ class DeviceChannel : Object {
 		try {
 			info("attempt TLS handshake");
 			var res = yield tls_conn.handshake_async();
-			info("TLS handshare successful");
+			if (res) {
+				info("TLS handshare successful");
+			} else {
+				warning("TLS handshake unsuccessful");
+				return false;
+			}
 		} catch (Error e) {
 			warning("TLS handshake failed: %s", e.message);
 			return false;
