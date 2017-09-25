@@ -81,10 +81,20 @@ test_mconn_crypt = executable('test-mconn-crypt', test_mconn_crypt_src,
 test('mconn-crypt', test_mconn_crypt)
 
 # other files
+applicationsdir = join_paths(get_option('datadir'),
+                             'applications')
+
 conf = configuration_data()
 conf.set('bindir',
          join_paths(get_option('prefix'), get_option('bindir')))
 
 configure_file(output: 'mconnect.desktop',
                input: 'mconnect.desktop.in',
-               configuration: conf)
+               configuration: conf,
+               install_dir: applicationsdir)
+
+mconnectdatadir = join_paths(get_option('datadir'),
+                             'mconnect')
+install_data('mconnect.conf',
+             install_dir: mconnectdatadir,
+             install_mode: 'rw-r--r--')
