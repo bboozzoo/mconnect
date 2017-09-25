@@ -54,7 +54,8 @@ executable('mconnect', mconnect_src,
                            json_glib_dep, gee_dep,
                            libnotify_dep, gdk_dep,
                            atspi_dep, gnutls_dep,
-                           posix_dep])
+                           posix_dep],
+           install: true)
 
 mconnectctl_src = 'src/mconnectctl/main.vala'
 executable('mconnectctl', mconnectctl_src,
@@ -62,7 +63,8 @@ executable('mconnectctl', mconnectctl_src,
                            gio_dep, gio_unix_dep,
                            json_glib_dep, gee_dep,
                            libnotify_dep, gdk_dep,
-                           atspi_dep, gnutls_dep])
+                           atspi_dep, gnutls_dep],
+           install: true)
 
 # tests
 test_mconn_crypt_src = [
