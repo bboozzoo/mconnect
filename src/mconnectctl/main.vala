@@ -43,6 +43,7 @@ namespace Mconnect {
 		public abstract bool is_connected { owned get;}
 		public abstract string[] outgoing_capabilities { owned get;}
 		public abstract string[] incoming_capabilities { owned get;}
+		public abstract string certificate { owned get;}
 	}
 
 	public class Client {
@@ -226,6 +227,7 @@ namespace Mconnect {
 						print_sorted_caps(dp.outgoing_capabilities, "    %s\n");
 						stdout.printf("  Capabilities (in):\n");
 						print_sorted_caps(dp.incoming_capabilities, "    %s\n");
+						stdout.printf("  Certificate:\n%s\n", dp.certificate);
 					}
 					return 0;
 				});
