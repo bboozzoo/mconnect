@@ -130,7 +130,16 @@ class Device : Object {
 			debug("last known address: %s:%u", last_ip_str, dev.tcp_port);
 			dev.allowed = cache.get_boolean(name, "allowed");
 			dev.is_paired = cache.get_boolean(name, "paired");
-			dev.certificate = cache.get_string(name, "certificate");
+			try {
+				dev.certificate = cache.get_string(name, "certificate");
+			} catch (KeyFileError e) {
+				if (e is KeyFileError.KEY_NOT_FOUND) {
+					warning("device %s using older cache format",
+							dev.device_id);
+				} else {
+					throw e;
+				}
+			}
 			dev.outgoing_capabilities =	new ArrayList<string>.wrap(
 				cache.get_string_list(name,
 									  "outgoing_capabilities"));
