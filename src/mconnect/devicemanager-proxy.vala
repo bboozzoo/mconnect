@@ -24,6 +24,11 @@ class DeviceManagerDBusProxy : Object
 {
 	private DeviceManager manager;
 
+	public string certificate {
+		owned get { return Core.instance().certificate.certificate_pem; }
+		private set {}
+	}
+
 	public signal void device_added(string path);
 
 	public signal void device_removed(string path);
