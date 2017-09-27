@@ -146,5 +146,36 @@ namespace Mconn {
 			export_to_file(cert_path, export_certificate(cert));
 			export_to_file(key_path, export_private_key(key));
 		}
+
+		private GnuTLS.X509.Certificate cert_from_pem(uint8[] certificate_pem) {
+			var datum = GnuTLS.Datum() { data=certificate_pem,
+										 size=certificate_pem.length };
+
+			var cert = GnuTLS.X509.Certificate.create();
+			var res = cert.import(ref datum, GnuTLS.X509.CertificateFormat.PEM);
+			assert(res == GnuTLS.ErrorCode.SUCCESS);
+			return cert;
+		}
+
+		/**
+		 * fingerprint_certificate:
+		 * Produce a SHA1 fingerprint of the certificate
+		 *
+		 * @param certificate_pem PEM encoded certificate
+		 * @return SHA1 fingerprint as bytes
+		 */
+		public uint8[] fingerprint_certificate(uint8[] certificate_pem) {
+			var cert = cert_from_pem(certificate_pem);
+
+			// TOOD: make digest configurable, for now assume it's SHA1
+			var data = new uint8[20];
+			size_t sz = data.length;
+			var res = cert.get_fingerprint(GnuTLS.DigestAlgorithm.SHA1,
+										   data, ref sz);
+			assert(res == GnuTLS.ErrorCode.SUCCESS);
+			assert(sz == data.length);
+
+			return data;
+		}
 	}
 }
