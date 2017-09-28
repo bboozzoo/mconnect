@@ -80,6 +80,11 @@ class DeviceDBusProxy : Object {
 		private set {}
 	}
 
+	public string certificate_fingerprint {
+		get { return device.certificate_fingerprint; }
+		private set {}
+	}
+
 	private HashMap<string,PacketHandlerInterfaceProxy> handlers;
 
 	private uint register_id = 0;

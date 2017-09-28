@@ -19,6 +19,7 @@
  */
 
 using Gee;
+using Mconn;
 
 /**
  * General device wrapper.
@@ -69,6 +70,7 @@ class Device : Object {
 	private HashSet<string> _capabilities = null;
 
 	public string certificate { get; private set; default = ""; }
+	public string certificate_fingerprint { get; private set; default = ""; }
 
 	// set to true if pair request was sent
 	private bool _pair_in_progress = false;
@@ -131,7 +133,12 @@ class Device : Object {
 			dev.allowed = cache.get_boolean(name, "allowed");
 			dev.is_paired = cache.get_boolean(name, "paired");
 			try {
-				dev.certificate = cache.get_string(name, "certificate");
+				var cached_certificate = cache.get_string(name, "certificate");
+				if (cached_certificate != "") {
+					var cert = new TlsCertificate.from_pem(cached_certificate,
+														   cached_certificate.length);
+					dev.update_certificate(cert);
+				}
 			} catch (KeyFileError e) {
 				if (e is KeyFileError.KEY_NOT_FOUND) {
 					warning("device %s using older cache format",
@@ -228,7 +235,7 @@ class Device : Object {
 		info("secure: %s", secure.to_string());
 
 		if (secure) {
-			this.certificate = _channel.peer_certificate.certificate_pem;
+			this.update_certificate(_channel.peer_certificate);
 
 			this.maybe_pair();
 		} else {
@@ -569,5 +576,20 @@ class Device : Object {
 			host = other_dev.host;
 			tcp_port = other_dev.tcp_port;
 		}
+	}
+
+	private void update_certificate(TlsCertificate cert) {
+		this.certificate = cert.certificate_pem;
+
+		// prepare fingerprint
+		var fingerprint = Crypt.fingerprint_certificate(cert.certificate_pem);
+		var sb = new StringBuilder.sized(fingerprint.length * 2
+										 + "sha1:".length);
+		sb.append("sha1:");
+		foreach(var b in fingerprint) {
+			sb.append_printf("%02x", b);
+		}
+
+		this.certificate_fingerprint = sb.str;
 	}
 }
