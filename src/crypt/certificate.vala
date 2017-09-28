@@ -147,9 +147,9 @@ namespace Mconn {
 			export_to_file(key_path, export_private_key(key));
 		}
 
-		private GnuTLS.X509.Certificate cert_from_pem(uint8[] certificate_pem) {
-			var datum = GnuTLS.Datum() { data=certificate_pem,
-										 size=certificate_pem.length };
+		private GnuTLS.X509.Certificate cert_from_pem(string certificate_pem) {
+			var datum = GnuTLS.Datum() { data=certificate_pem.data,
+										 size=certificate_pem.data.length };
 
 			var cert = GnuTLS.X509.Certificate.create();
 			var res = cert.import(ref datum, GnuTLS.X509.CertificateFormat.PEM);
@@ -164,7 +164,7 @@ namespace Mconn {
 		 * @param certificate_pem PEM encoded certificate
 		 * @return SHA1 fingerprint as bytes
 		 */
-		public uint8[] fingerprint_certificate(uint8[] certificate_pem) {
+		public uint8[] fingerprint_certificate(string certificate_pem) {
 			var cert = cert_from_pem(certificate_pem);
 
 			// TOOD: make digest configurable, for now assume it's SHA1

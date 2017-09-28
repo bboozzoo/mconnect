@@ -107,7 +107,7 @@ sCmsSGcb9ZkEQfRNGTmFFthkcnfTU9mKh8oGc/a9r0DDgYcPSCgqERt2fgiBrt85
 -----END CERTIFICATE-----""";
 	var expected = "eb2611a447085322b206fa61d4bc5869b4a55657";
 
-	var fingerprint = Crypt.fingerprint_certificate(pem.data);
+	var fingerprint = Crypt.fingerprint_certificate(pem);
 	// SHA1
 	assert(fingerprint.length == 20);
 
