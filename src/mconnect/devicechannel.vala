@@ -152,37 +152,15 @@ class DeviceChannel : Object {
 		var cert = Core.instance().certificate;
 
 		// wrap with TLS
-		var tls_conn = TlsServerConnection.@new(this._sock_conn, cert);
-		tls_conn.authentication_mode = TlsAuthenticationMode.REQUESTED;
-		tls_conn.accept_certificate.connect((peer_cert, errors) => {
-				info("accept certificate, flags: 0x%x", errors);
-				info("certificate:\n%s\n", peer_cert.certificate_pem);
-
-				this.peer_certificate = peer_cert;
-
-				if (expected_peer != null) {
-					if (Logging.VERBOSE) {
-						vdebug("verify certificate, expecting: %s, got: %s",
-							   expected_peer.certificate_pem,
-							   peer_cert.certificate_pem);
-					}
-
-					if (expected_peer.is_same(peer_cert)) {
-						return true;
-					} else {
-						warning("rejecting handshare, peer certificate mismatch, got:\n%s",
-								peer_cert.certificate_pem);
-						return false;
-					}
-				}
-				return true;
-			});
-
+		var tls_conn = Utils.make_tls_connection(this._sock_conn,
+												 cert,
+												 expected_peer);
 		try {
 			info("attempt TLS handshake");
 			var res = yield tls_conn.handshake_async();
 			if (res) {
 				info("TLS handshare successful");
+				this.peer_certificate = tls_conn.peer_certificate;
 			} else {
 				warning("TLS handshake unsuccessful");
 				return false;
