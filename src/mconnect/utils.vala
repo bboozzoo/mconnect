@@ -22,73 +22,73 @@ namespace Utils {
 
 using Posix;
 
-/**
- * make_unique_device_string:
- * @id: device ID
- * @name: device name
- * @type: device type
- * @pv: protocol version
- *
- * Generate device string that can be used as map index
- */
-string make_unique_device_string(string id, string name,
-								 string type, uint pv) {
-	return make_device_string(id, name, type, pv).replace(" ", "-");
-}
+	/**
+	 * make_unique_device_string:
+	 * @id: device ID
+	 * @name: device name
+	 * @type: device type
+	 * @pv: protocol version
+	 *
+	 * Generate device string that can be used as map index
+	 */
+	string make_unique_device_string(string id, string name,
+									 string type, uint pv) {
+		return make_device_string(id, name, type, pv).replace(" ", "-");
+	}
 
-/**
- * make_device_string:
- * @id: device ID
- * @name: device name
- * @type: device type
- * @pv: protocol version
- *
- * Generate device string
- */
-string make_device_string(string id, string name,
-						  string type, uint pv) {
-	return "%s-%s-%s-%u".printf(id, name, type, pv);
+	/**
+	 * make_device_string:
+	 * @id: device ID
+	 * @name: device name
+	 * @type: device type
+	 * @pv: protocol version
+	 *
+	 * Generate device string
+	 */
+	string make_device_string(string id, string name,
+							  string type, uint pv) {
+		return "%s-%s-%s-%u".printf(id, name, type, pv);
 
-}
+	}
 
-/**
- * socket_set_keepalive:
- * @sock: socket
- *
- * Set keepalive counters on socket
- */
-void socket_set_keepalive(Socket sock) {
+	/**
+	 * socket_set_keepalive:
+	 * @sock: socket
+	 *
+	 * Set keepalive counters on socket
+	 */
+	void socket_set_keepalive(Socket sock) {
 #if 0
-	IPPROTO_TCP = 6,	   /* Transmission Control Protocol.  */
+		IPPROTO_TCP = 6,	   /* Transmission Control Protocol.  */
 
-	TCP_KEEPIDLE	 4  /* Start keeplives after this period */
-	TCP_KEEPINTVL	 5  /* Interval between keepalives */
-	TCP_KEEPCNT		 6  /* Number of keepalives before death */
+		TCP_KEEPIDLE	 4  /* Start keeplives after this period */
+		TCP_KEEPINTVL	 5  /* Interval between keepalives */
+		TCP_KEEPCNT		 6  /* Number of keepalives before death */
 #endif
 #if 0
-	int option = 10;
-	Posix.setsockopt(sock.fd, 6, 4, &option, (Posix.socklen_t) sizeof(int));
-	option = 5;
-	Posix.setsockopt(sock.fd, 6, 5, &option, (Posix.socklen_t) sizeof(int));
-	option = 3;
-	Posix.setsockopt(sock.fd, 6, 6, &option, (Posix.socklen_t) sizeof(int));
+		int option = 10;
+		Posix.setsockopt(sock.fd, 6, 4, &option, (Posix.socklen_t) sizeof(int));
+		option = 5;
+		Posix.setsockopt(sock.fd, 6, 5, &option, (Posix.socklen_t) sizeof(int));
+		option = 3;
+		Posix.setsockopt(sock.fd, 6, 6, &option, (Posix.socklen_t) sizeof(int));
 #endif
 
-	int option = 10;
-	Posix.setsockopt(sock.fd, IPProto.TCP,
-					 Posix.TCP_KEEPIDLE,
-					 &option, (Posix.socklen_t) sizeof(int));
-	option = 5;
-	Posix.setsockopt(sock.fd, IPProto.TCP,
-					 Posix.TCP_KEEPINTVL,
-					 &option, (Posix.socklen_t) sizeof(int));
-	option = 3;
-	Posix.setsockopt(sock.fd, IPProto.TCP,
-					 Posix.TCP_KEEPCNT,
-					 &option, (Posix.socklen_t) sizeof(int));
+		int option = 10;
+		Posix.setsockopt(sock.fd, IPProto.TCP,
+						 Posix.TCP_KEEPIDLE,
+						 &option, (Posix.socklen_t) sizeof(int));
+		option = 5;
+		Posix.setsockopt(sock.fd, IPProto.TCP,
+						 Posix.TCP_KEEPINTVL,
+						 &option, (Posix.socklen_t) sizeof(int));
+		option = 3;
+		Posix.setsockopt(sock.fd, IPProto.TCP,
+						 Posix.TCP_KEEPCNT,
+						 &option, (Posix.socklen_t) sizeof(int));
 
-	// enable keepalive
-	sock.set_keepalive(true);
-}
+		// enable keepalive
+		sock.set_keepalive(true);
+	}
 
 }
