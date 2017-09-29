@@ -23,19 +23,23 @@ class DownloadTransfer : Object {
 	private FileOutputStream foutstream = null;
 	private Cancellable cancel = null;
 	private SocketConnection conn = null;
+	private TlsConnection tls_conn = null;
 	public uint64 size = 0;
 	public uint64 transferred = 0;
 	public string destination = "";
 	private Transfer transfer = null;
+	private Device device = null;
 
-	public DownloadTransfer(InetSocketAddress isa, uint64 size, string dest) {
+	public DownloadTransfer(Device dev, InetSocketAddress isa,
+							uint64 size, string dest) {
 		this.isa = isa;
 		this.cancel = new Cancellable();
 		this.destination = dest;
 		this.size = size;
+		this.device = dev;
 	}
 
-	public bool start() {
+	public async bool start_async() {
 		try {
 			this.file = File.new_for_path(this.destination + ".part");
 			this.foutstream = this.file.replace(null, false,
@@ -48,29 +52,41 @@ class DownloadTransfer : Object {
 
 		debug("start transfer from %s", this.isa.to_string());
 		var client = new SocketClient();
-		client.connect_async.begin(this.isa, null, this.connected);
-		return true;
-	}
 
-	private void connected(Object? obj, AsyncResult res) {
 		try {
-			var sc = (SocketClient)obj;
-			this.conn = sc.connect_async.end(res);
-
-			var sock = this.conn.get_socket();
-			Utils.socket_set_keepalive(sock);
-			this.start_transfer();
-
+			this.conn = yield client.connect_async(this.isa);
+			debug("connected");
 		} catch (Error e) {
 			var err ="failed to connect: %s".printf(e.message);
 			warning(err);
 			this.cleanup_error(err);
 		}
+
+		var sock = this.conn.get_socket();
+		Utils.socket_set_keepalive(sock);
+
+		// enable TLS
+		this.tls_conn = Utils.make_tls_connection(this.conn,
+												  Core.instance().certificate,
+												  this.device.certificate,
+												  Utils.TlsConnectionMode.CLIENT);
+		try {
+			debug("attempt TLS handshake");
+			var tls_res = yield this.tls_conn.handshake_async();
+			debug("TLS handshake complete");
+		} catch (Error e) {
+			var err ="TLS handshake failed: %s".printf(e.message);
+			warning(err);
+			this.cleanup_error(err);
+		}
+
+		this.start_transfer();
+		return true;
 	}
 
 	private void start_transfer() {
 		debug("connected, start transfer");
-		this.transfer = new Transfer(this.conn.input_stream,
+		this.transfer = new Transfer(this.tls_conn.input_stream,
 									 this.foutstream);
 		this.transfer.progress.connect((t, done) => {
 				int percent = (int) (100.0 * ((double)done / (double)this.size));
@@ -107,6 +123,14 @@ class DownloadTransfer : Object {
 			}
 		}
 
+		if (this.tls_conn != null) {
+			try {
+				this.tls_conn.close();
+			} catch (IOError e) {
+				warning("failed to close TLS connection: %s",
+						e.message);
+			}
+		}
 		if (this.conn != null) {
 			try {
 				this.conn.close();
@@ -119,6 +143,7 @@ class DownloadTransfer : Object {
 		this.file = null;
 		this.foutstream = null;
 		this.conn = null;
+		this.tls_conn = null;
 		this.transfer = null;
 	}
 

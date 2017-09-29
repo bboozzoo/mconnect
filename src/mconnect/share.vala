@@ -75,11 +75,12 @@ class ShareHandler : Object, PacketHandlerInterface {
 		debug("file: %s size: %s", name, format_size(pkt.payload.size));
 
 		var t = new DownloadTransfer(
+			dev,
 			new InetSocketAddress(dev.host,
 								  (uint16) pkt.payload.port),
 			pkt.payload.size,
 			make_downloads_path(name));
 
-		t.start();
+		t.start_async.begin();
 	}
 }
