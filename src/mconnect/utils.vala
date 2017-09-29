@@ -91,4 +91,62 @@ using Posix;
 		sock.set_keepalive(true);
 	}
 
+	public enum TlsConnectionMode {
+		SERVER,
+		CLIENT,
+	}
+	/**
+	 * make_tls_connection:
+	 *
+	 * Create a TLS connection around given connected socket.
+	 * When @expected_peer is non-null, the handshake will be rejected if the
+	 * certificate presented by peer is different from expected.
+	 *
+	 * @sock_conn: connected socket
+	 * @self_cert: own certificate
+	 * @expected_peer: expected peer certificate
+	 * @is_client_connection: if true then TLS client side connection is prepared
+	 *
+	 * @return new TlsConnection
+	 */
+	TlsConnection make_tls_connection(SocketConnection sock_conn,
+									  TlsCertificate self_cert,
+									  TlsCertificate? expected_peer = null,
+									  TlsConnectionMode mode = TlsConnectionMode.SERVER) {
+		TlsConnection tls_conn;
+
+		if (mode == TlsConnectionMode.SERVER) {
+			debug("creating TLS server connection");
+			var tls_serv = TlsServerConnection.@new(sock_conn, self_cert);
+			tls_serv.authentication_mode = TlsAuthenticationMode.REQUESTED;
+			tls_conn = tls_serv;
+		} else {
+			debug("creating TLS client connection");
+			tls_conn =  TlsClientConnection.@new(sock_conn,
+												 sock_conn.get_remote_address());
+			tls_conn.set_certificate(self_cert);
+		}
+		tls_conn.accept_certificate.connect((peer_cert, errors) => {
+				info("accept certificate, flags: 0x%x", errors);
+				info("certificate:\n%s\n", peer_cert.certificate_pem);
+
+				if (expected_peer != null) {
+					if (Logging.VERBOSE) {
+						vdebug("verify certificate, expecting: %s, got: %s",
+							   expected_peer.certificate_pem,
+							   peer_cert.certificate_pem);
+					}
+
+					if (expected_peer.is_same(peer_cert)) {
+						return true;
+					} else {
+						warning("rejecting handshare, peer certificate mismatch, got:\n%s",
+								peer_cert.certificate_pem);
+						return false;
+					}
+				}
+				return true;
+			});
+		return tls_conn;
+	}
 }
