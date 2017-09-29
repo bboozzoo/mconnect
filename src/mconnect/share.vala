@@ -66,21 +66,27 @@ class ShareHandler : Object, PacketHandlerInterface {
 			return;
 		}
 
-		if (pkt.payload == null) {
-			warning("missing payload info");
-			return;
+		if (pkt.body.has_member("filename")) {
+			if (pkt.payload == null) {
+				warning("missing payload info");
+				return;
+			}
+
+			string name = pkt.body.get_string_member("filename");
+			debug("file: %s size: %s", name, format_size(pkt.payload.size));
+
+			var t = new DownloadTransfer(
+				dev,
+				new InetSocketAddress(dev.host,
+									  (uint16) pkt.payload.port),
+				pkt.payload.size,
+				make_downloads_path(name));
+
+			t.start_async.begin();
+		} else if (pkt.body.has_member("url")) {
+			var url = pkt.body.get_string_member("url");
+			debug("got URL: %s, launching...", url);
+			AppInfo.launch_default_for_uri(url, null);
 		}
-
-		string name = pkt.body.get_string_member("filename");
-		debug("file: %s size: %s", name, format_size(pkt.payload.size));
-
-		var t = new DownloadTransfer(
-			dev,
-			new InetSocketAddress(dev.host,
-								  (uint16) pkt.payload.port),
-			pkt.payload.size,
-			make_downloads_path(name));
-
-		t.start_async.begin();
 	}
 }
