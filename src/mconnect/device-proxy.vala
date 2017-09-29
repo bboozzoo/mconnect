@@ -75,6 +75,16 @@ class DeviceDBusProxy : Object {
 		private set;
 	}
 
+	public string certificate {
+		get { return device.certificate; }
+		private set {}
+	}
+
+	public string certificate_fingerprint {
+		get { return device.certificate_fingerprint; }
+		private set {}
+	}
+
 	private HashMap<string,PacketHandlerInterfaceProxy> handlers;
 
 	private uint register_id = 0;
@@ -161,6 +171,10 @@ class DeviceDBusProxy : Object {
 		case "is-connected":
 			name = "IsConnected";
 			v = this.is_connected;
+			break;
+		case "certificate":
+			name = "certificate";
+			v = this.certificate;
 			break;
 		}
 

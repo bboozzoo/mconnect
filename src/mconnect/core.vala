@@ -23,7 +23,7 @@ class Core : Object {
 
 	public const string APP_NAME = "mconnect";
 
-	public Crypt crypt { get; private set; default = null; }
+	public TlsCertificate certificate { get; private set; }
 
 	public PacketHandlers handlers {get; private set; default = null; }
 
@@ -41,12 +41,12 @@ class Core : Object {
 			init_user_dirs();
 
 			var config = init_config();
-			Crypt crypt = init_crypto();
+			var cert = init_crypto();
 			var handlers = new PacketHandlers();
 
 			var core = new Core();
 			core.config = config;
-			core.crypt = crypt;
+			core.certificate = cert;
 			core.handlers = handlers;
 
 			info("supported interfaces: %s",
@@ -77,9 +77,33 @@ class Core : Object {
 		DirUtils.create_with_parents(get_config_dir(), 0700);
 	}
 
-	private static Crypt init_crypto() {
-		string key_path = get_storage_dir() + "/private.pem";
-		return new Crypt.for_key_path(key_path);
+	private static TlsCertificate init_crypto() throws Error {
+		var key_file = File.new_for_path(Path.build_filename(get_storage_dir(),
+															 "private.pem"));
+		var cert_file = File.new_for_path(Path.build_filename(get_storage_dir(),
+															  "certificate.pem"));
+		if (key_file.query_exists() == false || cert_file.query_exists() == false) {
+			try {
+				string host_name = Environment.get_host_name();
+				string user = Environment.get_user_name();
+				Crypt.generate_key_cert(key_file.get_path(),
+										cert_file.get_path(),
+										@"$user@$host_name");
+			} catch (Error e) {
+				warning("failed to generate private key or certificate: %s", e.message);
+				throw e;
+			}
+		}
+
+		TlsCertificate tls_cert;
+		try {
+			tls_cert = new TlsCertificate.from_files(cert_file.get_path(),
+													 key_file.get_path());
+		} catch (Error e) {
+			warning("failed to load certificate or key: %s", e.message);
+			throw e;
+		}
+		return tls_cert;
 	}
 
 	private static Config init_config() {
@@ -94,4 +118,5 @@ class Core : Object {
 
 		return config;
 	}
+
 }

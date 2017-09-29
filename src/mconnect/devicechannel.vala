@@ -32,51 +32,24 @@ class DeviceChannel : Object {
 	public signal void packet_received(Packet pkt);
 
 	private InetSocketAddress _isa = null;
-	private SocketConnection _conn = null;
+	private SocketConnection _sock_conn = null;
+	private TlsConnection _tls_conn = null;
 	private DataOutputStream _dout = null;
 	private DataInputStream _din = null;
 	private uint _srcid = 0;
+	private Socket _socket = null;
 
-	// channel encryption method
-	private Crypt _crypt = null;
+	public TlsCertificate peer_certificate = null;
 
-	public DeviceChannel(InetAddress host, uint port, Crypt crypt) {
-		_isa = new InetSocketAddress(host, (uint16) port);
-		_crypt = crypt;
+	public DeviceChannel(InetAddress host, uint port) {
+		this._isa = new InetSocketAddress(host, (uint16) port);
 	}
 
 	~DeviceChannel() {
 		debug("channel destroyed");
 	}
 
-	public async bool open() {
-		GLib.assert(this._isa != null);
-
-		debug("connect to %s:%u", _isa.address.to_string(), _isa.port);
-
-		var client = new SocketClient();
-		try {
-			_conn = yield client.connect_async(_isa);
-		} catch (Error e) {
-			//
-			warning("failed to connect to %s:%u: %s",
-					 _isa.address.to_string(), _isa.port,
-					 e.message);
-			// emit disconnected
-			return false;
-		}
-
-		debug("connected to %s:%u", _isa.address.to_string(), _isa.port);
-
-		// use data streams
-		_dout = new DataOutputStream(_conn.output_stream);
-		_din = new DataInputStream(_conn.input_stream);
-		// messages end with \n\n
-		_din.set_newline_type(DataStreamNewlineType.LF);
-
-		// setup socket monitoring
-		Socket sock = _conn.get_socket();
-
+	private static void fixup_socket(Socket sock) {
 #if 0
 		IPPROTO_TCP = 6,	   /* Transmission Control Protocol.  */
 
@@ -107,46 +80,194 @@ class DeviceChannel : Object {
 
 		// enable keepalive
 		sock.set_keepalive(true);
-		// prep source for monitoring events
-		var source = sock.create_source(IOCondition.IN);
+	}
+
+	private void replace_streams(InputStream input, OutputStream output) {
+		if (this._dout != null) {
+			try {
+				this._dout.close();
+			} catch (Error e) {
+				warning("failed to close output stream: %s", e.message);
+			}
+		}
+		this._dout = new DataOutputStream(output);
+
+		if (this._din != null) {
+			try {
+				this._din.close();
+			} catch (Error e) {
+				warning("failed to close input stream: %s", e.message);
+			}
+		}
+		this._din = new DataInputStream(input);
+		// messages end with \n\n
+		this._din.set_newline_type(DataStreamNewlineType.LF);
+	}
+
+	private void monitor_events() {
+		var source = _socket.create_source(IOCondition.IN);
 		source.set_callback((src, cond) => {
 				return this._io_ready(cond);
 			});
 		// attach source
-		_srcid = source.attach(null);
+		this._srcid = source.attach(null);
+	}
 
+	private void unmonitor_events() {
+		if (this._srcid > 0) {
+			Source.remove(_srcid);
+			this._srcid = 0;
+		}
+	}
+
+	public async bool open() {
+		GLib.assert(this._isa != null);
+
+		debug("connect to %s:%u", this._isa.address.to_string(), this._isa.port);
+
+		var client = new SocketClient();
+		SocketConnection conn;
+		try {
+			conn = yield client.connect_async(_isa);
+		} catch (Error e) {
+			//
+			warning("failed to connect to %s:%u: %s",
+					 this._isa.address.to_string(), this._isa.port,
+					 e.message);
+			// emit disconnected
+			return false;
+		}
+
+		debug("connected to %s:%u", this._isa.address.to_string(), this._isa.port);
+
+		this._socket = conn.get_socket();
+
+		// fixup socket keepalive
+		fixup_socket(_socket);
+
+		this._sock_conn = conn;
+
+		// input/output streams will close underlying base stream when .close()
+		// is called on them, make sure that we pass Unix*Stream with which can
+		// skip closing the socket
+		this.replace_streams(new UnixInputStream(_socket.fd, false),
+						new UnixOutputStream(_socket.fd, false));
+
+		// start monitoring socket events
+		this.monitor_events();
+
+		return true;
+	}
+
+	/**
+	 * secure:
+	 * Switch channel to TLS mode
+	 *
+	 * When TLS was established, `peer_certificate` will store the remote client
+	 * certificate. If `expected_peer` is null, the peer certificate will be
+	 * accepted unconditionally during handshake and the caller must eventually
+	 * decide if the client is to be trusted or not. However, if `expected_peer`
+	 * was set, the received certificate and expected one will be compared
+	 * during handshake and connection will be rejected if a mismatch is found.
+	 *
+	 * @param expected_peer the peer certificate we are expecting to see
+	 * @return true if TLS negotiation was successful, false otherwise
+	 */
+	public async bool secure(TlsCertificate? expected_peer = null) {
+		GLib.assert(this._sock_conn != null);
+
+		// stop monitoring socket events
+		this.unmonitor_events();
+
+		var cert = Core.instance().certificate;
+
+		// wrap with TLS
+		var tls_conn = TlsServerConnection.@new(this._sock_conn, cert);
+		tls_conn.authentication_mode = TlsAuthenticationMode.REQUESTED;
+		tls_conn.accept_certificate.connect((peer_cert, errors) => {
+				info("accept certificate, flags: 0x%x", errors);
+				info("certificate:\n%s\n", peer_cert.certificate_pem);
+
+				this.peer_certificate = peer_cert;
+
+				if (expected_peer != null) {
+					if (DebugLog.Verbose) {
+						vdebug("verify certificate, expecting: %s, got: %s",
+							   expected_peer.certificate_pem,
+							   peer_cert.certificate_pem);
+					}
+
+					if (expected_peer.is_same(peer_cert)) {
+						return true;
+					} else {
+						warning("rejecting handshare, peer certificate mismatch, got:\n%s",
+								peer_cert.certificate_pem);
+						return false;
+					}
+				}
+				return true;
+			});
+
+		try {
+			info("attempt TLS handshake");
+			var res = yield tls_conn.handshake_async();
+			if (res) {
+				info("TLS handshare successful");
+			} else {
+				warning("TLS handshake unsuccessful");
+				return false;
+			}
+		} catch (Error e) {
+			warning("TLS handshake failed: %s", e.message);
+			return false;
+		}
+
+		this._tls_conn = tls_conn;
+		// data will now pass through TLS stream wrapper
+		this.replace_streams(_tls_conn.input_stream,
+							 _tls_conn.output_stream);
+
+		// monitor socket events
+		this.monitor_events();
 		return true;
 	}
 
 	public void close() {
 		debug("closing connection");
 
-		if (_srcid > 0) {
-			Source.remove(_srcid);
-			_srcid = 0;
-		}
+		this.unmonitor_events();
 
 		try {
-			if (_din != null)
-				_din.close();
+			if (this._din != null)
+				this._din.close();
 		} catch (Error e) {
 			warning("failed to close data input: %s", e.message);
 		}
 		try {
-			if (_dout != null)
-				_dout.close();
+			if (this._dout != null)
+				this._dout.close();
 		} catch (Error e) {
 			warning("failed to close data output: %s", e.message);
 		}
 		try {
-			if (_conn != null)
-				_conn.close();
+			if (this._tls_conn != null)
+				this._tls_conn.close();
+		} catch (Error e) {
+			warning("failed to close TLS connection: %s", e.message);
+		}
+		try {
+			if (this._sock_conn != null)
+				this._sock_conn.close();
 		} catch (Error e) {
 			warning("failed to close connection: %s", e.message);
 		}
-		_din = null;
-		_dout = null;
-		_conn = null;
+		this._din = null;
+		this._dout = null;
+		this._sock_conn = null;
+		this._tls_conn = null;
+		this._socket = null;
+
+		this.peer_certificate = null;
 	}
 
 	/**
@@ -158,9 +279,11 @@ class DeviceChannel : Object {
 	public async void send(Packet pkt) {
 		string to_send = pkt.to_string() + "\n";
 		debug("send data: %s", to_send);
-		// _dout.put_string(data);
+
+		GLib.assert(this._dout != null);
+
 		try {
-			_dout.put_string(to_send);
+			this._dout.put_string(to_send);
 		} catch (IOError e) {
 			warning("failed to send message: %s", e.message);
 			// TODO disconnect?
@@ -176,12 +299,15 @@ class DeviceChannel : Object {
 	public bool receive() {
 		size_t line_len;
 		string data = null;
-		// read line up to newline
+
+		GLib.assert(this._din != null);
+
 		try {
-			data = _din.read_upto("\n", -1, out line_len, null);
+			// read line up to a newline
+			data = this._din.read_upto("\n", -1, out line_len, null);
 
 			// expecting \n
-			_din.read_byte();
+			this._din.read_byte();
 		} catch (IOError ie) {
 			warning("I/O error: %s", ie.message);
 		}
@@ -200,7 +326,7 @@ class DeviceChannel : Object {
 			return true;
 		}
 
-		handle_packet(pkt);
+		this.handle_packet(pkt);
 
 		return true;
 	}
@@ -211,7 +337,7 @@ class DeviceChannel : Object {
 
 		if (res == false) {
 			// disconnected
-			disconnected();
+			this.disconnected();
 		}
 		return res;
 	}
@@ -219,56 +345,10 @@ class DeviceChannel : Object {
 	private void handle_packet(Packet pkt) {
 		// debug("handle packet of type: %s", pkt.pkt_type);
 		if (pkt.pkt_type == Packet.ENCRYPTED) {
-			handle_encrypted_packet(pkt);
+			warning("received packet with eplicit encryption, this usually indicates a protocol version < 6 type packet, such pacckets are no longer supported, dropping..");
 		} else {
 			// signal that we got a packet
-			packet_received(pkt);
-		}
-	}
-
-	private void handle_encrypted_packet(Packet pkt) {
-		// Ecypted packets have 'data' member in body. The 'data'
-		// member is an array of strings, each string is base64
-		// encoded data, of length appropriate for channel ecryption
-		// method.
-		Json.Array arr = pkt.body.get_array_member("data");
-		if (arr == null) {
-			warning("missing data member in encrypted packet");
-			return;
-		}
-
-		bool failed = false;
-		var msgbytes = new ByteArray();
-		arr.foreach_element((a, i, node) => {
-				// exit early
-				if (failed == true)
-					return;
-
-				vdebug("node data: %s", node.get_string());
-				// encrypted data is base64 encoded
-				uchar[] data = Base64.decode(node.get_string());
-				var dbytes = new Bytes.take(data);
-				try {
-					ByteArray decrypted = this._crypt.decrypt(dbytes);
-					vdebug("data length: %zu", decrypted.data.length);
-					msgbytes.append(decrypted.data);
-				} catch (Error e) {
-					warning("decryption failed: %s", e.message);
-					failed = true;
-				}
-			});
-		// data should be complete now
-		vdebug("total length of packet data: %zu", msgbytes.len);
-		// make sure there is \0 at the end
-		msgbytes.append({'\0'});
-		string decrypted_data = ((string)msgbytes.data).dup();
-		vdebug("decrypted data: %s", decrypted_data);
-
-		Packet dec_pkt = Packet.new_from_data(decrypted_data);
-		if (dec_pkt == null) {
-			warning("failed to parse decrypted packet");
-		} else {
-			packet_received(dec_pkt);
+			this.packet_received(pkt);
 		}
 	}
 }

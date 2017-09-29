@@ -1,10 +1,9 @@
 # mconnect
 mconnect - KDE Connect protocol implementation in Vala/C
 
-GLib and Gio should be available even on trimmed down systems. Vala is
-really needed only at build time. OpenSSL does the packet
-encryption/decryption at the protocol level, while Json-glib does
-packet parsing. Libnotify is responsible for displaying shell popups.
+GLib and Gio should be available even on trimmed down systems. Vala is really
+needed only at build time. Json-glib does packet parsing. Libnotify is
+responsible for displaying shell popups.
 
 # Building
 
@@ -15,7 +14,7 @@ Build dependencies (using package names as found in Fedora):
 - gobject-introspection-devel
 - libgee-devel
 - json-glib
-- openssl-devel
+- gnutls-devel
 - libnotify-devel
 - gtk3-devel
 - at-spi2-core-devel (and at-spi2-atk)

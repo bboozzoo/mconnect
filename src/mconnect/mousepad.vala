@@ -57,7 +57,7 @@ class MousepadHandler : Object, PacketHandlerInterface {
 	}
 
 	private void message(Device dev, Packet pkt) {
-		if (pkt.pkt_type != MOUSEPAD_PACKET) {
+		if (pkt.pkt_type != MOUSEPAD_PACKET && pkt.pkt_type != MOUSEPAD) {
 			return;
 		}
 
