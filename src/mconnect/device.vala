@@ -69,7 +69,15 @@ class Device : Object {
 	}
 	private HashSet<string> _capabilities = null;
 
-	public string certificate { get; private set; default = ""; }
+	public TlsCertificate certificate = null;
+	public string certificate_pem { owned get {
+			if (this.certificate == null) {
+				return "";
+			}
+			return this.certificate.certificate_pem;
+		}
+		private set {}
+	}
 	public string certificate_fingerprint { get; private set; default = ""; }
 
 	// set to true if pair request was sent
@@ -206,7 +214,7 @@ class Device : Object {
 		cache.set_string(name, "lastIPAddress", this.host.to_string());
 		cache.set_boolean(name, "allowed", this.allowed);
 		cache.set_boolean(name, "paired", this.is_paired);
-		cache.set_string(name, "certificate", this.certificate);
+		cache.set_string(name, "certificate", this.certificate_pem);
 		cache.set_string_list(name, "outgoing_capabilities",
 							  this.outgoing_capabilities.to_array());
 		cache.set_string_list(name, "incoming_capabilities",
@@ -222,18 +230,8 @@ class Device : Object {
 												core.handlers.interfaces,
 												core.handlers.interfaces));
 
-		TlsCertificate? expected_cert = null;
-		if (this.certificate != "") {
-			try {
-				expected_cert = new TlsCertificate.from_pem(this.certificate,
-															this.certificate.length);
-			} catch (Error e) {
-				warning("failed to parse cached PEM cert of device %s: %s",
-						this.device_id, e.message);
-			}
-		}
 		// switch to secure channel
-		var secure = yield _channel.secure(expected_cert);
+		var secure = yield _channel.secure(this.certificate);
 		info("secure: %s", secure.to_string());
 
 		if (secure) {
@@ -581,7 +579,7 @@ class Device : Object {
 	}
 
 	private void update_certificate(TlsCertificate cert) {
-		this.certificate = cert.certificate_pem;
+		this.certificate = cert;
 
 		// prepare fingerprint
 		var fingerprint = Crypt.fingerprint_certificate(cert.certificate_pem);
