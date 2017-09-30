@@ -64,10 +64,7 @@ mconnect_prog = executable('mconnect', mconnect_src,
 mconnectctl_src = 'src/mconnectctl/main.vala'
 executable('mconnectctl', mconnectctl_src,
            dependencies : [glib_dep, gobject_dep,
-                           gio_dep, gio_unix_dep,
-                           json_glib_dep, gee_dep,
-                           libnotify_dep, gdk_dep,
-                           atspi_dep, gnutls_dep],
+                           gio_dep, gio_unix_dep],
            install: true)
 
 # tests
