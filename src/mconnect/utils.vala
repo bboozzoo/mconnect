@@ -162,7 +162,7 @@ using Posix;
 	string[] find_urls(string text) {
 		try {
 		// regex taken from SO
-			Regex r = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/=]*)/;
+			Regex r = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+,.~#?&\/=]*)/;
 
 			MatchInfo mi;
 

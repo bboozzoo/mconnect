@@ -34,6 +34,16 @@ void test_find_urls_none() {
 	assert(urls.length == 0);
 }
 
+void test_find_urls_special() {
+	var urls = Utils.find_urls("http://foo.bar.com/123,345%20,,,/foo.html");
+
+	assert(urls != null);
+	assert(urls.length == 1);
+
+	assert(urls[0] == "http://foo.bar.com/123,345%20,,,/foo.html");
+}
+
+
 
 public static void main(string[] args) {
 	Test.init(ref args);
@@ -42,5 +52,6 @@ public static void main(string[] args) {
 	Test.add_func("/mconn-utils/find-urls/extract", test_find_urls_extract);
 	Test.add_func("/mconn-utils/find-urls/many", test_find_urls_many);
 	Test.add_func("/mconn-utils/find-urls/none", test_find_urls_none);
+	Test.add_func("/mconn-utils/find-urls/special", test_find_urls_special);
 	Test.run();
 }
