@@ -106,5 +106,12 @@ class ShareHandler : Object, PacketHandlerInterface {
 	}
 
 	private void handle_text(Device dev, Packet pkt) {
+		var text = pkt.body.get_string_member("text");
+		debug("shared text '%s'", text);
+		var display = Gdk.Display.get_default();
+		if (display != null) {
+			var cb = Gtk.Clipboard.get_default(display);
+			cb.set_text(text, -1);
+		}
 	}
 }

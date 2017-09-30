@@ -9,6 +9,7 @@ json_glib_dep = dependency('json-glib-1.0')
 gee_dep = dependency('gee-0.8')
 libnotify_dep = dependency('libnotify')
 gdk_dep = dependency('gdk-3.0')
+gtk_dep = dependency('gtk+-3.0')
 atspi_dep = dependency('atspi-2')
 gnutls_dep = dependency('gnutls')
 posix_dep = meson.get_compiler('vala').find_library('posix')
@@ -58,7 +59,7 @@ mconnect_prog = executable('mconnect', mconnect_src,
                                            json_glib_dep, gee_dep,
                                            libnotify_dep, gdk_dep,
                                            atspi_dep, gnutls_dep,
-                                           posix_dep],
+                                           posix_dep, gtk_dep],
                            install: true)
 
 mconnectctl_src = 'src/mconnectctl/main.vala'

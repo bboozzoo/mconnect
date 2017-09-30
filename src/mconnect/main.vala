@@ -24,5 +24,8 @@ public static int main(string[] args)
 	// needed for mousepad protocol handler
 	Gdk.init(ref args);
 
+	// needed for clipboard sharing
+	Gtk.init(ref args);
+
 	return app.run(args);
 }
