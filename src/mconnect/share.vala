@@ -67,26 +67,44 @@ class ShareHandler : Object, PacketHandlerInterface {
 		}
 
 		if (pkt.body.has_member("filename")) {
-			if (pkt.payload == null) {
-				warning("missing payload info");
-				return;
-			}
-
-			string name = pkt.body.get_string_member("filename");
-			debug("file: %s size: %s", name, format_size(pkt.payload.size));
-
-			var t = new DownloadTransfer(
-				dev,
-				new InetSocketAddress(dev.host,
-									  (uint16) pkt.payload.port),
-				pkt.payload.size,
-				make_downloads_path(name));
-
-			t.start_async.begin();
+			this.handle_file(dev, pkt);
 		} else if (pkt.body.has_member("url")) {
-			var url = pkt.body.get_string_member("url");
+			this.handle_url(dev, pkt);
+		} else if (pkt.body.has_member("text")) {
+			this.handle_text(dev, pkt);
+		}
+	}
+
+	private void handle_file(Device dev, Packet pkt) {
+		if (pkt.payload == null) {
+			warning("missing payload info");
+			return;
+		}
+
+		string name = pkt.body.get_string_member("filename");
+		debug("file: %s size: %s", name, format_size(pkt.payload.size));
+
+		var t = new DownloadTransfer(
+			dev,
+			new InetSocketAddress(dev.host,
+								  (uint16) pkt.payload.port),
+			pkt.payload.size,
+			make_downloads_path(name));
+
+		t.start_async.begin();
+	}
+
+	private void handle_url(Device dev, Packet pkt) {
+		var url_msg = pkt.body.get_string_member("url");
+
+		var urls = Utils.find_urls(url_msg);
+		if (urls.length > 0) {
+			var url = urls[0];
 			debug("got URL: %s, launching...", url);
 			AppInfo.launch_default_for_uri(url, null);
 		}
+	}
+
+	private void handle_text(Device dev, Packet pkt) {
 	}
 }
