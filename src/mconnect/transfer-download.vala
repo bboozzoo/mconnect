@@ -50,7 +50,8 @@ class DownloadTransfer : Object {
 			return false;
 		}
 
-		debug("start transfer from %s", this.isa.to_string());
+		debug("start transfer from %s:%u",
+			  this.isa.address.to_string(), this.isa.port);
 		var client = new SocketClient();
 
 		try {
