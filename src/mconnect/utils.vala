@@ -149,4 +149,41 @@ using Posix;
 			});
 		return tls_conn;
 	}
+
+	/**
+	 * find_urls:
+	 *
+	 * Locate and extract URL like patterns in the text. URLs are assumed to
+	 * start with http or https.
+	 *
+	 * @text: input test
+	 * @return array of matches, if there were none then array if of length 0
+	 */
+	string[] find_urls(string text) {
+		try {
+		// regex taken from SO
+			Regex r = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/=]*)/;
+
+			MatchInfo mi;
+
+			string[] matches = {};
+
+			if (r.match(text, RegexMatchFlags.NOTEMPTY, out mi)) {
+				while (mi.matches()) {
+					if (mi.is_partial_match() == false) {
+						var m = mi.fetch(0);
+						debug("found match %s", m);
+						matches += m;
+					}
+					mi.next();
+				}
+			} else {
+				debug("no match");
+			}
+			return matches;
+		} catch (RegexError e) {
+			warning("failed to compile regex: %s", e.message);
+			return null;
+		}
+	}
 }

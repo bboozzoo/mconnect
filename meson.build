@@ -84,6 +84,20 @@ test_mconn_crypt = executable('test-mconn-crypt', test_mconn_crypt_src,
                               install: false)
 test('mconn-crypt', test_mconn_crypt)
 
+test_mconn_utils_src = [
+  'test/mconn-utils-test.vala',
+  'src/mconnect/utils.vala',
+  'src/mconnect/logging.vala',
+]
+test_mconn_utils = executable('test-mconn-utils', test_mconn_utils_src,
+                              dependencies: [
+                                glib_dep, gobject_dep,
+                                gio_dep, gio_unix_dep,
+                                posix_dep,
+                              ],
+                              install: false)
+test('mconn-utils', test_mconn_utils)
+
 # other files
 applicationsdir = join_paths(get_option('datadir'),
                              'applications')
