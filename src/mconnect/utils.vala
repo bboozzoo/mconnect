@@ -186,4 +186,16 @@ using Posix;
 			return null;
 		}
 	}
+
+	public void show_own_notification(string message,
+									  string summary = "mconnect",
+									  string icon = "dialog-information") {
+		try {
+			var notif = new Notify.Notification(summary, message,
+												"phone");
+			notif.show();
+		} catch (Error e) {
+			critical("failed to show notification: %s", e.message);
+		}
+	}
 }

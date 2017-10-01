@@ -91,7 +91,7 @@ test_mconn_utils = executable('test-mconn-utils', test_mconn_utils_src,
                               dependencies: [
                                 glib_dep, gobject_dep,
                                 gio_dep, gio_unix_dep,
-                                posix_dep,
+                                posix_dep, libnotify_dep,
                               ],
                               install: false)
 test('mconn-utils', test_mconn_utils)

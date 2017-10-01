@@ -101,6 +101,8 @@ class ShareHandler : Object, PacketHandlerInterface {
 		if (urls.length > 0) {
 			var url = urls[0];
 			debug("got URL: %s, launching...", url);
+			Utils.show_own_notification("Launching shared URL",
+										dev.device_name);
 			AppInfo.launch_default_for_uri(url, null);
 		}
 	}
@@ -112,6 +114,8 @@ class ShareHandler : Object, PacketHandlerInterface {
 		if (display != null) {
 			var cb = Gtk.Clipboard.get_default(display);
 			cb.set_text(text, -1);
+			Utils.show_own_notification("Text copied to clipboard",
+										dev.device_name);
 		}
 	}
 }
