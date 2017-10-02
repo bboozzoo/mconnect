@@ -23,6 +23,7 @@ add_project_arguments(['--vapidir',
 mconnect_src = [
   'src/mconnect/main.vala',
 	'src/mconnect/discovery.vala',
+	'src/mconnect/discovery-proxy.vala',
 	'src/mconnect/packet.vala',
 	'src/mconnect/device.vala',
 	'src/mconnect/discovereddevice.vala',

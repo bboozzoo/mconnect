@@ -36,6 +36,7 @@ namespace Mconn {
 		};
 
 		private Discovery discovery = null;
+		private DiscoveryDBusProxy bus_discovery = null;
 		private DeviceManager manager = null;
 		private DeviceManagerDBusProxy bus_manager = null;
 
@@ -91,6 +92,11 @@ namespace Mconn {
 			this.bus_manager = new DeviceManagerDBusProxy.with_manager(conn,
 																	   this.manager);
 			this.bus_manager.publish();
+
+			this.bus_discovery = new DiscoveryDBusProxy.with_discovery(conn,
+																	   this.discovery);
+			this.bus_discovery.publish();
+
 			base.dbus_register(conn, object_path);
 			debug("dbus register, path %s", object_path);
 

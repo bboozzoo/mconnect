@@ -29,6 +29,23 @@ class Core : Object {
 
 	public Config config { get; private set; default = null; }
 
+	public static string device_id {
+		owned get {
+			string host_name = Environment.get_host_name();
+			string user = Environment.get_user_name();
+			return @"$user@host_name";
+		}
+
+		private set {}
+	}
+
+	public static string device_name {
+		owned get {
+			return Environment.get_host_name();
+		}
+		private set {}
+	}
+
 	private static Core _instance = null;
 
 	private Core() {
@@ -84,11 +101,9 @@ class Core : Object {
 															  "certificate.pem"));
 		if (key_file.query_exists() == false || cert_file.query_exists() == false) {
 			try {
-				string host_name = Environment.get_host_name();
-				string user = Environment.get_user_name();
 				Crypt.generate_key_cert(key_file.get_path(),
 										cert_file.get_path(),
-										@"$user@$host_name");
+										Core.device_name);
 			} catch (Error e) {
 				warning("failed to generate private key or certificate: %s", e.message);
 				throw e;
