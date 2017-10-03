@@ -116,7 +116,7 @@ install_deps() {
 }
 
 build() {
-    set -e
+    set -ex
     mkdir build && \
         cd build && \
         meson .. && \
@@ -162,8 +162,10 @@ spin_container() {
            /mnt/extra/travis-build "$@"
 }
 
-if [ "$IN_CONTAINER" = "1" ]; then
-    build_in_container "$@"
-else
-    spin_container "$@"
+if [ -z "$NO_BUILD" ]; then
+    if [ "$IN_CONTAINER" = "1" ]; then
+        build_in_container "$@"
+    else
+        spin_container "$@"
+    fi
 fi
