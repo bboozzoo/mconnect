@@ -27,9 +27,7 @@
 
 deps_fedora() {
     dnf install --best -y --refresh \
-        automake \
-        autoconf \
-        libtool \
+        meson \
         pkgconfig \
         gcc \
         vala \
@@ -40,34 +38,32 @@ deps_fedora() {
         libnotify-devel \
         at-spi2-core-devel \
         gtk3-devel \
-        glib-networking
+        glib-networking \
+        tree
 }
 
 deps_opensuse() {
     zypper install -y \
-        make \
-        automake \
-        autoconf \
-        libtool \
-        pkgconfig \
-        gcc \
-        vala \
-        gobject-introspection-devel \
-        json-glib-devel \
-        libgee-devel \
-        gnutls-devel \
-        libnotify-devel \
-        at-spi2-core-devel \
-        gtk3-devel \
-        glib-networking
+           make \
+           meson \
+           pkgconfig \
+           gcc \
+           vala \
+           gobject-introspection-devel \
+           json-glib-devel \
+           libgee-devel \
+           gnutls-devel \
+           libnotify-devel \
+           at-spi2-core-devel \
+           gtk3-devel \
+           glib-networking \
+           tree
 }
 
 deps_archlinux() {
     pacman -Syu --noconfirm \
            base-devel \
-           autoconf \
-           automake \
-           libtool \
+           meson \
            pkg-config \
            gcc \
            vala \
@@ -79,22 +75,24 @@ deps_archlinux() {
            at-spi2-core \
            gtk3 \
            gnutls \
-           glib-networking
+           glib-networking \
+           tree
 }
 
-deps_ubuntu() {
+deps_ubuntu_xenial() {
     apt-get update && \
-    apt-get install -y \
-            autoconf \
-            libtool \
-            valac \
-            libgirepository1.0-dev \
-            libjson-glib-dev \
-            libgee-0.8-dev \
-            libgnutls28-dev \
-            libnotify-dev \
-            libgtk-3-dev \
-            glib-networking
+        apt-get install -y \
+                meson/xenial-backports \
+                pkg-config \
+                valac \
+                libgirepository1.0-dev \
+                libjson-glib-dev \
+                libgee-0.8-dev \
+                libgnutls28-dev \
+                libnotify-dev \
+                libgtk-3-dev \
+                glib-networking \
+                tree
 }
 
 install_deps() {
@@ -108,8 +106,8 @@ install_deps() {
         archlinux)
             deps_archlinux
             ;;
-        ubuntu)
-            deps_ubuntu
+        ubuntu-xenial)
+            deps_ubuntu_xenial
             ;;
         *)
             echo "unsupported distro $1"
@@ -118,11 +116,16 @@ install_deps() {
 }
 
 build() {
-    autoreconf -if && \
-        ./configure && \
-        make && \
-        make check && \
-        make install
+    set -ex
+    mkdir build && \
+        cd build && \
+        meson .. && \
+        ninja && \
+        ninja test
+
+    DESTDIR=$PWD/install-dir ninja install
+    (cd install-dir; LC_ALL=C tree -pan . > ../current-tree)
+    diff -up ../extra/install-tree current-tree
 }
 
 build_in_container() {
@@ -142,8 +145,8 @@ spin_container() {
         opensuse)
             DOCKER_IMG=opensuse:tumbleweed
             ;;
-        ubuntu)
-            DOCKER_IMG=ubuntu:latest
+        ubuntu-xenial)
+            DOCKER_IMG=ubuntu:xenial
             ;;
         *)
             echo "unsupported distro $1"
@@ -159,8 +162,10 @@ spin_container() {
            /mnt/extra/travis-build "$@"
 }
 
-if [ "$IN_CONTAINER" = "1" ]; then
-    build_in_container "$@"
-else
-    spin_container "$@"
+if [ -z "$NO_BUILD" ]; then
+    if [ "$IN_CONTAINER" = "1" ]; then
+        build_in_container "$@"
+    else
+        spin_container "$@"
+    fi
 fi

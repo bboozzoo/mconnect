@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -ex
+
+SELFDIR=$(dirname $(readlink -f $0))
+TOPDIR=$(readlink -f $SELFDIR/..)
+
+export IN_CONTAINER=1
+export NO_BUILD=1
+. $SELFDIR/travis-build
+
+(cd $TOPDIR && \
+     build)
