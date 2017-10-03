@@ -91,6 +91,8 @@ class ShareHandler : Object, PacketHandlerInterface {
 			pkt.payload.size,
 			make_downloads_path(name));
 
+		Core.instance().transfer_manager.push_job(t);
+
 		t.start_async.begin();
 	}
 
