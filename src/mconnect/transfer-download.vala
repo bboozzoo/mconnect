@@ -16,24 +16,24 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
-class DownloadTransfer : Object {
+class DownloadTransfer : TransferInterface, Object {
 
 	private InetSocketAddress isa = null;
 	private File file = null;
 	private FileOutputStream foutstream = null;
-	private Cancellable cancel = null;
+	private Cancellable cancellable = null;
 	private SocketConnection conn = null;
 	private TlsConnection tls_conn = null;
 	public uint64 size = 0;
 	public uint64 transferred = 0;
 	public string destination = "";
-	private Transfer transfer = null;
+	private IOCopyJob job = null;
 	private Device device = null;
 
 	public DownloadTransfer(Device dev, InetSocketAddress isa,
 							uint64 size, string dest) {
 		this.isa = isa;
-		this.cancel = new Cancellable();
+		this.cancellable = new Cancellable();
 		this.destination = dest;
 		this.size = size;
 		this.device = dev;
@@ -87,22 +87,25 @@ class DownloadTransfer : Object {
 
 	private void start_transfer() {
 		debug("connected, start transfer");
-		this.transfer = new Transfer(this.tls_conn.input_stream,
-									 this.foutstream);
-		this.transfer.progress.connect((t, done) => {
+		this.job = new IOCopyJob(this.tls_conn.input_stream,
+									  this.foutstream);
+		this.job.progress.connect((t, done) => {
 				int percent = (int) (100.0 * ((double)done / (double)this.size));
 				debug("progress: %s/%s %d%%",
 					  format_size(done), format_size(this.size), percent);
 				this.transferred = done;
 			});
-		this.transfer.transfer_async.begin(this.cancel,
-										   this.transfer_complete);
+
+		this.started();
+
+		this.job.start_async.begin(this.cancellable,
+								   this.job_complete);
 	}
 
-	private void transfer_complete(Object? obj, AsyncResult res) {
+	private void job_complete(Object? obj, AsyncResult res) {
 		info("transfer finished");
 		try {
-			var rcvd_bytes = this.transfer.transfer_async.end(res);
+			var rcvd_bytes = this.job.start_async.end(res);
 			debug("transfer done, got %s", format_size(rcvd_bytes));
 
 			this.cleanup_success();
@@ -145,7 +148,7 @@ class DownloadTransfer : Object {
 		this.foutstream = null;
 		this.conn = null;
 		this.tls_conn = null;
-		this.transfer = null;
+		this.job = null;
 	}
 
 	private void cleanup_error(string reason) {
@@ -175,6 +178,8 @@ class DownloadTransfer : Object {
 		}
 	}
 
-	public signal void finished();
-	public signal void error(string reason);
+	public void cancel() {
+		debug("cancel called");
+		this.cancellable.cancel();
+	}
 }
