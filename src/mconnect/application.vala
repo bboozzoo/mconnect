@@ -39,6 +39,7 @@ namespace Mconn {
 		private DiscoveryDBusProxy bus_discovery = null;
 		private DeviceManager manager = null;
 		private DeviceManagerDBusProxy bus_manager = null;
+		private NetworkMonitor net_monitor = null;
 
 		public Application() {
 			Object(application_id: "org.mconnect");
@@ -46,6 +47,7 @@ namespace Mconn {
 
 			discovery = new Discovery();
 			manager = new DeviceManager();
+			net_monitor = NetworkMonitor.get_default();
 		}
 
 		protected override void startup() {
@@ -83,6 +85,8 @@ namespace Mconn {
 			debug("activate");
 			// reload devices from cache
 			manager.load_cache();
+
+			net_monitor.network_changed.connect(this.network_changed);
 			hold();
 		}
 
@@ -108,6 +112,13 @@ namespace Mconn {
 
 			base.dbus_unregister(conn, object_path);
 			debug("dbus unregister, path %s", object_path);
+		}
+
+		private void network_changed(Object? monitor, bool available) {
+			debug("network connectivity changed: %s", available.to_string());
+			if (available == true) {
+				this.bus_discovery.announce();
+			}
 		}
 	}
 }
