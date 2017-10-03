@@ -18,17 +18,19 @@ Build dependencies (using package names as found in Fedora):
 - libnotify-devel
 - gtk3-devel
 - at-spi2-core-devel (and at-spi2-atk)
+- meson
+- pkg-config
 
 or see `extra/travis-build` in the source tree for example installation
 commands. Once build deps are in place, run:
 
-    autoreconf -if
-    ./configure --prefix=<your favorite prefix>
-    make
-    make install
-    # or make DESTDIR=<somedir> install if you want to inspect what
-    # gets installed
-
+    mkdir build
+    cd build
+    meson ..
+    ninja
+    ninja install
+    # to set a custom installation directory run:
+    #   DESTDIR=<somedir> ninja install
 
 # Configuration
 
