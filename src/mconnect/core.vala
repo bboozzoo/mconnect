@@ -31,9 +31,7 @@ class Core : Object {
 
 	public static string device_id {
 		owned get {
-			string host_name = Environment.get_host_name();
-			string user = Environment.get_user_name();
-			return @"$user@host_name";
+			return Environment.get_host_name();
 		}
 
 		private set {}
@@ -41,7 +39,9 @@ class Core : Object {
 
 	public static string device_name {
 		owned get {
-			return Environment.get_host_name();
+			string host_name = Environment.get_host_name();
+			string user = Environment.get_user_name();
+			return @"$user@$host_name";
 		}
 		private set {}
 	}

@@ -132,7 +132,8 @@ class Packet : GLib.Object {
 									  string device_id,
 									  string[] in_interfaces,
 									  string[] out_interfaces,
-									  string device_type = "desktop") {
+									  string device_type = "desktop",
+									  uint tcp_port = 1716) {
 		var builder = new Json.Builder();
 		builder.begin_object();
 		builder.set_member_name("deviceName");
@@ -147,6 +148,8 @@ class Packet : GLib.Object {
 		builder.add_string_value(string.joinv(",", out_interfaces));
 		builder.set_member_name("protocolVersion");
 		builder.add_int_value(PROTOCOL_VERSION);
+		builder.set_member_name("tcpPort");
+		builder.add_int_value(tcp_port);
 		builder.end_object();
 
 		Json.Object data_obj = builder.get_root().get_object();

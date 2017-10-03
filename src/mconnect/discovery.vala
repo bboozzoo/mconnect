@@ -101,6 +101,7 @@ class Discovery : GLib.Object
 		var sock = new Socket(SocketFamily.IPV4,
 							  SocketType.DATAGRAM,
 							  SocketProtocol.UDP);
+		sock.broadcast = true;
 		try {
 			var sa = new InetSocketAddress(new InetAddress.from_string("255.255.255.255"),
 										   1716);
@@ -112,6 +113,7 @@ class Discovery : GLib.Object
 											   core.handlers.interfaces,
 											   core.handlers.interfaces);
 
+			debug("identity: %s", identity.to_string());
 			sock.send_to(sa, identity.to_string().data);
 		} catch (Error e) {
 			warning("failed to send annoucement: %s", e.message);
