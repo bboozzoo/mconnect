@@ -1,0 +1,13 @@
+.
+`-- [drwxr-xr-x]  usr
+    `-- [drwxr-xr-x]  local
+        |-- [drwxr-xr-x]  bin
+        |   |-- [-rwxr-xr-x]  mconnect
+        |   `-- [-rwxr-xr-x]  mconnectctl
+        `-- [drwxr-xr-x]  share
+            |-- [drwxr-xr-x]  applications
+            |   `-- [-rw-rw-r--]  mconnect.desktop
+            `-- [drwxr-xr-x]  mconnect
+                `-- [-rw-r--r--]  mconnect.conf
+
+6 directories, 4 files
