@@ -61,6 +61,7 @@ class DownloadTransfer : TransferInterface, Object {
 			var err ="failed to connect: %s".printf(e.message);
 			warning(err);
 			this.cleanup_error(err);
+			return false;
 		}
 
 		var sock = this.conn.get_socket();
@@ -79,6 +80,7 @@ class DownloadTransfer : TransferInterface, Object {
 			var err ="TLS handshake failed: %s".printf(e.message);
 			warning(err);
 			this.cleanup_error(err);
+			return false;
 		}
 
 		this.start_transfer();
