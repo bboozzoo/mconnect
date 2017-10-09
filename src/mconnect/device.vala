@@ -592,4 +592,11 @@ class Device : Object {
 
 		this.certificate_fingerprint = sb.str;
 	}
+
+	public void send(Packet pkt) {
+		// TODO: queue messages
+		if (this._channel != null) {
+			_channel.send(pkt);
+		}
+	}
 }
