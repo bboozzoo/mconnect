@@ -18,8 +18,8 @@
 
 class ShareHandler : Object, PacketHandlerInterface {
 
-	private const string SHARE = "kdeconnect.share.request";
-	private const string SHARE_PKT = "kdeconnect.share";
+	public const string SHARE = "kdeconnect.share.request";
+	public const string SHARE_PKT = "kdeconnect.share";
 	private static string DOWNLOADS = null;
 
 	public void use_device(Device dev) {
@@ -119,5 +119,28 @@ class ShareHandler : Object, PacketHandlerInterface {
 			Utils.show_own_notification("Text copied to clipboard",
 										dev.device_name);
 		}
+	}
+
+	private Packet make_share_packet(string name, string data) {
+		var builder = new Json.Builder();
+		builder.begin_object();
+		builder.set_member_name(name);
+		builder.add_string_value(data);
+		builder.end_object();
+		return new Packet(SHARE,
+						  builder.get_root().get_object());
+	}
+
+	public void share_url(Device dev, string url) {
+		debug("share url %s to device %s", url, dev.to_string());
+
+		dev.send(make_share_packet("url", url));
+	}
+
+	public void share_text(Device dev, string text) {
+		debug("share text %s to device %s", text, dev.to_string());
+
+		dev.send(make_share_packet("text", text));
+
 	}
 }
