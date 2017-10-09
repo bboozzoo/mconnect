@@ -171,7 +171,7 @@ class DownloadTransfer : TransferInterface, Object {
 
 			this.finished();
 
-		} catch (IOError e) {
+		} catch (Error e) {
 			var err = "failed to rename temporary file %s to %s: %s".printf(this.file.get_path(),
 																			this.destination,
 																			e.message);
