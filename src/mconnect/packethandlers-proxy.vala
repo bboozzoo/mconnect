@@ -32,6 +32,9 @@ class PacketHandlersProxy : Object {
 		case PingHandler.PING: {
 			return new PingHandlerProxy.for_device_handler(dev, iface);
 		}
+		case ShareHandler.SHARE: {
+			return new ShareHandlerProxy.for_device_handler(dev, iface);
+		}
 		default:
 			warning("cannot register bus handler for %s",
 					iface.get_pkt_type());
