@@ -46,6 +46,13 @@ namespace Mconnect {
 		public abstract string certificate { owned get;}
 	}
 
+	[DBus (name = "org.mconnect.Device.Share")]
+	public interface ShareIface : Object {
+
+		public abstract void share_url(string url) throws IOError;
+		public abstract void share_text(string text) throws IOError;
+	}
+
 	public class Client {
 
 		private static bool log_debug = false;
@@ -96,6 +103,9 @@ namespace Mconnect {
   list-devices         List devices
   allow-device <path>  Allow device
   show-device <path>   Show device details
+
+  share-url <path> <url>   Share URL with device
+  share-text <path> <url>  Share text with device
 """
 					);
 				opt_context.set_help_enabled(true);
@@ -118,6 +128,8 @@ namespace Mconnect {
 				Command("list-devices", 0, cl.cmd_list_devices),
 				Command("allow-device", 1, cl.cmd_allow_device),
 				Command("show-device", 1, cl.cmd_show_device),
+				Command("share-url", 2, cl.cmd_share_url),
+				Command("share-text", 2, cl.cmd_share_text),
 			};
 			handle_command(remaining, commands);
 
@@ -189,6 +201,24 @@ namespace Mconnect {
 					var manager = get_manager();
 					debug("allow device device %s", dp);
 					manager.AllowDevice(new ObjectPath(dp));
+					return 0;
+				});
+		}
+
+		private int cmd_share_url(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var share = get_share(new ObjectPath(dp));
+					share.share_url(args[1]);
+					return 0;
+				});
+		}
+
+		private int cmd_share_text(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var share = get_share(new ObjectPath(dp));
+					share.share_text(args[1]);
 					return 0;
 				});
 		}
@@ -298,6 +328,17 @@ namespace Mconnect {
 		 * @return interface or null
 		 */
 		private DeviceIface? get_device(ObjectPath path) throws IOError {
+			return get_mconnect_obj_proxy(path);
+		}
+
+		/**
+		 * get_share:
+		 *
+		 * Obtain DBus interface to Share of given device
+		 *
+		 * @return interface or null
+		 */
+		private ShareIface? get_share(ObjectPath path) throws IOError {
 			return get_mconnect_obj_proxy(path);
 		}
 
