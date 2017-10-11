@@ -40,16 +40,16 @@ class ShareHandlerProxy : Object, PacketHandlerInterfaceProxy {
 		//conn.unregister_object(this);
 	}
 
-	public void ShareFile(string path) throws IOError {
+	public void share_file(string path) throws IOError {
 
 	}
 
-	public void ShareUrl(string url) throws IOError {
+	public void share_url(string url) throws IOError {
 		debug("share url %s", url);
 		this.share_handler.share_url(this.device, url);
 	}
 
-	public void ShareText(string text) throws IOError {
+	public void share_text(string text) throws IOError {
 		this.share_handler.share_text(this.device, text);
 	}
 }
