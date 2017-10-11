@@ -105,7 +105,7 @@ namespace Mconnect {
   show-device <path>   Show device details
 
   share-url <path> <url>   Share URL with device
-  share-text <path> <url>  Share text with device
+  share-text <path> <text>  Share text with device
 """
 					);
 				opt_context.set_help_enabled(true);
