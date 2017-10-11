@@ -41,7 +41,7 @@ class ShareHandlerProxy : Object, PacketHandlerInterfaceProxy {
 	}
 
 	public void share_file(string path) throws IOError {
-
+		this.share_handler.share_file(this.device, path);
 	}
 
 	public void share_url(string url) throws IOError {

@@ -131,6 +131,24 @@ class ShareHandler : Object, PacketHandlerInterface {
 						  builder.get_root().get_object());
 	}
 
+	private Packet make_file_share_packet(string filename, uint64 size,
+										  uint16 port) {
+
+		var builder = new Json.Builder();
+		builder.begin_object();
+		builder.set_member_name("filename");
+		builder.add_string_value(filename);
+		builder.end_object();
+
+		var pkt =  new Packet(SHARE,
+							  builder.get_root().get_object());
+		pkt.payload = Packet.Payload(){
+			size=size,
+			port=port
+		};
+		return pkt;
+	}
+
 	public void share_url(Device dev, string url) {
 		debug("share url %s to device %s", url, dev.to_string());
 
@@ -141,6 +159,47 @@ class ShareHandler : Object, PacketHandlerInterface {
 		debug("share text %s to device %s", text, dev.to_string());
 
 		dev.send(make_share_packet("text", text));
+	}
 
+	public void share_file(Device dev, string path) {
+		debug("share file %s to device %s", path, dev.to_string());
+
+		var file = File.new_for_path(path);
+		uint64 size = 0;
+		try {
+			var fi = file.query_info(FileAttribute.STANDARD_SIZE,
+									 FileQueryInfoFlags.NONE);
+			size = fi.get_size();
+		} catch (Error e) {
+			warning("failed to obtain file size: %s", e.message);
+			return;
+		}
+
+		debug("file size: %llu", size);
+
+		if (size == 0) {
+			warning("trying to share empty file %s", path);
+			return;
+		}
+
+		FileInputStream input;
+		try {
+			input = file.read();
+		} catch (Error e) {
+			warning("failed to open source file at path %s: %s",
+					file.get_path(), e.message);
+			throw e;
+		}
+
+		uint16 port;
+		var listener = Core.instance().transfer_manager.make_listener(out port);
+		debug("allocated listener on port %u", port);
+
+		var t = new UploadTransfer(dev, listener, input, size);
+
+		Core.instance().transfer_manager.push_job(t);
+
+		t.start_async.begin();
+		dev.send(make_file_share_packet(file.get_basename(), size, port));
 	}
 }
