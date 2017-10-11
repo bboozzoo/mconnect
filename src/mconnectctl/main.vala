@@ -20,39 +20,6 @@
 
 namespace Mconnect {
 
-	[DBus (name = "org.mconnect.DeviceManager")]
-	public interface DeviceManagerIface : Object {
-
-		public const string OBJECT_PATH = "/org/mconnect/manager";
-
-		public abstract ObjectPath[] ListDevices() throws IOError;
-		public abstract void AllowDevice(string path) throws IOError;
-	}
-
-	[DBus (name = "org.mconnect.Device")]
-	public interface DeviceIface : Object {
-
-		public abstract string id { owned get;}
-		public abstract string name { owned get;}
-		public abstract string device_type  { owned get;}
-		public abstract uint protocol_version  { owned get;}
-		public abstract string address  { owned get;}
-		public abstract bool is_paired  { owned get;}
-		public abstract bool allowed { owned get;}
-		public abstract bool is_active { owned get;}
-		public abstract bool is_connected { owned get;}
-		public abstract string[] outgoing_capabilities { owned get;}
-		public abstract string[] incoming_capabilities { owned get;}
-		public abstract string certificate { owned get;}
-	}
-
-	[DBus (name = "org.mconnect.Device.Share")]
-	public interface ShareIface : Object {
-
-		public abstract void share_url(string url) throws IOError;
-		public abstract void share_text(string text) throws IOError;
-	}
-
 	public class Client {
 
 		private static bool log_debug = false;

@@ -67,7 +67,12 @@ mconnect_prog = executable('mconnect', mconnect_src,
                                            posix_dep, gtk_dep],
                            install: true)
 
-mconnectctl_src = 'src/mconnectctl/main.vala'
+mconnectctl_src = [
+  'src/mconnectctl/main.vala',
+  'src/mconnectctl/device-manager-iface.vala',
+  'src/mconnectctl/device-iface.vala',
+  'src/mconnectctl/share-iface.vala',
+]
 executable('mconnectctl', mconnectctl_src,
            dependencies : [glib_dep, gobject_dep,
                            gio_dep, gio_unix_dep],
