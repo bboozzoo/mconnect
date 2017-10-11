@@ -59,7 +59,7 @@ class IOCopyJob : Object {
 				chunk_size = max_chunk_size;
 		}
 
-		debug("transfer done, got %llu bytes", format_size(bytes_done));
+		debug("transfer done, got %s bytes", format_size(bytes_done));
 		return bytes_done;
 	}
 
