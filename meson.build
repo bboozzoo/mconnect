@@ -54,6 +54,7 @@ mconnect_src = [
 	'src/mconnect/transfer-interface.vala',
 	'src/mconnect/transfer-proxy.vala',
 	'src/mconnect/transfer-download.vala',
+	'src/mconnect/transfer-upload.vala',
 	'src/mconnect/logging.vala',
 	'src/crypt/certificate.vala',
 ]
