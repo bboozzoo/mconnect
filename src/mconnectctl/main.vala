@@ -73,6 +73,7 @@ namespace Mconnect {
 
   share-url <path> <url>   Share URL with device
   share-text <path> <text>  Share text with device
+  share-file <path> <file>  Share file with device
 """
 					);
 				opt_context.set_help_enabled(true);
@@ -97,6 +98,7 @@ namespace Mconnect {
 				Command("show-device", 1, cl.cmd_show_device),
 				Command("share-url", 2, cl.cmd_share_url),
 				Command("share-text", 2, cl.cmd_share_text),
+				Command("share-file", 2, cl.cmd_share_file),
 			};
 			handle_command(remaining, commands);
 
@@ -186,6 +188,18 @@ namespace Mconnect {
 					var dp = args[0];
 					var share = get_share(new ObjectPath(dp));
 					share.share_text(args[1]);
+					return 0;
+				});
+		}
+
+		private int cmd_share_file(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var share = get_share(new ObjectPath(dp));
+					var file = File.new_for_path(args[1]);
+					var path = file.get_path();
+					debug("share path: %s", path);
+					share.share_file(path);
 					return 0;
 				});
 		}

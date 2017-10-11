@@ -23,6 +23,7 @@ namespace Mconnect {
 
 		public abstract void share_url(string url) throws IOError;
 		public abstract void share_text(string text) throws IOError;
+		public abstract void share_file(string path) throws IOError;
 	}
 
 }
