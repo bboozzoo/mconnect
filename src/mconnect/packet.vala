@@ -33,11 +33,6 @@ class Packet : GLib.Object {
 	public struct Payload {
 		public uint64 size;
 		public uint port;
-
-		Payload() {
-			this.size = 0;
-			this.port = 0;
-		}
 	}
 
 	public const int PROTOCOL_VERSION = 7;
@@ -49,7 +44,7 @@ class Packet : GLib.Object {
 	public string pkt_type { get; private set; default = ""; }
 	public int64 id { get; private set; default = 0; }
 	public Json.Object body { get; private set; default = null; }
-	public Payload? payload { get; private set; default = null; }
+	public Payload? payload { get; set; default = null; }
 
 	public Packet(string type, Json.Object body, int64 id = 0) {
 		this.pkt_type = type;
