@@ -71,8 +71,9 @@ class UploadTransfer : TransferInterface, Object {
 	}
 
 	private async void handle_client(SocketConnection conn) {
-		var remote = conn.get_remote_address() as InetSocketAddress;
-		debug("client connected: %s", remote.to_string());
+		var isa = conn.get_remote_address() as InetSocketAddress;
+		debug("client connected: %s:%u", isa.address.to_string(),
+			  isa.port);
 
 		this.conn = conn;
 
