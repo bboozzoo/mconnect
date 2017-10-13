@@ -157,6 +157,12 @@ class Packet : GLib.Object {
 		root_obj.set_string_member("type", pkt_type);
 		root_obj.set_int_member("id", id);
 		root_obj.set_object_member("body", body);
+		if (this.payload != null) {
+			root_obj.set_int_member("payloadSize", (int64) this.payload.size);
+			var pti = new Json.Object();
+			pti.set_int_member("port", this.payload.port);
+			root_obj.set_object_member("payloadTransferInfo", pti);
+		}
 		root.set_object(root_obj);
 
 		gen.set_root(root);
