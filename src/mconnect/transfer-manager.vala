@@ -32,7 +32,7 @@ class TransferManager : Object {
 		new_transfer(job);
 	}
 
-	public SocketService make_listener(out uint16 listen_port) {
+	public SocketService? make_listener(out uint16 listen_port) {
 		var ss = new SocketService();
 		for (var port = PORT_MIN; port <= PORT_MAX; port++) {
 			var added = false;
@@ -49,6 +49,7 @@ class TransferManager : Object {
 				return ss;
 			}
 		}
+		ss.close();
 		warning("could not find a free port to listen on");
 		return null;
 	}

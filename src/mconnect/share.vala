@@ -193,6 +193,10 @@ class ShareHandler : Object, PacketHandlerInterface {
 
 		uint16 port;
 		var listener = Core.instance().transfer_manager.make_listener(out port);
+		if (listener == null) {
+			warning("coult not allodate a listener");
+			return;
+		}
 		debug("allocated listener on port %u", port);
 
 		var t = new UploadTransfer(dev, listener, input, size);
