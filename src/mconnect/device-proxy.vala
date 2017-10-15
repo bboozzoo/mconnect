@@ -76,7 +76,7 @@ class DeviceDBusProxy : Object {
 	}
 
 	public string certificate {
-		get { return device.certificate; }
+		owned get { return device.certificate_pem; }
 		private set {}
 	}
 

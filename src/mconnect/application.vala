@@ -38,6 +38,8 @@ namespace Mconn {
 		private Discovery discovery = null;
 		private DeviceManager manager = null;
 		private DeviceManagerDBusProxy bus_manager = null;
+		private TransferManager transfer = null;
+		private TransferManagerDBusProxy bus_transfer = null;
 
 		public Application() {
 			Object(application_id: "org.mconnect");
@@ -45,6 +47,7 @@ namespace Mconn {
 
 			discovery = new Discovery();
 			manager = new DeviceManager();
+			transfer = new TransferManager();
 		}
 
 		protected override void startup() {
@@ -56,11 +59,13 @@ namespace Mconn {
 				Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
 
 			if (log_debug_verbose == true)
-				enable_vdebug();
+				Logging.enable_vdebug();
 
 			core = Core.instance();
 			if (core == null)
 				error("cannot initialize core");
+
+			core.transfer_manager = this.transfer;
 
 			if (core.config.is_debug_on() == true)
 				Environment.set_variable("G_MESSAGES_DEBUG", "all", false);
@@ -91,6 +96,11 @@ namespace Mconn {
 			this.bus_manager = new DeviceManagerDBusProxy.with_manager(conn,
 																	   this.manager);
 			this.bus_manager.publish();
+
+			this.bus_transfer = new TransferManagerDBusProxy.with_manager(conn,
+																		  this.transfer);
+			this.bus_transfer.publish();
+
 			base.dbus_register(conn, object_path);
 			debug("dbus register, path %s", object_path);
 

@@ -1,5 +1,3 @@
-/* ex:ts=4:sw=4:sts=4:et */
-/* -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -17,15 +15,15 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-public static int main(string[] args)
-{
-	var app = new Mconn.Application();
 
-	// needed for mousepad protocol handler
-	Gdk.init(ref args);
+interface TransferInterface : Object {
 
-	// needed for clipboard sharing
-	Gtk.init(ref args);
+	public abstract async bool start_async();
 
-	return app.run(args);
+	public abstract void cancel();
+
+	public signal void started();
+	public signal void finished();
+	public signal void error(string reason);
+
 }

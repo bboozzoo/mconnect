@@ -41,12 +41,14 @@ class PacketHandlers : Object {
 		var telephony = TelephonyHandler.instance();
 		var mousepad = MousepadHandler.instance();
 		var ping = PingHandler.instance();
+		var share = ShareHandler.instance();
 
 		hnd.@set(notification.get_pkt_type(), notification);
 		hnd.@set(battery.get_pkt_type(), battery);
 		hnd.@set(telephony.get_pkt_type(), telephony);
 		hnd.@set(mousepad.get_pkt_type(), mousepad);
 		hnd.@set(ping.get_pkt_type(), ping);
+		hnd.@set(share.get_pkt_type(), share);
 
 		return hnd;
 	}

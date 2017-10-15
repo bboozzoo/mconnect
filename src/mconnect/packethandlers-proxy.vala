@@ -28,11 +28,12 @@ class PacketHandlersProxy : Object {
 		switch (iface.get_pkt_type()) {
 		case BatteryHandler.BATTERY: {
 			return new BatteryHandlerProxy.for_device_handler(dev, iface);
-			break;
 		}
 		case PingHandler.PING: {
 			return new PingHandlerProxy.for_device_handler(dev, iface);
-			break;
+		}
+		case ShareHandler.SHARE: {
+			return new ShareHandlerProxy.for_device_handler(dev, iface);
 		}
 		default:
 			warning("cannot register bus handler for %s",

@@ -1,5 +1,3 @@
-/* ex:ts=4:sw=4:sts=4:et */
-/* -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -17,15 +15,23 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-public static int main(string[] args)
-{
-	var app = new Mconn.Application();
+namespace Mconnect {
 
-	// needed for mousepad protocol handler
-	Gdk.init(ref args);
+	[DBus (name = "org.mconnect.Device")]
+	public interface DeviceIface : Object {
 
-	// needed for clipboard sharing
-	Gtk.init(ref args);
+		public abstract string id { owned get;}
+		public abstract string name { owned get;}
+		public abstract string device_type  { owned get;}
+		public abstract uint protocol_version  { owned get;}
+		public abstract string address  { owned get;}
+		public abstract bool is_paired  { owned get;}
+		public abstract bool allowed { owned get;}
+		public abstract bool is_active { owned get;}
+		public abstract bool is_connected { owned get;}
+		public abstract string[] outgoing_capabilities { owned get;}
+		public abstract string[] incoming_capabilities { owned get;}
+		public abstract string certificate { owned get;}
+	}
 
-	return app.run(args);
 }

@@ -29,6 +29,8 @@ class Core : Object {
 
 	public Config config { get; private set; default = null; }
 
+	public TransferManager transfer_manager { get; set; default = null; }
+
 	private static Core _instance = null;
 
 	private Core() {
@@ -118,5 +120,4 @@ class Core : Object {
 
 		return config;
 	}
-
 }

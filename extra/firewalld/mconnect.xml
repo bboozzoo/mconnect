@@ -3,4 +3,5 @@
   <short>mconnect</short>
   <description>mconnect service configuration</description>
   <port port="1714" protocol="udp"/>
+  <port port="9970-9975" protocol="tcp"/>
 </service>

@@ -19,7 +19,6 @@
  */
 
 using Mconn;
-using Posix;
 
 /**
  * Device communication channel
@@ -50,36 +49,7 @@ class DeviceChannel : Object {
 	}
 
 	private static void fixup_socket(Socket sock) {
-#if 0
-		IPPROTO_TCP = 6,	   /* Transmission Control Protocol.  */
-
-		TCP_KEEPIDLE	 4  /* Start keeplives after this period */
-		TCP_KEEPINTVL	 5  /* Interval between keepalives */
-		TCP_KEEPCNT		 6  /* Number of keepalives before death */
-#endif
-#if 0
-		int option = 10;
-		Posix.setsockopt(sock.fd, 6, 4, &option, (Posix.socklen_t) sizeof(int));
-		option = 5;
-		Posix.setsockopt(sock.fd, 6, 5, &option, (Posix.socklen_t) sizeof(int));
-		option = 3;
-		Posix.setsockopt(sock.fd, 6, 6, &option, (Posix.socklen_t) sizeof(int));
-#endif
-		int option = 10;
-		Posix.setsockopt(sock.fd, IPProto.TCP,
-						 Posix.TCP_KEEPIDLE,
-						 &option, (Posix.socklen_t) sizeof(int));
-		option = 5;
-		Posix.setsockopt(sock.fd, IPProto.TCP,
-						 Posix.TCP_KEEPINTVL,
-						 &option, (Posix.socklen_t) sizeof(int));
-		option = 3;
-		Posix.setsockopt(sock.fd, IPProto.TCP,
-						 Posix.TCP_KEEPCNT,
-						 &option, (Posix.socklen_t) sizeof(int));
-
-		// enable keepalive
-		sock.set_keepalive(true);
+		Utils.socket_set_keepalive(sock);
 	}
 
 	private void replace_streams(InputStream input, OutputStream output) {
@@ -182,37 +152,15 @@ class DeviceChannel : Object {
 		var cert = Core.instance().certificate;
 
 		// wrap with TLS
-		var tls_conn = TlsServerConnection.@new(this._sock_conn, cert);
-		tls_conn.authentication_mode = TlsAuthenticationMode.REQUESTED;
-		tls_conn.accept_certificate.connect((peer_cert, errors) => {
-				info("accept certificate, flags: 0x%x", errors);
-				info("certificate:\n%s\n", peer_cert.certificate_pem);
-
-				this.peer_certificate = peer_cert;
-
-				if (expected_peer != null) {
-					if (DebugLog.Verbose) {
-						vdebug("verify certificate, expecting: %s, got: %s",
-							   expected_peer.certificate_pem,
-							   peer_cert.certificate_pem);
-					}
-
-					if (expected_peer.is_same(peer_cert)) {
-						return true;
-					} else {
-						warning("rejecting handshare, peer certificate mismatch, got:\n%s",
-								peer_cert.certificate_pem);
-						return false;
-					}
-				}
-				return true;
-			});
-
+		var tls_conn = Utils.make_tls_connection(this._sock_conn,
+												 cert,
+												 expected_peer);
 		try {
 			info("attempt TLS handshake");
 			var res = yield tls_conn.handshake_async();
 			if (res) {
 				info("TLS handshare successful");
+				this.peer_certificate = tls_conn.peer_certificate;
 			} else {
 				warning("TLS handshake unsuccessful");
 				return false;

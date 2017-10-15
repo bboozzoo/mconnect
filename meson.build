@@ -9,6 +9,7 @@ json_glib_dep = dependency('json-glib-1.0')
 gee_dep = dependency('gee-0.8')
 libnotify_dep = dependency('libnotify')
 gdk_dep = dependency('gdk-3.0')
+gtk_dep = dependency('gtk+-3.0')
 atspi_dep = dependency('atspi-2')
 gnutls_dep = dependency('gnutls')
 posix_dep = meson.get_compiler('vala').find_library('posix')
@@ -45,6 +46,16 @@ mconnect_src = [
 	'src/mconnect/application.vala',
 	'src/mconnect/utils.vala',
 	'src/mconnect/property-proxy.vala',
+	'src/mconnect/share.vala',
+	'src/mconnect/share-proxy.vala',
+	'src/mconnect/io-job.vala',
+	'src/mconnect/transfer-manager.vala',
+	'src/mconnect/transfer-manager-proxy.vala',
+	'src/mconnect/transfer-interface.vala',
+	'src/mconnect/transfer-proxy.vala',
+	'src/mconnect/transfer-download.vala',
+	'src/mconnect/transfer-upload.vala',
+	'src/mconnect/logging.vala',
 	'src/crypt/certificate.vala',
 ]
 
@@ -54,16 +65,18 @@ mconnect_prog = executable('mconnect', mconnect_src,
                                            json_glib_dep, gee_dep,
                                            libnotify_dep, gdk_dep,
                                            atspi_dep, gnutls_dep,
-                                           posix_dep],
+                                           posix_dep, gtk_dep],
                            install: true)
 
-mconnectctl_src = 'src/mconnectctl/main.vala'
+mconnectctl_src = [
+  'src/mconnectctl/main.vala',
+  'src/mconnectctl/device-manager-iface.vala',
+  'src/mconnectctl/device-iface.vala',
+  'src/mconnectctl/share-iface.vala',
+]
 executable('mconnectctl', mconnectctl_src,
            dependencies : [glib_dep, gobject_dep,
-                           gio_dep, gio_unix_dep,
-                           json_glib_dep, gee_dep,
-                           libnotify_dep, gdk_dep,
-                           atspi_dep, gnutls_dep],
+                           gio_dep, gio_unix_dep],
            install: true)
 
 # tests
@@ -79,6 +92,20 @@ test_mconn_crypt = executable('test-mconn-crypt', test_mconn_crypt_src,
                               ],
                               install: false)
 test('mconn-crypt', test_mconn_crypt)
+
+test_mconn_utils_src = [
+  'test/mconn-utils-test.vala',
+  'src/mconnect/utils.vala',
+  'src/mconnect/logging.vala',
+]
+test_mconn_utils = executable('test-mconn-utils', test_mconn_utils_src,
+                              dependencies: [
+                                glib_dep, gobject_dep,
+                                gio_dep, gio_unix_dep,
+                                posix_dep, libnotify_dep,
+                              ],
+                              install: false)
+test('mconn-utils', test_mconn_utils)
 
 # other files
 applicationsdir = join_paths(get_option('datadir'),

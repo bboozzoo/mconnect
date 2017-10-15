@@ -65,12 +65,15 @@ identity packet (a sort of a handshake) is received, a connection to the
 sender's address will be made. Known devices are cached in
 `~/.cache/mconnect/devices`.
 
+File sharing to a device requires TCP ports 9970-9975 to be open. Files shared
+from the device are saved to `~/Downloads/mconnect/`.
+
 ## The client
 
 List discovered devices:
 
 ```
-$ ./mconnectctl list-devices
+$ mconnectctl list-devices
 Devices:
     /org/mconnect/device/0    673ac2db27d2a331 - Motorola Moto G Maciek
 ```
@@ -78,13 +81,13 @@ Devices:
 Accept a device (previously done only through the configuration):
 
 ```
-$ ./mconnectctl allow-device /org/mconnect/device/0
+$ mconnectctl allow-device /org/mconnect/device/0
 ```
 
 Show device details:
 
 ```
-$ ./mconnectctl show-device /org/mconnect/device/0
+$ mconnectctl show-device /org/mconnect/device/0
 Device 
   Name: Motorola Moto G Maciek
   ID: 673ac2db27d2a331
@@ -95,6 +98,15 @@ Device
   Active: true
   Connected: true
 ```
+
+Share a file/URL/text:
+
+```
+$ mconnectctl share-file /org/mconnect/device/0 <path>
+$ mconnectctl share-url /org/mconnect/device/0 www.google.com
+$ mconnectctl share-text /org/mconnect/device/0 'battery horse staple'
+```
+
 
 ## DBus API
 

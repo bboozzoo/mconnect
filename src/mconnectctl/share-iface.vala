@@ -1,5 +1,3 @@
-/* ex:ts=4:sw=4:sts=4:et */
-/* -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -17,15 +15,15 @@
  * AUTHORS
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
-public static int main(string[] args)
-{
-	var app = new Mconn.Application();
 
-	// needed for mousepad protocol handler
-	Gdk.init(ref args);
+namespace Mconnect {
 
-	// needed for clipboard sharing
-	Gtk.init(ref args);
+	[DBus (name = "org.mconnect.Device.Share")]
+	public interface ShareIface : Object {
 
-	return app.run(args);
+		public abstract void share_url(string url) throws IOError;
+		public abstract void share_text(string text) throws IOError;
+		public abstract void share_file(string path) throws IOError;
+	}
+
 }

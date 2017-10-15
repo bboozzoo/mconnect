@@ -20,32 +20,6 @@
 
 namespace Mconnect {
 
-	[DBus (name = "org.mconnect.DeviceManager")]
-	public interface DeviceManagerIface : Object {
-
-		public const string OBJECT_PATH = "/org/mconnect/manager";
-
-		public abstract ObjectPath[] ListDevices() throws IOError;
-		public abstract void AllowDevice(string path) throws IOError;
-	}
-
-	[DBus (name = "org.mconnect.Device")]
-	public interface DeviceIface : Object {
-
-		public abstract string id { owned get;}
-		public abstract string name { owned get;}
-		public abstract string device_type  { owned get;}
-		public abstract uint protocol_version  { owned get;}
-		public abstract string address  { owned get;}
-		public abstract bool is_paired  { owned get;}
-		public abstract bool allowed { owned get;}
-		public abstract bool is_active { owned get;}
-		public abstract bool is_connected { owned get;}
-		public abstract string[] outgoing_capabilities { owned get;}
-		public abstract string[] incoming_capabilities { owned get;}
-		public abstract string certificate { owned get;}
-	}
-
 	public class Client {
 
 		private static bool log_debug = false;
@@ -96,6 +70,10 @@ namespace Mconnect {
   list-devices         List devices
   allow-device <path>  Allow device
   show-device <path>   Show device details
+
+  share-url <path> <url>   Share URL with device
+  share-text <path> <text>  Share text with device
+  share-file <path> <file>  Share file with device
 """
 					);
 				opt_context.set_help_enabled(true);
@@ -118,6 +96,9 @@ namespace Mconnect {
 				Command("list-devices", 0, cl.cmd_list_devices),
 				Command("allow-device", 1, cl.cmd_allow_device),
 				Command("show-device", 1, cl.cmd_show_device),
+				Command("share-url", 2, cl.cmd_share_url),
+				Command("share-text", 2, cl.cmd_share_text),
+				Command("share-file", 2, cl.cmd_share_file),
 			};
 			handle_command(remaining, commands);
 
@@ -189,6 +170,36 @@ namespace Mconnect {
 					var manager = get_manager();
 					debug("allow device device %s", dp);
 					manager.AllowDevice(new ObjectPath(dp));
+					return 0;
+				});
+		}
+
+		private int cmd_share_url(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var share = get_share(new ObjectPath(dp));
+					share.share_url(args[1]);
+					return 0;
+				});
+		}
+
+		private int cmd_share_text(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var share = get_share(new ObjectPath(dp));
+					share.share_text(args[1]);
+					return 0;
+				});
+		}
+
+		private int cmd_share_file(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var share = get_share(new ObjectPath(dp));
+					var file = File.new_for_path(args[1]);
+					var path = file.get_path();
+					debug("share path: %s", path);
+					share.share_file(path);
 					return 0;
 				});
 		}
@@ -298,6 +309,17 @@ namespace Mconnect {
 		 * @return interface or null
 		 */
 		private DeviceIface? get_device(ObjectPath path) throws IOError {
+			return get_mconnect_obj_proxy(path);
+		}
+
+		/**
+		 * get_share:
+		 *
+		 * Obtain DBus interface to Share of given device
+		 *
+		 * @return interface or null
+		 */
+		private ShareIface? get_share(ObjectPath path) throws IOError {
 			return get_mconnect_obj_proxy(path);
 		}
 
