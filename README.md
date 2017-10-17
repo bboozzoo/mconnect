@@ -128,3 +128,8 @@ port 1714.
 An example service definition for [firewalld](http://www.firewalld.org/) is
 provided in `extra/firewalld/mconnect.xml` directory. The file needs to be
 copied into `/etc/firewalld/services`.
+
+# Contributing
+
+Please open a Pull Request with your changes. Feel free to ping me (@bboozzoo)
+in description.
