@@ -22,6 +22,6 @@
  * PacketHandlerInterfaceProxy: interface of DBus exported packet handler
  */
 interface PacketHandlerInterfaceProxy : Object {
-	public abstract void bus_register(DBusConnection conn, string path) throws IOError;
-	public abstract void bus_unregister(DBusConnection conn) throws IOError;
+    public abstract void bus_register (DBusConnection conn, string path) throws IOError;
+    public abstract void bus_unregister (DBusConnection conn) throws IOError;
 }

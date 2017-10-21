@@ -19,98 +19,99 @@
  */
 public class Config : Object {
 
-	public const string FILE = "mconnect.conf";
+    public const string FILE = "mconnect.conf";
 
-	private KeyFile _kf = null;
+    private KeyFile _kf = null;
 
-	public string path { get; private set; default = null; }
+    public string path {
+        get; private set; default = null;
+    }
 
-	public static string[] config_search_dirs(string primary_dir) {
-		string[] dirs = {primary_dir};
+    public static string[] config_search_dirs (string primary_dir) {
+        string[] dirs = { primary_dir };
 
-		string[] sysdirs = Environment.get_system_data_dirs();
-		foreach (string d in sysdirs) {
-			dirs += Path.build_path(Path.DIR_SEPARATOR_S,
-									d, "mconnect");
-		}
-		return dirs;
-	}
+        string[] sysdirs = Environment.get_system_data_dirs ();
+        foreach (string d in sysdirs) {
+            dirs += Path.build_path (Path.DIR_SEPARATOR_S,
+                                     d, "mconnect");
+        }
+        return dirs;
+    }
 
-	public Config(string base_config_dir) {
+    public Config (string base_config_dir) {
 
-		_kf = new KeyFile();
-		string[] dirs = config_search_dirs(base_config_dir);
-		string full_path = null;
+        _kf = new KeyFile ();
+        string[] dirs = config_search_dirs (base_config_dir);
+        string full_path = null;
 
-		foreach (string d in dirs) {
-			debug("config search dir: %s", d);
-		}
+        foreach (string d in dirs) {
+            debug ("config search dir: %s", d);
+        }
 
-		try {
-			bool found = _kf.load_from_dirs(Config.FILE, dirs,
-											out full_path,
-											KeyFileFlags.KEEP_COMMENTS);
-			path = full_path;
-			if (found == false) {
-				critical("configuration file %s was not found",
-						 Config.FILE);
-			}
-			message("loaded configuration from %s", full_path);
-		} catch (KeyFileError ke) {
-			critical("failed to parse configuration file: %s", ke.message);
-		} catch (FileError fe) {
-			critical("failed to read configuration file: %s", fe.message);
-		}
-	}
+        try {
+            bool found = _kf.load_from_dirs (Config.FILE, dirs,
+                                             out full_path,
+                                             KeyFileFlags.KEEP_COMMENTS);
+            path = full_path;
+            if (found == false) {
+                critical ("configuration file %s was not found",
+                          Config.FILE);
+            }
+            message ("loaded configuration from %s", full_path);
+        } catch (KeyFileError ke) {
+            critical ("failed to parse configuration file: %s", ke.message);
+        } catch (FileError fe) {
+            critical ("failed to read configuration file: %s", fe.message);
+        }
+    }
 
-	public void dump_to_file(string path) {
-		if (_kf == null)
-			return;
+    public void dump_to_file (string path) {
+        if (_kf == null)
+            return;
 
-		string data = _kf.to_data();
-		try {
-			FileUtils.set_contents(path, data);
-		} catch (FileError e) {
-			critical("failed to save configuration to %s: %s",
-					 path, e.message);
-		}
-	}
+        string data = _kf.to_data ();
+        try {
+            FileUtils.set_contents (path, data);
+        } catch (FileError e) {
+            critical ("failed to save configuration to %s: %s",
+                      path, e.message);
+        }
+    }
 
-	public bool is_device_allowed(string name, string type) {
+    public bool is_device_allowed (string name, string type) {
 
-		debug("check if device %s type %s is allowed", name, type);
-		try {
-			string[] devices = _kf.get_string_list("main", "devices");
+        debug ("check if device %s type %s is allowed", name, type);
+        try {
+            string[] devices = _kf.get_string_list ("main", "devices");
 
-			foreach (string dev in devices) {
-				debug("checking dev %s", dev);
-				//
-				if (_kf.has_group(dev) == false) {
-					debug("no group %s", dev);
-					continue;
-				}
+            foreach (string dev in devices) {
+                debug ("checking dev %s", dev);
+                //
+                if (_kf.has_group (dev) == false) {
+                    debug ("no group %s", dev);
+                    continue;
+                }
 
-				if (_kf.get_string(dev, "name") == name &&
-					_kf.get_string(dev, "type") == type &&
-					_kf.get_boolean(dev, "allowed") == true)
-				{
-					return true;
-				}
-			}
-		} catch (KeyFileError ke) {
-			critical("failed to read entries from configuration file: %s",
-					 ke.message);
-		}
-		return false;
-	}
+                if (_kf.get_string (dev, "name") == name &&
+                    _kf.get_string (dev, "type") == type &&
+                    _kf.get_boolean (dev, "allowed") == true) {
+                    return true;
+                }
+            }
+        } catch (KeyFileError ke) {
+            critical ("failed to read entries from configuration file: %s",
+                      ke.message);
+        }
+        return false;
+    }
 
-	public bool is_debug_on() {
-		try {
-			bool debug = _kf.get_boolean("main", "debug");
-			return debug;
-		} catch (KeyFileError ke) {
-			critical("failed to read config entry");
-		}
-		return false;
-	}
+    public bool is_debug_on () {
+        try {
+            bool debug = _kf.get_boolean ("main", "debug");
+            return debug;
+        } catch (KeyFileError ke) {
+            critical ("failed to read config entry");
+        }
+        return false;
+    }
 }

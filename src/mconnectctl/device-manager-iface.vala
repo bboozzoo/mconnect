@@ -17,12 +17,12 @@
  */
 namespace Mconnect {
 
-	[DBus (name = "org.mconnect.DeviceManager")]
-	public interface DeviceManagerIface : Object {
+    [DBus (name = "org.mconnect.DeviceManager")]
+    public interface DeviceManagerIface : Object {
 
-		public const string OBJECT_PATH = "/org/mconnect/manager";
+        public const string OBJECT_PATH = "/org/mconnect/manager";
 
-		public abstract ObjectPath[] ListDevices() throws IOError;
-		public abstract void AllowDevice(string path) throws IOError;
-	}
+        public abstract ObjectPath[] ListDevices () throws IOError;
+        public abstract void AllowDevice (string path) throws IOError;
+    }
 }

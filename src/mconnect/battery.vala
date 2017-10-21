@@ -20,44 +20,43 @@
 
 class BatteryHandler : Object, PacketHandlerInterface {
 
-	public const string BATTERY = "kdeconnect.battery";
+    public const string BATTERY = "kdeconnect.battery";
 
-	public string get_pkt_type() {
-		return BATTERY;
-	}
+    public string get_pkt_type () {
+        return BATTERY;
+    }
 
-	private BatteryHandler() {
+    private BatteryHandler () {
+    }
 
-	}
+    public static BatteryHandler instance () {
+        return new BatteryHandler ();
+    }
 
-	public static BatteryHandler instance() {
-		return new BatteryHandler();
-	}
+    public void use_device (Device dev) {
+        debug ("use device %s for battery status updates", dev.to_string ());
+        dev.message.connect (this.message);
+    }
 
-	public void use_device(Device dev) {
-		debug("use device %s for battery status updates", dev.to_string());
-		dev.message.connect(this.message);
-	}
+    public void release_device (Device dev) {
+        debug ("release device %s", dev.to_string ());
+        dev.message.disconnect (this.message);
+    }
 
-	public void release_device(Device dev) {
-		debug("release device %s", dev.to_string());
-		dev.message.disconnect(this.message);
-	}
+    public void message (Device dev, Packet pkt) {
+        if (pkt.pkt_type != BATTERY) {
+            return;
+        }
 
-	public void message(Device dev, Packet pkt) {
-		if (pkt.pkt_type != BATTERY) {
-			return;
-		}
+        debug ("got battery packet");
 
-		debug("got battery packet");
+        int64 level = pkt.body.get_int_member ("currentCharge");
+        bool charging = pkt.body.get_boolean_member ("isCharging");
 
-		int64 level = pkt.body.get_int_member("currentCharge");
-		bool charging = pkt.body.get_boolean_member("isCharging");
+        debug ("battery level: %u %s", (uint) level,
+               (charging == true) ? "charging" : "");
+        battery (dev, (uint) level, charging);
+    }
 
-		debug("battery level: %u %s", (uint) level,
-			  (charging == true) ? "charging" : "");
-		battery(dev, (uint)level, charging);
-	}
-
-	public signal void battery(Device dev, uint level, bool charging);
+    public signal void battery (Device dev, uint level, bool charging);
 }

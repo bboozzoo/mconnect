@@ -21,58 +21,61 @@ using Gee;
 
 class PacketHandlers : Object {
 
-	private HashMap<string, PacketHandlerInterface> _handlers;
+    private HashMap<string, PacketHandlerInterface> _handlers;
 
-	public string[] interfaces {
-		owned get { return _handlers.keys.to_array(); }
-		private set {}
-	}
+    public string[] interfaces {
+        owned get {
+            return _handlers.keys.to_array ();
+        }
+        private set {
+        }
+    }
 
-	public PacketHandlers() {
-		_handlers = load_handlers();
-	}
+    public PacketHandlers () {
+        _handlers = load_handlers ();
+    }
 
-	private static HashMap<string, PacketHandlerInterface> load_handlers() {
-		HashMap<string, PacketHandlerInterface> hnd =
-			new HashMap<string, PacketHandlerInterface>();
+    private static HashMap<string, PacketHandlerInterface> load_handlers () {
+        HashMap<string, PacketHandlerInterface> hnd =
+            new HashMap<string, PacketHandlerInterface>();
 
-		var notification = NotificationHandler.instance();
-		var battery = BatteryHandler.instance();
-		var telephony = TelephonyHandler.instance();
-		var mousepad = MousepadHandler.instance();
-		var ping = PingHandler.instance();
-		var share = ShareHandler.instance();
+        var notification = NotificationHandler.instance ();
+        var battery = BatteryHandler.instance ();
+        var telephony = TelephonyHandler.instance ();
+        var mousepad = MousepadHandler.instance ();
+        var ping = PingHandler.instance ();
+        var share = ShareHandler.instance ();
 
-		hnd.@set(notification.get_pkt_type(), notification);
-		hnd.@set(battery.get_pkt_type(), battery);
-		hnd.@set(telephony.get_pkt_type(), telephony);
-		hnd.@set(mousepad.get_pkt_type(), mousepad);
-		hnd.@set(ping.get_pkt_type(), ping);
-		hnd.@set(share.get_pkt_type(), share);
+        hnd.@set (notification.get_pkt_type (), notification);
+        hnd.@set (battery.get_pkt_type (), battery);
+        hnd.@set (telephony.get_pkt_type (), telephony);
+        hnd.@set (mousepad.get_pkt_type (), mousepad);
+        hnd.@set (ping.get_pkt_type (), ping);
+        hnd.@set (share.get_pkt_type (), share);
 
-		return hnd;
-	}
+        return hnd;
+    }
 
-	/**
-	 * SupportedCapabilityFunc:
-	 * @capability: capability name
-	 * @handler: packet handler
-	 *
-	 * User provided callback called when enabling @capability handled
-	 * by @handler for a particular device.
-	 */
-	public delegate void SupportedCapabilityFunc(string capability,
-												 PacketHandlerInterface handler);
+    /**
+     * SupportedCapabilityFunc:
+     * @capability: capability name
+     * @handler: packet handler
+     *
+     * User provided callback called when enabling @capability handled
+     * by @handler for a particular device.
+     */
+    public delegate void SupportedCapabilityFunc (string capability,
+                                                  PacketHandlerInterface handler);
 
-	public PacketHandlerInterface? get_capability_handler(string cap) {
-		// all handlers are singletones for now
-		var h = this._handlers.@get(cap);
-		return h;
-	}
+    public PacketHandlerInterface ? get_capability_handler (string cap) {
+        // all handlers are singletones for now
+        var h = this._handlers.@get (cap);
+        return h;
+    }
 
-	public static string to_capability(string pkttype) {
-		if (pkttype.has_suffix(".request"))
-			return pkttype.replace(".request", "");
-		return pkttype;
-	}
+    public static string to_capability (string pkttype) {
+        if (pkttype.has_suffix (".request"))
+            return pkttype.replace (".request", "");
+        return pkttype;
+    }
 }

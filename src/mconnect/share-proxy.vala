@@ -21,35 +21,35 @@
 [DBus (name = "org.mconnect.Device.Share")]
 class ShareHandlerProxy : Object, PacketHandlerInterfaceProxy {
 
-	private Device device = null;
-	private ShareHandler share_handler = null;
+    private Device device = null;
+    private ShareHandler share_handler = null;
 
-	public ShareHandlerProxy.for_device_handler(Device dev,
-												PacketHandlerInterface iface) {
-		this.device = dev;
-		this.share_handler = (ShareHandler) iface;
-	}
+    public ShareHandlerProxy.for_device_handler (Device dev,
+                                                 PacketHandlerInterface iface) {
+        this.device = dev;
+        this.share_handler = (ShareHandler) iface;
+    }
 
-	[DBus (visible = false)]
-	public void bus_register(DBusConnection conn, string path) throws IOError {
-		conn.register_object(path, this);
-	}
+    [DBus (visible = false)]
+    public void bus_register (DBusConnection conn, string path) throws IOError {
+        conn.register_object (path, this);
+    }
 
-	[DBus (visible = false)]
-	public void bus_unregister(DBusConnection conn) throws IOError {
-		//conn.unregister_object(this);
-	}
+    [DBus (visible = false)]
+    public void bus_unregister (DBusConnection conn) throws IOError {
+        // conn.unregister_object(this);
+    }
 
-	public void share_file(string path) throws IOError {
-		this.share_handler.share_file(this.device, path);
-	}
+    public void share_file (string path) throws IOError {
+        this.share_handler.share_file (this.device, path);
+    }
 
-	public void share_url(string url) throws IOError {
-		debug("share url %s", url);
-		this.share_handler.share_url(this.device, url);
-	}
+    public void share_url (string url) throws IOError {
+        debug ("share url %s", url);
+        this.share_handler.share_url (this.device, url);
+    }
 
-	public void share_text(string text) throws IOError {
-		this.share_handler.share_text(this.device, text);
-	}
+    public void share_text (string text) throws IOError {
+        this.share_handler.share_text (this.device, text);
+    }
 }

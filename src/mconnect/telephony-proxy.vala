@@ -19,26 +19,26 @@
 [DBus (name = "org.mconnect.Device.Telephony")]
 class TelephonyHandlerProxy : Object, PacketHandlerInterfaceProxy {
 
-	private Device device = null;
-	private TelephonyHandler telephony = null;
+    private Device device = null;
+    private TelephonyHandler telephony = null;
 
-	public TelephonyHandlerProxy.for_device_handler(Device dev,
-													PacketHandlerInterface iface) {
-		this.device = dev;
-		this.telephony = (TelephonyHandler) iface;
-	}
+    public TelephonyHandlerProxy.for_device_handler (Device dev,
+                                                     PacketHandlerInterface iface) {
+        this.device = dev;
+        this.telephony = (TelephonyHandler) iface;
+    }
 
-	[DBus (visible = false)]
-	public void bus_register(DBusConnection conn, string path) throws IOError {
-		conn.register_object(path, this);
-	}
+    [DBus (visible = false)]
+    public void bus_register (DBusConnection conn, string path) throws IOError {
+        conn.register_object (path, this);
+    }
 
-	[DBus (visible = false)]
-	public void bus_unregister(DBusConnection conn) throws IOError {
-		// conn.unregister_object(this);
-	}
+    [DBus (visible = false)]
+    public void bus_unregister (DBusConnection conn) throws IOError {
+        // conn.unregister_object(this);
+    }
 
-	public void send_sms(string number, string message) {
-		this.telephony.send_sms(this.device, number, message);
-	}
+    public void send_sms (string number, string message) {
+        this.telephony.send_sms (this.device, number, message);
+    }
 }

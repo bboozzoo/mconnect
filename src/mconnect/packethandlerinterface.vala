@@ -20,10 +20,9 @@
 
 interface PacketHandlerInterface : Object {
 
-	public abstract string get_pkt_type();
+    public abstract string get_pkt_type ();
 
-	public abstract void use_device(Device dev);
+    public abstract void use_device (Device dev);
 
-	public abstract void release_device(Device dev);
-
+    public abstract void release_device (Device dev);
 }

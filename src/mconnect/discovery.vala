@@ -18,83 +18,81 @@
  * Maciek Borzecki <maciek.borzecki (at] gmail.com>
  */
 
-class Discovery : GLib.Object
-{
-	private Socket socket = null;
+class Discovery : GLib.Object {
+    private Socket socket = null;
 
-	public signal void device_found(DiscoveredDevice dev);
+    public signal void device_found (DiscoveredDevice dev);
 
-	public Discovery() {
-	}
+    public Discovery () {
+    }
 
-	~Discovery() {
-		debug("cleaning up discovery...");
-		if (this.socket != null) {
-			this.socket.close();
-		}
-	}
+    ~Discovery () {
+        debug ("cleaning up discovery...");
+        if (this.socket != null) {
+            this.socket.close ();
+        }
+    }
 
-	public void listen() throws Error {
-			this.socket = new Socket(SocketFamily.IPV4,
-									 SocketType.DATAGRAM,
-									 SocketProtocol.UDP);
-			var sa = new InetSocketAddress(new InetAddress.any(SocketFamily.IPV4),
-										   1714);
-			debug("start listening for new devices at: %s:%u",
-				  sa.address.to_string(), sa.port);
+    public void listen () throws Error {
+        this.socket = new Socket (SocketFamily.IPV4,
+                                  SocketType.DATAGRAM,
+                                  SocketProtocol.UDP);
+        var sa = new InetSocketAddress (new InetAddress.any (SocketFamily.IPV4),
+                                        1714);
+        debug ("start listening for new devices at: %s:%u",
+               sa.address.to_string (), sa.port);
 
-			try {
-				socket.bind(sa, false);
-			} catch (Error e) {
-				this.socket.close();
-				this.socket = null;
-				throw e;
-			}
+        try {
+            socket.bind (sa, false);
+        } catch (Error e) {
+            this.socket.close ();
+            this.socket = null;
+            throw e;
+        }
 
-			var source = socket.create_source(IOCondition.IN);
-			source.set_callback((s, c) => {
-					this.incomingPacket();
-					return true;
-				});
-			source.attach(MainContext.default());
-		}
+        var source = socket.create_source (IOCondition.IN);
+        source.set_callback ((s, c) => {
+            this.incomingPacket ();
+            return true;
+        });
+        source.attach (MainContext.default ());
+    }
 
-	private void incomingPacket() {
-			vdebug("incoming packet");
+    private void incomingPacket () {
+        vdebug ("incoming packet");
 
-			uint8 buffer[4096];
-			SocketAddress sa;
-			InetSocketAddress isa;
+        uint8 buffer[4096];
+        SocketAddress sa;
+        InetSocketAddress isa;
 
-			try {
-				ssize_t read = this.socket.receive_from(out sa, buffer);
-				isa = (InetSocketAddress)sa;
-				vdebug("got %zd bytes from: %s:%u", read,
-						isa.address.to_string(), isa.port);
-			} catch (Error e) {
-				warning("failed to receive packet: %s", e.message);
-				return;
-			}
+        try {
+            ssize_t read = this.socket.receive_from (out sa, buffer);
+            isa = (InetSocketAddress) sa;
+            vdebug ("got %zd bytes from: %s:%u", read,
+                    isa.address.to_string (), isa.port);
+        } catch (Error e) {
+            warning ("failed to receive packet: %s", e.message);
+            return;
+        }
 
-			vdebug("message data: %s", (string)buffer);
+        vdebug ("message data: %s", (string) buffer);
 
-			this.parsePacketFromHost((string) buffer, isa.address);
-		}
+        this.parsePacketFromHost ((string) buffer, isa.address);
+    }
 
-	private void parsePacketFromHost(string data, InetAddress host)
-		{
-			// expecing an identity packet
-			var pkt = Packet.new_from_data(data);
-			if (pkt.pkt_type != Packet.IDENTITY) {
-				message("unexpected packet type %s from device %s",
-						pkt.pkt_type, host.to_string());
-				return;
-			}
+    private void parsePacketFromHost (string data, InetAddress host) {
+        // expecing an identity packet
+        var pkt = Packet.new_from_data (data);
+        if (pkt.pkt_type != Packet.IDENTITY) {
+            message ("unexpected packet type %s from device %s",
+                     pkt.pkt_type, host.to_string ());
+            return;
+        }
 
-			var dev = new DiscoveredDevice.from_identity(pkt, host);
-			message("connection from device: \'%s\', responds at: %s:%u",
-				  dev.device_name, host.to_string(), dev.tcp_port);
+        var dev = new DiscoveredDevice.from_identity (pkt, host);
+        message ("connection from device: \'%s\', responds at: %s:%u",
+                 dev.device_name, host.to_string (), dev.tcp_port);
 
-			device_found(dev);
-		}
+        device_found (dev);
+    }
 }

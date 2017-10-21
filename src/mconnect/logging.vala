@@ -17,18 +17,17 @@
  */
 
 namespace Logging {
-	
-	public bool VERBOSE = false;
+
+    public bool VERBOSE = false;
 
 /**
  * enable_vdebug:
  *
  * Enable verbose debug logging
  */
-void enable_vdebug() {
-	VERBOSE = true;
-}
-
+    void enable_vdebug () {
+        VERBOSE = true;
+    }
 }
 
 /**
@@ -37,10 +36,9 @@ void enable_vdebug() {
  *
  * Same as debug() but looks at verbose debug flag
  */
-void vdebug(string format, ...) {
-	if (Logging.VERBOSE == true) {
-		var l = va_list();
-		logv(null, LogLevelFlags.LEVEL_DEBUG, format, l);
-	}
+void vdebug (string format, ...) {
+    if (Logging.VERBOSE == true) {
+        var l = va_list ();
+        logv (null, LogLevelFlags.LEVEL_DEBUG, format, l);
+    }
 }
-

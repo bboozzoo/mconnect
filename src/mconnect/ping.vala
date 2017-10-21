@@ -20,38 +20,37 @@
 
 class PingHandler : Object, PacketHandlerInterface {
 
-	public const string PING = "kdeconnect.ping";
+    public const string PING = "kdeconnect.ping";
 
-	public string get_pkt_type() {
-		return PING;
-	}
+    public string get_pkt_type () {
+        return PING;
+    }
 
-	private PingHandler() {
+    private PingHandler () {
+    }
 
-	}
+    public static PingHandler instance () {
+        return new PingHandler ();
+    }
 
-	public static PingHandler instance() {
-		return new PingHandler();
-	}
+    public void use_device (Device dev) {
+        debug ("use device %s for ping", dev.to_string ());
+        dev.message.connect (this.message);
+    }
 
-	public void use_device(Device dev) {
-		debug("use device %s for ping", dev.to_string());
-		dev.message.connect(this.message);
-	}
+    public void release_device (Device dev) {
+        debug ("release device %s", dev.to_string ());
+        dev.message.disconnect (this.message);
+    }
 
-	public void release_device(Device dev) {
-		debug("release device %s", dev.to_string());
-		dev.message.disconnect(this.message);
-	}
+    public void message (Device dev, Packet pkt) {
+        if (pkt.pkt_type != PING) {
+            return;
+        }
 
-	public void message(Device dev, Packet pkt) {
-		if (pkt.pkt_type != PING) {
-			return;
-		}
+        GLib.message ("ping from device %s", dev.to_string ());
+        ping (dev);
+    }
 
-		GLib.message("ping from device %s", dev.to_string());
-		ping(dev);
-	}
-
-	public signal void ping(Device dev);
+    public signal void ping (Device dev);
 }

@@ -20,29 +20,29 @@
 
 class PacketHandlersProxy : Object {
 
-	public static PacketHandlerInterfaceProxy? new_device_capability_handler(
-		Device dev,
-		string cap,
-		PacketHandlerInterface iface) {
+    public static PacketHandlerInterfaceProxy ? new_device_capability_handler (
+        Device dev,
+        string cap,
+        PacketHandlerInterface iface) {
 
-		switch (iface.get_pkt_type()) {
-		case BatteryHandler.BATTERY: {
-			return new BatteryHandlerProxy.for_device_handler(dev, iface);
-		}
-		case PingHandler.PING: {
-			return new PingHandlerProxy.for_device_handler(dev, iface);
-		}
-		case ShareHandler.SHARE: {
-			return new ShareHandlerProxy.for_device_handler(dev, iface);
-		}
-		case TelephonyHandler.TELEPHONY: {
-			return new TelephonyHandlerProxy.for_device_handler(dev, iface);
-		}
-		default:
-			warning("cannot register bus handler for %s",
-					iface.get_pkt_type());
-			break;
-		}
-		return null;
-	}
+        switch (iface.get_pkt_type ()) {
+        case BatteryHandler.BATTERY: {
+            return new BatteryHandlerProxy.for_device_handler (dev, iface);
+        }
+        case PingHandler.PING: {
+            return new PingHandlerProxy.for_device_handler (dev, iface);
+        }
+        case ShareHandler.SHARE: {
+            return new ShareHandlerProxy.for_device_handler (dev, iface);
+        }
+        case TelephonyHandler.TELEPHONY: {
+            return new TelephonyHandlerProxy.for_device_handler (dev, iface);
+        }
+        default:
+            warning ("cannot register bus handler for %s",
+                     iface.get_pkt_type ());
+            break;
+        }
+        return null;
+    }
 }

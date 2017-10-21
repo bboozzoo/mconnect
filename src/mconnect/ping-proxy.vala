@@ -21,32 +21,32 @@
 [DBus (name = "org.mconnect.Device.Ping")]
 class PingHandlerProxy : Object, PacketHandlerInterfaceProxy {
 
-	private Device device = null;
-	private PingHandler ping_handler = null;
+    private Device device = null;
+    private PingHandler ping_handler = null;
 
-	public PingHandlerProxy.for_device_handler(Device dev,
-											   PacketHandlerInterface iface) {
-		this.device = dev;
-		this.ping_handler = (PingHandler) iface;
-		this.ping_handler.ping.connect(this.ping_cb);
-	}
+    public PingHandlerProxy.for_device_handler (Device dev,
+                                                PacketHandlerInterface iface) {
+        this.device = dev;
+        this.ping_handler = (PingHandler) iface;
+        this.ping_handler.ping.connect (this.ping_cb);
+    }
 
-	[DBus (visible = false)]
-	public void bus_register(DBusConnection conn, string path) throws IOError {
-		conn.register_object(path, this);
-	}
+    [DBus (visible = false)]
+    public void bus_register (DBusConnection conn, string path) throws IOError {
+        conn.register_object (path, this);
+    }
 
-	[DBus (visible = false)]
-	public void bus_unregister(DBusConnection conn) throws IOError {
-		//conn.unregister_object(this);
-	}
+    [DBus (visible = false)]
+    public void bus_unregister (DBusConnection conn) throws IOError {
+        // conn.unregister_object(this);
+    }
 
-	private void ping_cb(Device dev) {
-		if (this.device != dev)
-			return;
+    private void ping_cb (Device dev) {
+        if (this.device != dev)
+            return;
 
-		ping();
-	}
+        ping ();
+    }
 
-	public signal void ping();
+    public signal void ping ();
 }
