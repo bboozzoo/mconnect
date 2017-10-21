@@ -21,7 +21,8 @@ using Mconn;
 
 class TelephonyHandler : Object, PacketHandlerInterface {
 
-	private const string TELEPHONY = "kdeconnect.telephony";
+	public const string TELEPHONY = "kdeconnect.telephony";
+	public const string SMS_REQUEST = "kdeconnect.sms.request";
 
 	public string get_pkt_type() {
 		return TELEPHONY;
@@ -93,5 +94,36 @@ class TelephonyHandler : Object, PacketHandlerInterface {
 			}
 
 		}
+	}
+
+	/**
+	 * make_sms_packet:
+	 * @number: recipient's number
+	 * @message: message
+	 *
+	 * @return allocated packet
+	 */
+	private Packet make_sms_packet(string number, string message) {
+		var builder = new Json.Builder();
+		builder.begin_object();
+		builder.set_member_name("sendSms");
+		builder.add_boolean_value(true);
+		builder.set_member_name("phoneNumber");
+		builder.add_string_value(number);
+		builder.set_member_name("messageBody");
+		builder.add_string_value(message);
+		builder.end_object();
+
+		return new Packet(SMS_REQUEST,
+						  builder.get_root().get_object());
+	}
+
+	/**
+	 * send_sms:
+	 *
+	 * Reques to send an SMS to @number with message @message.
+	 */
+	public void send_sms(Device dev, string number, string message) {
+		dev.send(make_sms_packet(number, message));
 	}
 }
