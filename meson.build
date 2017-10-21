@@ -39,6 +39,7 @@ mconnect_src = [
 	'src/mconnect/battery.vala',
 	'src/mconnect/battery-proxy.vala',
 	'src/mconnect/telephony.vala',
+	'src/mconnect/telephony-proxy.vala',
 	'src/mconnect/mousepad.vala',
 	'src/mconnect/ping.vala',
 	'src/mconnect/ping-proxy.vala',
