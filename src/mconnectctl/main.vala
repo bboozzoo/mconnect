@@ -74,6 +74,8 @@ namespace Mconnect {
   share-url <path> <url>   Share URL with device
   share-text <path> <text>  Share text with device
   share-file <path> <file>  Share file with device
+
+  send-sms <number> <message>  Send SMS
 """
 					);
 				opt_context.set_help_enabled(true);
@@ -99,6 +101,7 @@ namespace Mconnect {
 				Command("share-url", 2, cl.cmd_share_url),
 				Command("share-text", 2, cl.cmd_share_text),
 				Command("share-file", 2, cl.cmd_share_file),
+				Command("send-sms", 3, cl.cmd_send_sms),
 			};
 			handle_command(remaining, commands);
 
@@ -200,6 +203,17 @@ namespace Mconnect {
 					var path = file.get_path();
 					debug("share path: %s", path);
 					share.share_file(path);
+					return 0;
+				});
+		}
+
+		private int cmd_send_sms(string[] args) {
+			return checked_dbus_call(() => {
+					var dp = args[0];
+					var number = args[1];
+					var message = args[2];
+					var telephony = get_telephony(new ObjectPath(dp));
+					telephony.send_sms(number, message);
 					return 0;
 				});
 		}
@@ -320,6 +334,17 @@ namespace Mconnect {
 		 * @return interface or null
 		 */
 		private ShareIface? get_share(ObjectPath path) throws IOError {
+			return get_mconnect_obj_proxy(path);
+		}
+
+		/**
+		 * get_telephony:
+		 *
+		 * Obtain DBus interface to Telephony of given device
+		 *
+		 * @return interface or null
+		 */
+		private TelephonyIface? get_telephony(ObjectPath path) throws IOError {
 			return get_mconnect_obj_proxy(path);
 		}
 
