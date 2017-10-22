@@ -17,6 +17,7 @@ fi
 cmd=$1
 case "$cmd" in
     check)
+        echo "-- uncrustify version $(${UNCRUSTIFY} --version)"
         ${UNCRUSTIFY} -c ${CFG} --check -q $FILES
     ;;
     apply|fix)
