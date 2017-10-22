@@ -122,7 +122,7 @@ install_deps() {
 build() {
     set -ex
     ./extra/fmt check && \
-        mkdir build && \
+        mkdir -p build && \
         cd build && \
         meson .. && \
         ninja && \
