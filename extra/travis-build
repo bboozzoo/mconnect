@@ -126,7 +126,8 @@ build() {
         cd build && \
         meson .. && \
         ninja && \
-        ninja test
+        ninja test \
+            || false
 
     DESTDIR=$PWD/install-dir ninja install
     (cd install-dir; LC_ALL=C tree -pan . > ../current-tree)
