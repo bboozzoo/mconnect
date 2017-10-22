@@ -121,8 +121,12 @@ install_deps() {
 
 build() {
     set -ex
-    ./extra/fmt check && \
-        mkdir -p build && \
+    ./extra/fmt check || {
+        echo "WARNING: code formatting check failed"
+        [ -z "${SUPPRESS_FMT}" ] && false
+    }
+
+    mkdir -p build && \
         cd build && \
         meson .. && \
         ninja && \
@@ -136,6 +140,14 @@ build() {
 
 build_in_container() {
     install_deps $1
+
+    # distro specific quirks
+    case "$1" in
+        ubuntu-xenial|opensuse)
+            echo "$1 is using an outdated version of uncrustify, suppress formatting errors"
+            export SUPPRESS_FMT=1
+            ;;
+    esac
 
     build
 }
