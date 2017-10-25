@@ -71,7 +71,7 @@ namespace Mconnect {
   share-text <path> <text>  Share text with device
   share-file <path> <file>  Share file with device
 
-  send-sms <number> <message>  Send SMS
+  send-sms <path> <number> <message>  Send SMS
 
   find-my-phone <path>       Find my phone
 """
