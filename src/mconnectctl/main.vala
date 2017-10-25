@@ -72,6 +72,8 @@ namespace Mconnect {
   share-file <path> <file>  Share file with device
 
   send-sms <number> <message>  Send SMS
+
+  find-my-phone <path>       Find my phone
 """
                     );
                 opt_context.set_help_enabled (true);
@@ -98,6 +100,7 @@ namespace Mconnect {
                 Command ("share-text", 2, cl.cmd_share_text),
                 Command ("share-file", 2, cl.cmd_share_file),
                 Command ("send-sms", 3, cl.cmd_send_sms),
+                Command ("find-my-phone", 1, cl.cmd_find_my_phone),
             };
             handle_command (remaining, commands);
 
@@ -210,6 +213,15 @@ namespace Mconnect {
                 var message = args[2];
                 var telephony = get_telephony (new ObjectPath (dp));
                 telephony.send_sms (number, message);
+                return 0;
+            });
+        }
+
+        private int cmd_find_my_phone (string[] args) {
+            return checked_dbus_call (() => {
+                var dp = args[0];
+                var fmp = get_find_my_phone (new ObjectPath (dp));
+                fmp.ring ();
                 return 0;
             });
         }
@@ -342,6 +354,17 @@ namespace Mconnect {
          * @return interface or null
          */
         private TelephonyIface ? get_telephony (ObjectPath path) throws IOError {
+            return get_mconnect_obj_proxy (path);
+        }
+
+        /**
+         * get_find_my_phone:
+         *
+         * Obtain DBus interface to FindMyPhone of given device
+         *
+         * @return interface or null
+         */
+        private FindMyPhoneIface ? get_find_my_phone (ObjectPath path) throws IOError {
             return get_mconnect_obj_proxy (path);
         }
 

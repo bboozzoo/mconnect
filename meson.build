@@ -77,6 +77,7 @@ mconnectctl_src = [
   'src/mconnectctl/device-iface.vala',
   'src/mconnectctl/share-iface.vala',
   'src/mconnectctl/telephony-iface.vala',
+  'src/mconnectctl/find-my-phone-iface.vala',
 ]
 executable('mconnectctl', mconnectctl_src,
            dependencies : [glib_dep, gobject_dep,
