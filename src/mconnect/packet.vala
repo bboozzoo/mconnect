@@ -45,14 +45,14 @@ class Packet : GLib.Object {
     public int64 id {
         get; private set; default = 0;
     }
-    public Json.Object body {
+    public Json.Object ? body {
         get; private set; default = null;
     }
     public Payload ? payload {
         get; set; default = null;
     }
 
-    public Packet (string type, Json.Object body, int64 id = 0) {
+    public Packet (string type, Json.Object ? body, int64 id = 0) {
         this.pkt_type = type;
         this.body = body;
         if (id == 0) {
@@ -162,7 +162,12 @@ class Packet : GLib.Object {
         var root_obj = new Json.Object ();
         root_obj.set_string_member ("type", pkt_type);
         root_obj.set_int_member ("id", id);
-        root_obj.set_object_member ("body", body);
+
+        if (this.body != null)
+            root_obj.set_object_member ("body", body);
+        else
+            root_obj.set_object_member ("body", new Json.Object ());
+
         if (this.payload != null) {
             root_obj.set_int_member ("payloadSize", (int64) this.payload.size);
             var pti = new Json.Object ();
