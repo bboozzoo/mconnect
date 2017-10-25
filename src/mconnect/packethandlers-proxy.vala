@@ -36,6 +36,9 @@ class PacketHandlersProxy : Object {
         case TelephonyHandler.TELEPHONY: {
             return new TelephonyHandlerProxy.for_device_handler (dev, iface);
         }
+        case FindMyPhoneHandler.FIND_MY_PHONE: {
+            return new FindMyPhoneHandlerProxy.for_device_handler (dev, iface);
+        }
         default:
             warning ("cannot register bus handler for %s",
                      iface.get_pkt_type ());
