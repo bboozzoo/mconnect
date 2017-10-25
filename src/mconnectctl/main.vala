@@ -63,17 +63,17 @@ namespace Mconnect {
                 var opt_context = new OptionContext ();
                 opt_context.set_description (
                     """Available commands:
-  list-devices         List devices
-  allow-device <path>  Allow device
-  show-device <path>   Show device details
+  list-devices                        List devices
+  allow-device <path>                 Allow device
+  show-device <path>                  Show device details
 
-  share-url <path> <url>   Share URL with device
-  share-text <path> <text>  Share text with device
-  share-file <path> <file>  Share file with device
+  share-url <path> <url>              Share URL with device
+  share-text <path> <text>            Share text with device
+  share-file <path> <file>            Share file with device
 
   send-sms <path> <number> <message>  Send SMS
 
-  find-my-phone <path>       Find my phone
+  find-my-phone <path>                Find my phone
 """
                     );
                 opt_context.set_help_enabled (true);
