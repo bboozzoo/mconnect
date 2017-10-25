@@ -1,5 +1,3 @@
-/* ex:ts=4:sw=4:sts=4:et */
-/* -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,10 +18,9 @@
 
 interface PacketHandlerInterface : Object {
 
-	public abstract string get_pkt_type();
+    public abstract string get_pkt_type ();
 
-	public abstract void use_device(Device dev);
+    public abstract void use_device (Device dev);
 
-	public abstract void release_device(Device dev);
-
+    public abstract void release_device (Device dev);
 }

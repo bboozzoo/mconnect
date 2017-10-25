@@ -1,5 +1,3 @@
-/* ex:ts=4:sw=4:sts=4:et */
-/* -*- tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,29 +18,29 @@
 
 class PacketHandlersProxy : Object {
 
-	public static PacketHandlerInterfaceProxy? new_device_capability_handler(
-		Device dev,
-		string cap,
-		PacketHandlerInterface iface) {
+    public static PacketHandlerInterfaceProxy ? new_device_capability_handler (
+        Device dev,
+        string cap,
+        PacketHandlerInterface iface) {
 
-		switch (iface.get_pkt_type()) {
-		case BatteryHandler.BATTERY: {
-			return new BatteryHandlerProxy.for_device_handler(dev, iface);
-		}
-		case PingHandler.PING: {
-			return new PingHandlerProxy.for_device_handler(dev, iface);
-		}
-		case ShareHandler.SHARE: {
-			return new ShareHandlerProxy.for_device_handler(dev, iface);
-		}
-		case TelephonyHandler.TELEPHONY: {
-			return new TelephonyHandlerProxy.for_device_handler(dev, iface);
-		}
-		default:
-			warning("cannot register bus handler for %s",
-					iface.get_pkt_type());
-			break;
-		}
-		return null;
-	}
+        switch (iface.get_pkt_type ()) {
+        case BatteryHandler.BATTERY: {
+            return new BatteryHandlerProxy.for_device_handler (dev, iface);
+        }
+        case PingHandler.PING: {
+            return new PingHandlerProxy.for_device_handler (dev, iface);
+        }
+        case ShareHandler.SHARE: {
+            return new ShareHandlerProxy.for_device_handler (dev, iface);
+        }
+        case TelephonyHandler.TELEPHONY: {
+            return new TelephonyHandlerProxy.for_device_handler (dev, iface);
+        }
+        default:
+            warning ("cannot register bus handler for %s",
+                     iface.get_pkt_type ());
+            break;
+        }
+        return null;
+    }
 }

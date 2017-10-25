@@ -18,12 +18,11 @@
 
 interface TransferInterface : Object {
 
-	public abstract async bool start_async();
+    public abstract async bool start_async ();
 
-	public abstract void cancel();
+    public abstract void cancel ();
 
-	public signal void started();
-	public signal void finished();
-	public signal void error(string reason);
-
+    public signal void started ();
+    public signal void finished ();
+    public signal void error (string reason);
 }

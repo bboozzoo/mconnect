@@ -1,0 +1,43 @@
+#!/bin/sh
+
+[ "$V" = "1" ] && set -x
+
+SELFDIR=$(readlink -f $(dirname $0))
+CFG=${SELFDIR}/uncrustify.cfg
+UNCRUSTIFY=${UNCRUSTIFY:-uncrustify}
+SRCDIR=${SRCDIR:-$(readlink -f ${SELFDIR}/../src ${SELFDIR}/../test | \
+                       tr '\n' ' ')}
+
+FILES=$(find $SRCDIR -name '*.vala')
+if [ "$FILES" = "" ]; then
+    echo "no relevant source files found in $SRCDIR"
+    exit 1
+fi
+
+cmd=$1
+case "$cmd" in
+    check)
+        echo "-- uncrustify version $(${UNCRUSTIFY} --version)"
+        ${UNCRUSTIFY} -c ${CFG} --check -q $FILES
+    ;;
+    apply|fix)
+        ${UNCRUSTIFY} -c ${CFG} --replace $FILES
+        ;;
+    help|-h|--help)
+        echo "Usage:"
+        echo "   $(basename $0) <command>"
+        echo
+        echo "Commands:"
+        echo "    check     - check if source code is properly formatted"
+        echo "                exit code will be non-0 if code is badly formatted"
+        echo "    fix       - fix formatting"
+        echo "    help      - show this message"
+        echo
+        echo "Environment variables:"
+        echo "  UNCRUSTIFY - override path to 'uncrustify' tool, default: $UNCRUSTIFY"
+        echo "  SRCDIR     - override path to source directory, default: $SRCDIR"
+        ;;
+    *)
+        echo "unsupported command $cmd, see --help"
+        ;;
+esac

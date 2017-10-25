@@ -18,12 +18,11 @@
 
 namespace Mconnect {
 
-	[DBus (name = "org.mconnect.Device.Share")]
-	public interface ShareIface : Object {
+    [DBus (name = "org.mconnect.Device.Share")]
+    public interface ShareIface : Object {
 
-		public abstract void share_url(string url) throws IOError;
-		public abstract void share_text(string text) throws IOError;
-		public abstract void share_file(string path) throws IOError;
-	}
-
+        public abstract void share_url (string url) throws IOError;
+        public abstract void share_text (string text) throws IOError;
+        public abstract void share_file (string path) throws IOError;
+    }
 }

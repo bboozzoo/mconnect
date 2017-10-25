@@ -18,11 +18,10 @@
 
 namespace Mconnect {
 
-	[DBus (name = "org.mconnect.Device.Telephony")]
-	public interface TelephonyIface : Object {
+    [DBus (name = "org.mconnect.Device.Telephony")]
+    public interface TelephonyIface : Object {
 
-		public abstract void send_sms(string number,
-									  string message) throws IOError;
-	}
-
+        public abstract void send_sms (string number,
+                                       string message) throws IOError;
+    }
 }

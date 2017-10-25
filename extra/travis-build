@@ -39,7 +39,8 @@ deps_fedora() {
         at-spi2-core-devel \
         gtk3-devel \
         glib-networking \
-        tree
+        tree \
+        uncrustify
 }
 
 deps_opensuse() {
@@ -57,7 +58,8 @@ deps_opensuse() {
            at-spi2-core-devel \
            gtk3-devel \
            glib-networking \
-           tree
+           tree \
+           uncrustify
 }
 
 deps_archlinux() {
@@ -76,7 +78,8 @@ deps_archlinux() {
            gtk3 \
            gnutls \
            glib-networking \
-           tree
+           tree \
+           uncrustify
 }
 
 deps_ubuntu_xenial() {
@@ -92,7 +95,8 @@ deps_ubuntu_xenial() {
                 libnotify-dev \
                 libgtk-3-dev \
                 glib-networking \
-                tree
+                tree \
+                uncrustify
 }
 
 install_deps() {
@@ -117,11 +121,17 @@ install_deps() {
 
 build() {
     set -ex
-    mkdir build && \
+    ./extra/fmt check || {
+        echo "WARNING: code formatting check failed"
+        [ -z "${SUPPRESS_FMT}" ] && false
+    }
+
+    mkdir -p build && \
         cd build && \
         meson .. && \
         ninja && \
-        ninja test
+        ninja test \
+            || false
 
     DESTDIR=$PWD/install-dir ninja install
     (cd install-dir; LC_ALL=C tree -pan . > ../current-tree)
@@ -130,6 +140,14 @@ build() {
 
 build_in_container() {
     install_deps $1
+
+    # distro specific quirks
+    case "$1" in
+        ubuntu-xenial|opensuse)
+            echo "$1 is using an outdated version of uncrustify, suppress formatting errors"
+            export SUPPRESS_FMT=1
+            ;;
+    esac
 
     build
 }

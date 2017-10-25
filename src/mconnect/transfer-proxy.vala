@@ -17,36 +17,38 @@
  */
 
 [DBus (name = "org.mconnect.Transfer")]
-class TransferDBusProxy: Object {
+class TransferDBusProxy : Object {
 
-	[DBus (visible = false)]
-	public TransferInterface transfer { get; private set; default = null; }
+    [DBus (visible = false)]
+    public TransferInterface transfer {
+        get; private set; default = null;
+    }
 
-	private ObjectPath object_path = null;
-	private uint register_id = 0;
+    private ObjectPath object_path = null;
+    private uint register_id = 0;
 
-	public TransferDBusProxy.for_transfer_with_path(TransferInterface transfer,
-													ObjectPath path) {
-		this.transfer = transfer;
-		this.object_path = path;
-	}
+    public TransferDBusProxy.for_transfer_with_path (TransferInterface transfer,
+                                                     ObjectPath path) {
+        this.transfer = transfer;
+        this.object_path = path;
+    }
 
-	[DBus (visible = false)]
-	public void bus_register(DBusConnection conn) {
-		debug("register transfer at path %s", this.object_path.to_string());
-		this.register_id = conn.register_object(this.object_path, this);
-	}
+    [DBus (visible = false)]
+    public void bus_register (DBusConnection conn) {
+        debug ("register transfer at path %s", this.object_path.to_string ());
+        this.register_id = conn.register_object (this.object_path, this);
+    }
 
-	[DBus (visible = false)]
-	public void bus_unregister(DBusConnection conn) {
-		if (this.register_id != 0) {
-			debug("unregister transfer at path %s", this.object_path.to_string());
-			conn.unregister_object(this.register_id);
-		}
-	}
+    [DBus (visible = false)]
+    public void bus_unregister (DBusConnection conn) {
+        if (this.register_id != 0) {
+            debug ("unregister transfer at path %s", this.object_path.to_string ());
+            conn.unregister_object (this.register_id);
+        }
+    }
 
-	public void cancel() {
-		debug("cancelling job");
-		this.transfer.cancel();
-	}
+    public void cancel () {
+        debug ("cancelling job");
+        this.transfer.cancel ();
+    }
 }

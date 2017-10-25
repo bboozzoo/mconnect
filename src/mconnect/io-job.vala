@@ -19,55 +19,57 @@ using Logging;
 
 class IOCopyJob : Object {
 
-	private InputStream from = null;
-	private OutputStream to = null;
+    private InputStream from = null;
+    private OutputStream to = null;
 
-	public IOCopyJob(InputStream from, OutputStream to) {
-		this.from = from;
-		this.to = to;
-	}
+    public IOCopyJob (InputStream from, OutputStream to) {
+        this.from = from;
+        this.to = to;
+    }
 
-	/**
-	 * transfer_async:
-	 * @cancel: cancellable
-	 *
-	 * Starty asynchronous transfer of data from @from stream to @to stream.
-	 *
-	 * @return number of bytes transferred if no error occurred
-	 */
-	public async uint64 start_async(Cancellable? cancel) throws Error {
-		uint64 bytes_done = 0;
-		var chunk_size = 4096;
-		var max_chunk_size = 64 * 1024;
-		while (true) {
-			var data = yield this.from.read_bytes_async(chunk_size,
-														Priority.DEFAULT,
-														cancel);
-			vdebug("read %d bytes", data.length);
-			if (data.length == 0) {
-				break;
-			}
-			yield this.to.write_bytes_async(data, Priority.DEFAULT,
-											cancel);
-			bytes_done += data.length;
-			this.progress(bytes_done);
+    /**
+     * transfer_async:
+     * @cancel: cancellable
+     *
+     * Starty asynchronous transfer of data from @from stream to @to stream.
+     *
+     * @return number of bytes transferred if no error occurred
+     */
+    public async uint64 start_async (Cancellable ? cancel) throws Error {
+        uint64 bytes_done = 0;
+        var chunk_size = 4096;
+        var max_chunk_size = 64 * 1024;
+        while (true) {
+            var data = yield this.from.read_bytes_async (chunk_size,
+                                                         Priority.DEFAULT,
+                                                         cancel);
 
-			if (data.length == chunk_size)
-				chunk_size = 2 * chunk_size;
+            vdebug ("read %d bytes", data.length);
+            if (data.length == 0) {
+                break;
+            }
+            yield this.to.write_bytes_async (data, Priority.DEFAULT,
+                                             cancel);
 
-			if (chunk_size > max_chunk_size)
-				chunk_size = max_chunk_size;
-		}
+            bytes_done += data.length;
+            this.progress (bytes_done);
 
-		debug("transfer done, got %s bytes", format_size(bytes_done));
-		return bytes_done;
-	}
+            if (data.length == chunk_size)
+                chunk_size = 2 * chunk_size;
 
-	/**
-	 * progress:
-	 * @bytes_down: number of bytes transferred
-	 *
-	 * Indicate transfer progress
-	 */
-	public signal void progress(uint64 bytes_done);
+            if (chunk_size > max_chunk_size)
+                chunk_size = max_chunk_size;
+        }
+
+        debug ("transfer done, got %s bytes", format_size (bytes_done));
+        return bytes_done;
+    }
+
+    /**
+     * progress:
+     * @bytes_down: number of bytes transferred
+     *
+     * Indicate transfer progress
+     */
+    public signal void progress (uint64 bytes_done);
 }
