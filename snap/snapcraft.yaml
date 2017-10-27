@@ -1,0 +1,68 @@
+name: m-connect
+version: '0.3+git'
+summary: Connect your Android phone running KDE connect with you computer
+description: |
+  mconnect is an application for connecting your Android Phone running KDE
+  connect application with your computer. It is an implementation of KDE Connect
+  protocol without KDE dependencies making it easier to use in non-KDE setups.
+
+grade: devel
+confinement: devmode
+
+parts:
+  main:
+    source: .
+    plugin: meson # you may need to add xenial-backports repository
+    meson-parameters: [--prefix=/usr]
+    source-type: git
+    after:
+      - desktop-gtk3
+    build-packages:
+      - valac
+      - libgirepository1.0-dev
+      - libjson-glib-dev
+      - libgee-0.8-dev
+      - libgnutls28-dev
+      - libnotify-dev
+      - libgtk-3-dev
+      - glib-networking
+      - python3-pip
+    prime:
+      - usr/share/applications/mconnect.desktop
+      - usr/bin/mconnect
+      - usr/bin/mconnectctl
+
+plugs:
+  gnome-3-26-1604:
+    interface: content
+    target: $SNAP/gnome-platform
+    default-provider: gnome-3-26-1604:gnome-3-26-1604
+
+slots:
+  mconnect:
+    bus: session
+    name: org.mconnect
+    interface: dbus
+
+apps:
+  mconnect:
+    command: desktop-launch mconnect
+    plugs:
+      # device cache, downloads
+      - desktop
+      - desktop-legacy
+      - home
+      # pointer control
+      - x11
+      # connecting to remote clients
+      - network
+      # listening for connections
+      - network-bind
+      # monitor network state for changes
+      - network-observe
+      # # shared Gnome 3.26 content
+      - gnome-3-26-1604
+    desktop: usr/share/applications/mconnect.desktop
+
+  mconnectctl:
+    command: desktop-launch mconnectctl
