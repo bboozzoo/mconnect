@@ -84,17 +84,16 @@ class MousepadHandler : Object, PacketHandlerInterface {
                 while (dy > 3.0) {
                     // scroll down
                     send_click (5);
-                    dy/=4.0;
+                    dy /= 4.0;
                     debug ("scroll down");
                 }
                 while (dy < -3.0) {
                     // scroll up
                     send_click (4);
-                    dy/=4.0;
+                    dy /= 4.0;
                     debug ("scroll up");
                 }
-            }
-            else {
+            } else {
                 debug ("position: %f x %f", dx, dy);
 
                 move_cursor_relative (dx, dy);
@@ -119,7 +118,7 @@ class MousepadHandler : Object, PacketHandlerInterface {
     }
 
     private void send_click (int button, bool doubleclick = false) {
-        var etype = "b%ic".printf(button);
+        var etype = "b%ic".printf (button);
         try {
             int x, y;
             _display.get_pointer (null, out x, out y, null);
