@@ -50,7 +50,7 @@ mconnect_src = [
 	'src/mconnect/share.vala',
 	'src/mconnect/share-proxy.vala',
 	'src/mconnect/mpris.vala',
-	'src/mconnect/mpris-proxy.vala',
+	'src/mconnect/mpris-proxies.vala',
 	'src/mconnect/io-job.vala',
 	'src/mconnect/transfer-manager.vala',
 	'src/mconnect/transfer-manager-proxy.vala',
