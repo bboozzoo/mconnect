@@ -75,12 +75,29 @@ class MousepadHandler : Object, PacketHandlerInterface {
         } else if (pkt.body.has_member ("middleclick")) {
             send_click (2);
         } else if (pkt.body.has_member ("dx") && pkt.body.has_member ("dy")) {
-            // motion/position
+            // motion/position or scrolling
             double dx = pkt.body.get_double_member ("dx");
             double dy = pkt.body.get_double_member ("dy");
-            debug ("position: %f x %f", dx, dy);
 
-            move_cursor_relative (dx, dy);
+            if (pkt.body.has_member ("scroll") && pkt.body.get_boolean_member ("scroll")) {
+                // scroll with variable speed
+                while (dy > 3.0) {
+                    // scroll down
+                    send_click (5);
+                    dy /= 4.0;
+                    debug ("scroll down");
+                }
+                while (dy < -3.0) {
+                    // scroll up
+                    send_click (4);
+                    dy /= 4.0;
+                    debug ("scroll up");
+                }
+            } else {
+                debug ("position: %f x %f", dx, dy);
+
+                move_cursor_relative (dx, dy);
+            }
         } else if (pkt.body.has_member ("key")) {
             string key = pkt.body.get_string_member ("key");
             debug ("got key: %s", key);
@@ -101,12 +118,7 @@ class MousepadHandler : Object, PacketHandlerInterface {
     }
 
     private void send_click (int button, bool doubleclick = false) {
-        var etype = "b1c";
-        if (button == 2) {
-            etype = "b2c";
-        } else if (button == 3) {
-            etype = "b3c";
-        }
+        var etype = "b%ic".printf (button);
         try {
             int x, y;
             _display.get_pointer (null, out x, out y, null);
