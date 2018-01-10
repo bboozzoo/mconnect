@@ -87,89 +87,99 @@ class MprisHandler : Object, PacketHandlerInterface {
         }
         var bus_name = player_list.get (player_id);
         if (!_properties_watchers.contains (bus_name)) {
-            MprisPropertiesProxy prop = Bus.get_proxy_sync (BusType.SESSION, bus_name, "/org/mpris/MediaPlayer2");
-            _properties_watchers.insert (bus_name, prop);
-            prop.properties_changed.connect ((a, b, c) => {
-                properties_changed (player_id, a, b);
-            });
-        }
-
-        MprisPlayerProxy mpris_player = Bus.get_proxy_sync (BusType.SESSION, bus_name, "/org/mpris/MediaPlayer2");
-
-        if (pkt.body.has_member ("action")) {
-            switch (pkt.body.get_string_member ("action")) {
-            case "PlayPause":
-                mpris_player.play_pause ();
-                break;
-            case "Previous":
-                mpris_player.previous ();
-                break;
-            case "Next":
-                mpris_player.next ();
-                break;
+            try {
+                MprisPropertiesProxy prop = Bus.get_proxy_sync (BusType.SESSION, bus_name, "/org/mpris/MediaPlayer2");
+                _properties_watchers.insert (bus_name, prop);
+                prop.properties_changed.connect ((a, b, c) => {
+                    properties_changed (player_id, a, b);
+                });
+            } catch (IOError e) {
+                warning ("failed to open dbus connection: %s", e.message);
+                return;
             }
         }
 
-        if (pkt.body.has_member ("setVolume")) {
-            mpris_player.volume = (int) pkt.body.get_int_member ("setVolume") / 100.0;
-        }
+        try {
+            MprisPlayerProxy mpris_player = Bus.get_proxy_sync (BusType.SESSION, bus_name, "/org/mpris/MediaPlayer2");
 
-        if (pkt.body.has_member ("SetPosition")) {
-            int64 pos = pkt.body.get_int_member ("SetPosition") * 1000 - mpris_player.position;
-            mpris_player.seek (pos);
-        }
+            if (pkt.body.has_member ("action")) {
+                switch (pkt.body.get_string_member ("action")) {
+                case "PlayPause":
+                    mpris_player.play_pause ();
+                    break;
+                case "Previous":
+                    mpris_player.previous ();
+                    break;
+                case "Next":
+                    mpris_player.next ();
+                    break;
+                }
+            }
 
-        bool update_needed = false;
-        Properties prop = {};
-        prop.position = mpris_player.position / 1000;
-        if (pkt.body.has_member ("Seek")) {
-            mpris_player.seek (pkt.body.get_int_member ("Seek"));
-            prop.position += pkt.body.get_int_member ("Seek") / 1000;
-            update_needed = true;
-        }
+            if (pkt.body.has_member ("setVolume")) {
+                mpris_player.volume = (int) pkt.body.get_int_member ("setVolume") / 100.0;
+            }
 
-        int ? volume = null;
-        if (pkt.body.has_member ("requestVolume") && pkt.body.get_boolean_member ("requestVolume")) {
-            volume = (int) (mpris_player.volume * 100.0);
-            update_needed = true;
-        }
-        if (pkt.body.has_member ("requestNowPlaying") && pkt.body.get_boolean_member ("requestNowPlaying")) {
-            if (mpris_player.metadata.contains ("xesam:title")
-                && mpris_player.metadata.get ("xesam:title").is_of_type (VariantType.STRING)) {
-                prop.title = mpris_player.metadata.get ("xesam:title").get_string ();
+            if (pkt.body.has_member ("SetPosition")) {
+                int64 pos = pkt.body.get_int_member ("SetPosition") * 1000 - mpris_player.position;
+                mpris_player.seek (pos);
             }
-            if (mpris_player.metadata.contains ("xesam:artist")
-                && mpris_player.metadata.get ("xesam:artist").is_of_type (VariantType.STRING)) {
-                prop.artist = mpris_player.metadata.get ("xesam:artist").get_string ();
-            }
-            if (mpris_player.metadata.contains ("xesam:album")
-                && mpris_player.metadata.get ("xesam:artist").is_of_type (VariantType.STRING)) {
-                prop.album = mpris_player.metadata.get ("xesam:artist").get_string ();
-            }
-            if (mpris_player.metadata.contains ("mpris:artUrl")
-                && mpris_player.metadata.get ("mpris:artUrl").is_of_type (VariantType.STRING)) {
-                prop.album_art_url = mpris_player.metadata.get ("mpris:artUrl").get_string ();
-            }
-            prop.now_playing = prop.title;
-            if (prop.title != null && prop.artist != null) {
-                prop.now_playing = prop.artist + " - " + prop.title;
-            }
-            debug ("now playing: %s", prop.now_playing);
-            if (mpris_player.metadata.contains ("mpris:length")
-                && mpris_player.metadata.get ("mpris:length").is_of_type (VariantType.INT64)) {
-                prop.length = mpris_player.metadata.get ("mpris:length").get_int64 () / 1000;
-            }
-            update_needed = true;
-        }
 
-        if (update_needed) {
-            prop.is_playing = mpris_player.playback_status == "Playing";
-            prop.can_pause = mpris_player.can_pause;
-            prop.can_play = mpris_player.can_play;
-            prop.can_go_next = mpris_player.can_go_next;
-            prop.can_go_previous = mpris_player.can_go_previous;
-            prop.can_seek = mpris_player.can_seek;
-            update_status (make_player_prop_packet (player_id, prop));
+            bool update_needed = false;
+            Properties prop = {};
+            prop.position = mpris_player.position / 1000;
+            if (pkt.body.has_member ("Seek")) {
+                mpris_player.seek (pkt.body.get_int_member ("Seek"));
+                prop.position += pkt.body.get_int_member ("Seek") / 1000;
+                update_needed = true;
+            }
+
+            int ? volume = null;
+            if (pkt.body.has_member ("requestVolume") && pkt.body.get_boolean_member ("requestVolume")) {
+                volume = (int) (mpris_player.volume * 100.0);
+                update_needed = true;
+            }
+            if (pkt.body.has_member ("requestNowPlaying") && pkt.body.get_boolean_member ("requestNowPlaying")) {
+                if (mpris_player.metadata.contains ("xesam:title")
+                    && mpris_player.metadata.get ("xesam:title").is_of_type (VariantType.STRING)) {
+                    prop.title = mpris_player.metadata.get ("xesam:title").get_string ();
+                }
+                if (mpris_player.metadata.contains ("xesam:artist")
+                    && mpris_player.metadata.get ("xesam:artist").is_of_type (VariantType.STRING)) {
+                    prop.artist = mpris_player.metadata.get ("xesam:artist").get_string ();
+                }
+                if (mpris_player.metadata.contains ("xesam:album")
+                    && mpris_player.metadata.get ("xesam:artist").is_of_type (VariantType.STRING)) {
+                    prop.album = mpris_player.metadata.get ("xesam:artist").get_string ();
+                }
+                if (mpris_player.metadata.contains ("mpris:artUrl")
+                    && mpris_player.metadata.get ("mpris:artUrl").is_of_type (VariantType.STRING)) {
+                    prop.album_art_url = mpris_player.metadata.get ("mpris:artUrl").get_string ();
+                }
+                prop.now_playing = prop.title;
+                if (prop.title != null && prop.artist != null) {
+                    prop.now_playing = prop.artist + " - " + prop.title;
+                }
+                debug ("now playing: %s", prop.now_playing);
+                if (mpris_player.metadata.contains ("mpris:length")
+                    && mpris_player.metadata.get ("mpris:length").is_of_type (VariantType.INT64)) {
+                    prop.length = mpris_player.metadata.get ("mpris:length").get_int64 () / 1000;
+                }
+                update_needed = true;
+            }
+
+            if (update_needed) {
+                prop.is_playing = mpris_player.playback_status == "Playing";
+                prop.can_pause = mpris_player.can_pause;
+                prop.can_play = mpris_player.can_play;
+                prop.can_go_next = mpris_player.can_go_next;
+                prop.can_go_previous = mpris_player.can_go_previous;
+                prop.can_seek = mpris_player.can_seek;
+                update_status (make_player_prop_packet (player_id, prop));
+            }
+        } catch (IOError e) {
+            warning ("dbus communication failed: %s", e.message);
+            return;
         }
     }
 
@@ -241,9 +251,13 @@ class MprisHandler : Object, PacketHandlerInterface {
         }
 
         if (update_needed) {
-            MprisPlayerProxy mpris_player = Bus.get_proxy_sync (BusType.SESSION, "org.mpris.MediaPlayer2.mpv", "/org/mpris/MediaPlayer2");
-            prop.position = int64.max (0, mpris_player.position / 1000);
-            update_status (make_player_prop_packet (player_id, prop));
+            try {
+                MprisPlayerProxy mpris_player = Bus.get_proxy_sync (BusType.SESSION, "org.mpris.MediaPlayer2.mpv", "/org/mpris/MediaPlayer2");
+                prop.position = int64.max (0, mpris_player.position / 1000);
+                update_status (make_player_prop_packet (player_id, prop));
+            } catch (IOError e) {
+                warning ("failed to open dbus connection %s", e.message);
+            }
         }
     }
 
@@ -326,47 +340,60 @@ class MprisHandler : Object, PacketHandlerInterface {
     }
 
     private void add_to_player_list (string bus_name) {
-        MprisProxy mpris = Bus.get_proxy_sync (BusType.SESSION,
-                                               bus_name,
-                                               "/org/mpris/MediaPlayer2");
-        player_list.insert (mpris.identity, bus_name);
         debug ("mpris player found: %s", bus_name);
+        try {
+            MprisProxy mpris = Bus.get_proxy_sync (BusType.SESSION,
+                                                   bus_name,
+                                                   "/org/mpris/MediaPlayer2");
+            player_list.insert (mpris.identity, bus_name);
+        } catch (IOError e) {
+            warning ("failed to connect to mpris player: %s", e.message);
+        }
     }
 
     private void get_player_list () {
         if (_dbus_watcher == null) {
-            _dbus_watcher = Bus.get_proxy_sync (BusType.SESSION, "org.freedesktop.DBus", "/org/freedesktop/DBus");
+            try {
+                _dbus_watcher = Bus.get_proxy_sync (BusType.SESSION, "org.freedesktop.DBus", "/org/freedesktop/DBus");
 
-            _dbus_watcher.name_owner_changed.connect ((name, old_owner, new_owner) => {
-                if (!name.has_prefix ("org.mpris.MediaPlayer2.")) {
-                    return;
-                }
-                if (new_owner == "") {
-                    debug ("mpris player disconnected: %s", name);
-                    string key = "";
-                    player_list.find ((k, v) => {
-                        if (v == name) {
-                            key = k;
-                        }
-                        return v == k;
-                    });
-                    player_list.remove (key);
-                    _properties_watchers.remove (key);
-                    update_status (make_player_list_packet (player_list));
-                } else if (old_owner == "") {
-                    debug ("new mpris player detected: %s", name);
-                    add_to_player_list (name);
-                    update_status (make_player_list_packet (player_list));
-                }
-            });
+                _dbus_watcher.name_owner_changed.connect ((name, old_owner, new_owner) => {
+                    if (!name.has_prefix ("org.mpris.MediaPlayer2.")) {
+                        return;
+                    }
+                    if (new_owner == "") {
+                        debug ("mpris player disconnected: %s", name);
+                        string key = "";
+                        player_list.find ((k, v) => {
+                            if (v == name) {
+                                key = k;
+                            }
+                            return v == k;
+                        });
+                        player_list.remove (key);
+                        _properties_watchers.remove (key);
+                        update_status (make_player_list_packet (player_list));
+                    } else if (old_owner == "") {
+                        debug ("new mpris player detected: %s", name);
+                        add_to_player_list (name);
+                        update_status (make_player_list_packet (player_list));
+                    }
+                });
+            } catch (IOError e) {
+                warning ("failed to open dbus connection: %s", e.message);
+                return;
+            }
         }
 
-        string[] bus_names = _dbus_watcher.list_names ();
+        try {
+            string[] bus_names = _dbus_watcher.list_names ();
 
-        foreach (string bus_name in bus_names) {
-            if (bus_name.has_prefix ("org.mpris.MediaPlayer2.")) {
-                add_to_player_list (bus_name);
+            foreach (string bus_name in bus_names) {
+                if (bus_name.has_prefix ("org.mpris.MediaPlayer2.")) {
+                    add_to_player_list (bus_name);
+                }
             }
+        } catch (IOError e) {
+            warning ("failed to get mpris player list: %s", e.message);
         }
     }
 }

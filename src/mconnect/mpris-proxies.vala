@@ -2,7 +2,7 @@
 [DBus (name = "org.freedesktop.DBus")]
 public interface DBusProxy : Object {
     [DBus (name = "ListNames")]
-    public abstract string[] list_names () throws DBusError, IOError;
+    public abstract string[] list_names () throws IOError;
 
     [DBus (name = "NameOwnerChanged")]
     public signal void name_owner_changed (string name, string old_owner, string new_owner);
@@ -17,16 +17,16 @@ public interface MprisPropertiesProxy : Object {
 [DBus (name = "org.mpris.MediaPlayer2.Player")]
 public interface MprisPlayerProxy : Object {
     [DBus (name = "Next")]
-    public abstract void next () throws DBusError, IOError;
+    public abstract void next () throws IOError;
 
     [DBus (name = "Previous")]
-    public abstract void previous () throws DBusError, IOError;
+    public abstract void previous () throws IOError;
 
     [DBus (name = "PlayPause")]
-    public abstract void play_pause () throws DBusError, IOError;
+    public abstract void play_pause () throws IOError;
 
     [DBus (name = "Seek")]
-    public abstract void seek (int64 Offset) throws DBusError, IOError;
+    public abstract void seek (int64 Offset) throws IOError;
 
     [DBus (name = "PlaybackStatus")]
     public abstract string playback_status {
