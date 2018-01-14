@@ -13,7 +13,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  * AUTHORS
- * Maciek Borzecki <maciek.borzecki (at] gmail.com>
+ * Raphael Vogelgsang <rap.vog (at] gmail.com>
  */
 
 class MprisHandler : Object, PacketHandlerInterface {
@@ -22,8 +22,13 @@ class MprisHandler : Object, PacketHandlerInterface {
     public const string MPRIS_PKT = "kdeconnect.mpris";
 
     private DBusProxy ? _dbus_watcher = null;
-    private HashTable<string, MprisPropertiesProxy ? > _properties_watchers;
+
     private HashTable<string, string> player_list;
+    // maps MPRIS identity to player ID, eg. Spotify -> org.mpris.MediaPlayer2.spotify
+
+    private HashTable<string, DBusPropertiesProxy ? > _player_properties_watchers;
+    // maps player DBus name (eg. org.mpris.MediaPlayer2.spotify) to org.freedesktop.DBus.Properties
+    // proxy for that player
 
     private struct Properties {
         int ? volume;
@@ -51,9 +56,9 @@ class MprisHandler : Object, PacketHandlerInterface {
     }
 
     private MprisHandler () {
-        _properties_watchers = new HashTable<string, MprisPropertiesProxy ? >(str_hash, str_equal);
+        _player_properties_watchers = new HashTable<string, DBusPropertiesProxy ? >(str_hash, str_equal);
         player_list = new HashTable<string, string>(str_hash, str_equal);
-        get_player_list ();
+        update_players_list ();
     }
 
     public static MprisHandler instance () {
@@ -70,12 +75,16 @@ class MprisHandler : Object, PacketHandlerInterface {
     }
 
     private void message (Device dev, Packet pkt) {
+        /* example packet:
+         * {"id":1515928341379,"type":"kdeconnect.mpris.request","body":{
+         *                  "player":"mpv","requestNowPlaying":true,"requestVolume":true}}
+         */
         if (pkt.pkt_type != MPRIS) {
             return;
         }
 
         if (pkt.body.has_member ("requestPlayerList") && pkt.body.get_boolean_member ("requestPlayerList")) {
-            get_player_list ();
+            update_players_list ();
             update_status (make_player_list_packet (player_list));
         }
         if (!pkt.body.has_member ("player")) {
@@ -86,10 +95,10 @@ class MprisHandler : Object, PacketHandlerInterface {
             return;
         }
         var bus_name = player_list.get (player_id);
-        if (!_properties_watchers.contains (bus_name)) {
+        if (!_player_properties_watchers.contains (bus_name)) {
             try {
-                MprisPropertiesProxy prop = Bus.get_proxy_sync (BusType.SESSION, bus_name, "/org/mpris/MediaPlayer2");
-                _properties_watchers.insert (bus_name, prop);
+                DBusPropertiesProxy prop = Bus.get_proxy_sync (BusType.SESSION, bus_name, "/org/mpris/MediaPlayer2");
+                _player_properties_watchers.insert (bus_name, prop);
                 prop.properties_changed.connect ((a, b, c) => {
                     properties_changed (player_id, a, b);
                 });
@@ -119,7 +128,7 @@ class MprisHandler : Object, PacketHandlerInterface {
             if (pkt.body.has_member ("setVolume")) {
                 mpris_player.volume = (int) pkt.body.get_int_member ("setVolume") / 100.0;
             }
-
+            // strangely the kdeconnect protocol uses setVolume vs SetPosition as keynames
             if (pkt.body.has_member ("SetPosition")) {
                 int64 pos = pkt.body.get_int_member ("SetPosition") * 1000 - mpris_player.position;
                 mpris_player.seek (pos);
@@ -134,28 +143,15 @@ class MprisHandler : Object, PacketHandlerInterface {
                 update_needed = true;
             }
 
-            int ? volume = null;
             if (pkt.body.has_member ("requestVolume") && pkt.body.get_boolean_member ("requestVolume")) {
-                volume = (int) (mpris_player.volume * 100.0);
+                prop.volume = (int) (mpris_player.volume * 100.0);
                 update_needed = true;
             }
             if (pkt.body.has_member ("requestNowPlaying") && pkt.body.get_boolean_member ("requestNowPlaying")) {
-                if (mpris_player.metadata.contains ("xesam:title")
-                    && mpris_player.metadata.get ("xesam:title").is_of_type (VariantType.STRING)) {
-                    prop.title = mpris_player.metadata.get ("xesam:title").get_string ();
-                }
-                if (mpris_player.metadata.contains ("xesam:artist")
-                    && mpris_player.metadata.get ("xesam:artist").is_of_type (VariantType.STRING)) {
-                    prop.artist = mpris_player.metadata.get ("xesam:artist").get_string ();
-                }
-                if (mpris_player.metadata.contains ("xesam:album")
-                    && mpris_player.metadata.get ("xesam:artist").is_of_type (VariantType.STRING)) {
-                    prop.album = mpris_player.metadata.get ("xesam:artist").get_string ();
-                }
-                if (mpris_player.metadata.contains ("mpris:artUrl")
-                    && mpris_player.metadata.get ("mpris:artUrl").is_of_type (VariantType.STRING)) {
-                    prop.album_art_url = mpris_player.metadata.get ("mpris:artUrl").get_string ();
-                }
+                get_metadata_string (mpris_player.metadata, "xesam:title", out prop.title);
+                get_metadata_string (mpris_player.metadata, "xesam:artist", out prop.artist);
+                get_metadata_string (mpris_player.metadata, "xesam:album", out prop.album);
+                get_metadata_string (mpris_player.metadata, "mpris:artUrl", out prop.album_art_url);
                 prop.now_playing = prop.title;
                 if (prop.title != null && prop.artist != null) {
                     prop.now_playing = prop.artist + " - " + prop.title;
@@ -180,6 +176,13 @@ class MprisHandler : Object, PacketHandlerInterface {
         } catch (IOError e) {
             warning ("dbus communication failed: %s", e.message);
             return;
+        }
+    }
+
+    private static void get_metadata_string (HashTable<string, Variant> metadata, string meta_what, out string where) {
+        if (metadata.contains (meta_what) &&
+            metadata.get (meta_what).is_of_type (VariantType.STRING)) {
+            where = metadata.get (meta_what).get_string ();
         }
     }
 
@@ -252,7 +255,7 @@ class MprisHandler : Object, PacketHandlerInterface {
 
         if (update_needed) {
             try {
-                MprisPlayerProxy mpris_player = Bus.get_proxy_sync (BusType.SESSION, "org.mpris.MediaPlayer2.mpv", "/org/mpris/MediaPlayer2");
+                MprisPlayerProxy mpris_player = Bus.get_proxy_sync (BusType.SESSION, player_list.get (player_id), "/org/mpris/MediaPlayer2");
                 prop.position = int64.max (0, mpris_player.position / 1000);
                 update_status (make_player_prop_packet (player_id, prop));
             } catch (IOError e) {
@@ -339,44 +342,18 @@ class MprisHandler : Object, PacketHandlerInterface {
                            builder.get_root ().get_object ());
     }
 
-    private void add_to_player_list (string bus_name) {
-        debug ("mpris player found: %s", bus_name);
-        try {
-            MprisProxy mpris = Bus.get_proxy_sync (BusType.SESSION,
-                                                   bus_name,
-                                                   "/org/mpris/MediaPlayer2");
-            player_list.insert (mpris.identity, bus_name);
-        } catch (IOError e) {
-            warning ("failed to connect to mpris player: %s", e.message);
-        }
-    }
-
-    private void get_player_list () {
+    /**
+     * update_players_list:
+     *
+     * Update and cache the list of available players (var player_list)
+     */
+    private void update_players_list () {
         if (_dbus_watcher == null) {
             try {
                 _dbus_watcher = Bus.get_proxy_sync (BusType.SESSION, "org.freedesktop.DBus", "/org/freedesktop/DBus");
 
                 _dbus_watcher.name_owner_changed.connect ((name, old_owner, new_owner) => {
-                    if (!name.has_prefix ("org.mpris.MediaPlayer2.")) {
-                        return;
-                    }
-                    if (new_owner == "") {
-                        debug ("mpris player disconnected: %s", name);
-                        string key = "";
-                        player_list.find ((k, v) => {
-                            if (v == name) {
-                                key = k;
-                            }
-                            return v == k;
-                        });
-                        player_list.remove (key);
-                        _properties_watchers.remove (key);
-                        update_status (make_player_list_packet (player_list));
-                    } else if (old_owner == "") {
-                        debug ("new mpris player detected: %s", name);
-                        add_to_player_list (name);
-                        update_status (make_player_list_packet (player_list));
-                    }
+                    _dbus_name_changed (name, old_owner, new_owner);
                 });
             } catch (IOError e) {
                 warning ("failed to open dbus connection: %s", e.message);
@@ -389,11 +366,52 @@ class MprisHandler : Object, PacketHandlerInterface {
 
             foreach (string bus_name in bus_names) {
                 if (bus_name.has_prefix ("org.mpris.MediaPlayer2.")) {
-                    add_to_player_list (bus_name);
+                    add_player (bus_name);
                 }
             }
         } catch (IOError e) {
             warning ("failed to get mpris player list: %s", e.message);
+        }
+    }
+
+    private void _dbus_name_changed (string bus_name, string old_owner, string new_owner) {
+        if (!bus_name.has_prefix ("org.mpris.MediaPlayer2.")) {
+            return;
+        }
+        if (new_owner == "") {
+            debug ("mpris player disconnected: %s", bus_name);
+            remove_player (bus_name);
+            update_status (make_player_list_packet (player_list));
+        } else if (old_owner == "") {
+            debug ("new mpris player detected: %s", bus_name);
+            add_player (bus_name);
+            update_status (make_player_list_packet (player_list));
+        }
+    }
+
+    private void add_player (string bus_name) {
+        debug ("mpris player found: %s", bus_name);
+        try {
+            MprisProxy mpris = Bus.get_proxy_sync (BusType.SESSION,
+                                                   bus_name,
+                                                   "/org/mpris/MediaPlayer2");
+            player_list.insert (mpris.identity, bus_name);
+        } catch (IOError e) {
+            warning ("failed to connect to mpris player: %s", e.message);
+        }
+    }
+
+    private void remove_player (string bus_name) {
+        _player_properties_watchers.remove (bus_name);
+        string key = "";
+        player_list.find ((k, v) => {
+            if (v == bus_name) {
+                key = k;
+            }
+            return v == k;
+        });
+        if (key != "") {
+            player_list.remove (key);
         }
     }
 }
