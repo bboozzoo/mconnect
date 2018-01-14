@@ -143,7 +143,7 @@ build_in_container() {
 
     # distro specific quirks
     case "$1" in
-        ubuntu-xenial|opensuse)
+        ubuntu-xenial|opensuse|fedora)
             echo "$1 is using an outdated version of uncrustify, suppress formatting errors"
             export SUPPRESS_FMT=1
             ;;
