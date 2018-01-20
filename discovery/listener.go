@@ -16,6 +16,7 @@ import (
 	"net"
 
 	"github.com/bboozzoo/mconnect/logger"
+	"github.com/bboozzoo/mconnect/protocol/packet"
 )
 
 type Listener struct {
@@ -48,4 +49,16 @@ func (l *Listener) Receive(ctx context.Context) {
 
 	log.Printf("got %v bytes from %v", count, addr)
 	log.Printf("data:\n%s", string(buf))
+	p, err := packet.FromData(buf)
+	if err != nil {
+		log.Errorf("failed to parse packet: %v", err)
+		return
+	}
+	log.Printf("packet: %+v", p)
+	identity, err := p.AsIdentity()
+	if err != nil {
+		log.Errorf("failed to parse identity packet: %v", err)
+		return
+	}
+	log.Printf("identity: %+v", identity)
 }
