@@ -15,6 +15,8 @@ import (
 	"context"
 	"net"
 
+	"github.com/pkg/errors"
+
 	"github.com/bboozzoo/mconnect/logger"
 	"github.com/bboozzoo/mconnect/protocol/packet"
 )
@@ -39,26 +41,40 @@ func NewListener() (*Listener, error) {
 	return listener, nil
 }
 
-func (l *Listener) Receive(ctx context.Context) {
+// Discovery conveys the received discovery information
+type Discovery struct {
+	// Packet is the original packet received
+	Packet *packet.Packet
+	// Identity is the parsed identity data
+	Identity *packet.Identity
+	// From is the address the packet was received from
+	From *net.UDPAddr
+}
+
+// Receive blocks waiting to receive a discovery packet. Once received, it will
+// parse the packet and return a result.
+func (l *Listener) Receive(ctx context.Context) (*Discovery, error) {
 	log := logger.FromContext(ctx)
 	buf := make([]byte, 4096)
 	count, addr, err := l.conn.ReadFromUDP(buf)
 	if err != nil {
-		log.Printf("listen failed: %v", err)
+		return nil, errors.Wrap(err, "failed to receive a packet")
 	}
 
-	log.Printf("got %v bytes from %v", count, addr)
-	log.Printf("data:\n%s", string(buf))
+	log.Debugf("got %v bytes from %v", count, addr)
+	log.Debugf("data:\n%s", string(buf))
 	p, err := packet.FromData(buf)
 	if err != nil {
-		log.Errorf("failed to parse packet: %v", err)
-		return
+		return nil, errors.Wrap(err, "failed to parse packet")
 	}
-	log.Printf("packet: %+v", p)
 	identity, err := p.AsIdentity()
 	if err != nil {
-		log.Errorf("failed to parse identity packet: %v", err)
-		return
+		return nil, errors.Wrap(err, "failed to parse as identity packet")
 	}
-	log.Printf("identity: %+v", identity)
+	discovery := &Discovery{
+		Packet:   p,
+		Identity: identity,
+		From:     addr,
+	}
+	return discovery, nil
 }
