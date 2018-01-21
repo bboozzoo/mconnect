@@ -38,6 +38,13 @@ func main() {
 
 	for {
 		log.Printf("receive wait")
-		l.Receive(ctx)
+		d, err := l.Receive(ctx)
+		if err != nil {
+			log.Warning("failed to receive identity packet: %v", err)
+			continue
+		}
+
+		log.Infof("discovered a device at %s packet: %v",
+			d.From, d.Identity)
 	}
 }
