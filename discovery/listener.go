@@ -63,8 +63,8 @@ func (l *Listener) Receive(ctx context.Context) (*Discovery, error) {
 
 	log.Debugf("got %v bytes from %v", count, addr)
 	log.Debugf("data:\n%s", string(buf))
-	p, err := packet.FromData(buf)
-	if err != nil {
+	var p packet.Packet
+	if err := packet.Unmarshal(buf, &p); err != nil {
 		return nil, errors.Wrap(err, "failed to parse packet")
 	}
 	identity, err := p.AsIdentity()
@@ -72,7 +72,7 @@ func (l *Listener) Receive(ctx context.Context) (*Discovery, error) {
 		return nil, errors.Wrap(err, "failed to parse as identity packet")
 	}
 	discovery := &Discovery{
-		Packet:   p,
+		Packet:   &p,
 		Identity: identity,
 		From:     addr,
 	}
