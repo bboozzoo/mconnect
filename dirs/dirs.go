@@ -37,5 +37,5 @@ func UserConfig() string {
 }
 
 func UserData() string {
-	return path.Join(UserHome(), ".local", "mconnect")
+	return path.Join(UserHome(), ".local", "share", "mconnect")
 }

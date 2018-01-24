@@ -25,5 +25,5 @@ func TestUserDirs(t *testing.T) {
 
 	assert.Equal(t, dirs.UserCache(), "/home/foo/.cache/mconnect")
 	assert.Equal(t, dirs.UserConfig(), "/home/foo/.config/mconnect")
-	assert.Equal(t, dirs.UserData(), "/home/foo/.local/mconnect")
+	assert.Equal(t, dirs.UserData(), "/home/foo/.local/share/mconnect")
 }
