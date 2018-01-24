@@ -16,7 +16,15 @@ import (
 )
 
 type Packet struct {
-	Id   uint64
-	Type string
-	Body json.RawMessage
+	Id      uint64          `json:"id"`
+	Type    string          `json:"type"`
+	Body    json.RawMessage `json:"body"`
+	auxBody interface{}
+}
+
+func New(typ string, body interface{}) *Packet {
+	return &Packet{
+		Type:    typ,
+		auxBody: body,
+	}
 }
