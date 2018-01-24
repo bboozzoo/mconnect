@@ -19,7 +19,7 @@ import (
 	"github.com/bboozzoo/mconnect/protocol/packet"
 )
 
-func TestParseFromData(t *testing.T) {
+func TestUnmarshal(t *testing.T) {
 	var p packet.Packet
 	err := packet.Unmarshal([]byte(`foobar`), &p)
 	assert.Error(t, err)
