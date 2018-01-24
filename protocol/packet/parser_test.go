@@ -20,16 +20,18 @@ import (
 )
 
 func TestParseFromData(t *testing.T) {
-	p, err := packet.FromData([]byte(`foobar`))
+	var p packet.Packet
+	err := packet.Unmarshal([]byte(`foobar`), &p)
 	assert.Error(t, err)
 
-	p, err = packet.FromData([]byte(`{}`))
+	p = packet.Packet{}
+	err = packet.Unmarshal([]byte(`{}`), &p)
 	assert.Error(t, err)
 
-	p, err = packet.FromData([]byte(`{"id": 123, "type": "foo","body":{}}`))
+	p = packet.Packet{}
+	err = packet.Unmarshal([]byte(`{"id": 123, "type": "foo","body":{}}`), &p)
 	assert.NoError(t, err)
-	assert.NotNil(t, p)
-	assert.Equal(t, p, &packet.Packet{
+	assert.Equal(t, p, packet.Packet{
 		Id:   uint64(123),
 		Type: "foo",
 		Body: []byte("{}"),

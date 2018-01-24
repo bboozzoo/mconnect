@@ -17,18 +17,24 @@ import (
 	"fmt"
 )
 
-func FromData(data []byte) (*Packet, error) {
-	var p Packet
+func Unmarshal(data []byte, p *Packet) error {
+	if len(data) == 0 {
+		return fmt.Errorf("no data")
+	}
+
+	if p == nil {
+		return fmt.Errorf("no packet")
+	}
 
 	if idx := bytes.LastIndexByte(data, '\n'); idx != -1 {
 		data = data[0:idx]
 	}
-	if err := json.Unmarshal(data, &p); err != nil {
-		return nil, err
+	if err := json.Unmarshal(data, p); err != nil {
+		return err
 	}
 
 	if p.Id == uint64(0) || p.Type == "" || p.Body == nil {
-		return nil, fmt.Errorf("packet incomplete, missing id, type or body")
+		return fmt.Errorf("packet incomplete, missing id, type or body")
 	}
-	return &p, nil
+	return nil
 }
