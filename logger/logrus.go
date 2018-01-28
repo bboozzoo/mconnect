@@ -17,19 +17,29 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-var log *logrus.Logger
+type logger struct {
+	logrus.Logger
+}
+
+var log *logger
 
 func init() {
-	log = &logrus.Logger{
-		Out: os.Stderr,
-		Formatter: &logrus.TextFormatter{
-			FullTimestamp: true,
+	log = &logger{
+		Logger: logrus.Logger{
+			Out: os.Stderr,
+			Formatter: &logrus.TextFormatter{
+				FullTimestamp: true,
+			},
+			Hooks: make(logrus.LevelHooks),
+			Level: logrus.DebugLevel,
 		},
-		Hooks: make(logrus.LevelHooks),
-		Level: logrus.DebugLevel,
 	}
 }
 
 func New() Logger {
 	return log
+}
+
+func (l *logger) SetLevel(level Level) {
+	l.Logger.SetLevel(logrus.Level(level))
 }
