@@ -15,9 +15,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/bboozzoo/mconnect/discovery"
 	"github.com/bboozzoo/mconnect/logger"
+	"github.com/bboozzoo/mconnect/protocol/packet"
 )
 
 var Stderr = os.Stderr
@@ -35,6 +37,29 @@ func main() {
 			err)
 		os.Exit(1)
 	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Fprintf(Stderr, "error: failed to obtain hostname: %v\n",
+			err)
+		os.Exit(1)
+	}
+
+	go func() {
+		for {
+			err := discovery.Announce(ctx, packet.Identity{
+				DeviceId:        "mconnect-" + hostname,
+				DeviceName:      hostname,
+				DeviceType:      "computer",
+				ProtocolVersion: 7,
+				TcpPort:         1716,
+			})
+			if err != nil {
+				log.Errorf("failed to self announce: %v", err)
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	for {
 		log.Printf("receive wait")
