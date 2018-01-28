@@ -17,13 +17,13 @@ import (
 )
 
 type Identity struct {
-	DeviceId             string
-	DeviceName           string
-	DeviceType           string
-	ProtocolVersion      uint
-	IncomingCapabilities []string
-	OutgoingCapabilities []string
-	TcpPort              uint
+	DeviceId             string   `json:"deviceId"`
+	DeviceName           string   `json:"deviceName"`
+	DeviceType           string   `json:"deviceType"`
+	ProtocolVersion      uint     `json:"protocolVersion"`
+	IncomingCapabilities []string `json:"incomingCapabilities"`
+	OutgoingCapabilities []string `json:"outgoingCapabilities"`
+	TcpPort              uint     `json:"tcpPort"`
 }
 
 func (p *Packet) AsIdentity() (*Identity, error) {
