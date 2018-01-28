@@ -27,7 +27,7 @@ type Listener struct {
 
 func NewListener() (*Listener, error) {
 	addr := net.UDPAddr{
-		Port: 1714,
+		Port: 1716,
 	}
 	conn, err := net.ListenUDP("udp", &addr)
 	if err != nil {
