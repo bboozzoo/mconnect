@@ -22,15 +22,19 @@ import (
 	"github.com/bboozzoo/mconnect/protocol/packet"
 )
 
-var Stderr = os.Stderr
+var (
+	Stderr = os.Stderr
+	Stdout = os.Stdout
+)
 
 func main() {
 	ctx := context.Background()
 	ctx = logger.WithContext(ctx, logger.New())
 
 	log := logger.FromContext(ctx)
+	log.SetLevel(logger.ErrorLevel)
 
-	log.Printf("setting up listener")
+	log.Infof("setting up listener")
 	l, err := discovery.NewListener()
 	if err != nil {
 		fmt.Fprintf(Stderr, "error: failed to setup listener: %v\n",
@@ -61,8 +65,10 @@ func main() {
 		}
 	}()
 
+	devices := map[string]*discovery.Discovery{}
+
 	for {
-		log.Printf("receive wait")
+		log.Info("receive wait")
 		d, err := l.Receive(ctx)
 		if err != nil {
 			log.Warning("failed to receive identity packet: %v", err)
@@ -71,5 +77,12 @@ func main() {
 
 		log.Infof("discovered a device at %s packet: %v",
 			d.From, d.Identity)
+		if _, ok := devices[d.Identity.DeviceId]; !ok {
+			devices[d.Identity.DeviceId] = d
+			fmt.Fprintf(Stdout, " * %q (ID: %v) %v\n",
+				d.Identity.DeviceName,
+				d.Identity.DeviceId,
+				d.From.IP)
+		}
 	}
 }
