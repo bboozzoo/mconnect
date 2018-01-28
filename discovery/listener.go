@@ -18,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/bboozzoo/mconnect/logger"
+	"github.com/bboozzoo/mconnect/protocol"
 	"github.com/bboozzoo/mconnect/protocol/packet"
 )
 
@@ -26,10 +27,7 @@ type Listener struct {
 }
 
 func NewListener() (*Listener, error) {
-	addr := net.UDPAddr{
-		Port: 1716,
-	}
-	conn, err := net.ListenUDP("udp", &addr)
+	conn, err := net.ListenUDP("udp", protocol.UDPDiscoveryAddr)
 	if err != nil {
 		return nil, err
 	}

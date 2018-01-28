@@ -17,6 +17,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/bboozzoo/mconnect/protocol"
 	"github.com/bboozzoo/mconnect/protocol/packet"
 )
 
@@ -27,11 +28,7 @@ func Announce(ctx context.Context, identity packet.Identity) error {
 		return errors.Wrapf(err, "failed to marshal packet")
 	}
 
-	addr := net.UDPAddr{
-		Port: 1716,
-		IP:   net.ParseIP("255.255.255.255"),
-	}
-	c, err := net.DialUDP("udp", nil, &addr)
+	c, err := net.DialUDP("udp", nil, protocol.UDPDiscoveryAddr)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open UDP socket")
 	}
