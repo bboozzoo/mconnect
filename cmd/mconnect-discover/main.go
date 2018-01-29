@@ -17,9 +17,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/jessevdk/go-flags"
+
 	"github.com/bboozzoo/mconnect/discovery"
 	"github.com/bboozzoo/mconnect/logger"
 	"github.com/bboozzoo/mconnect/protocol/packet"
+	uflags "github.com/bboozzoo/mconnect/utils/flags"
 )
 
 var (
@@ -28,11 +31,23 @@ var (
 )
 
 func main() {
+	var opts struct {
+		Debug bool `short:"d" long:"debug" description:"Show debugging information"`
+	}
+
+	_, err := flags.ParseArgs(&opts, os.Args)
+	if err != nil {
+		uflags.HandleFlagsError(err)
+	}
+
 	ctx := context.Background()
 	ctx = logger.WithContext(ctx, logger.New())
 
 	log := logger.FromContext(ctx)
 	log.SetLevel(logger.ErrorLevel)
+	if opts.Debug {
+		log.SetLevel(logger.DebugLevel)
+	}
 
 	log.Infof("setting up listener")
 	l, err := discovery.NewListener()
