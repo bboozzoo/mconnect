@@ -12,9 +12,12 @@
 package packet
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"io"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var getId = func() uint64 {
@@ -22,30 +25,57 @@ var getId = func() uint64 {
 }
 
 func Marshal(p *Packet) ([]byte, error) {
+	b := &bytes.Buffer{}
+	enc := NewEncoder(b)
+	if err := enc.Encode(p); err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+type Encoder struct {
+	w io.Writer
+	j *json.Encoder
+}
+
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{
+		w: w,
+		j: json.NewEncoder(w),
+	}
+}
+
+type auxPacket struct {
+	Packet
+	Body interface{} `json:"body"`
+}
+
+func (e *Encoder) Encode(p *Packet) error {
 	if p == nil {
-		return nil, fmt.Errorf("no packet")
+		return errors.New("no packet")
 	}
 
 	if p.Type == "" {
-		return nil, fmt.Errorf("packet type not set")
+		return errors.New("packet type not set")
 	}
 
-	body, err := json.Marshal(p.auxBody)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode body: %v", err)
-	}
 	id := p.Id
 	if id == 0 {
 		id = getId()
 	}
-	data, err := json.Marshal(Packet{
-		Id:   id,
-		Type: p.Type,
+
+	body := p.auxBody
+	// encodes packet and appends a newline character
+	err := e.j.Encode(auxPacket{
+		Packet: Packet{
+			Id:   id,
+			Type: p.Type,
+		},
 		Body: body,
 	})
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "failed to encode body")
 	}
 
-	return append(data, '\n'), nil
+	return nil
 }

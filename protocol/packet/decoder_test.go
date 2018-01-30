@@ -12,6 +12,7 @@
 package packet_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,4 +37,35 @@ func TestUnmarshal(t *testing.T) {
 		Type: "foo",
 		Body: []byte("{}"),
 	})
+}
+
+func TestDecoder(t *testing.T) {
+	input := `
+{"id": 123, "type": "foo","body":{}}
+{"id": 456, "type": "bar","body":{"123": 123}}
+{"id": 678, "type": "baz"
+`
+	d := packet.NewDecoder(strings.NewReader(input))
+
+	p := packet.Packet{}
+	err := d.Decode(&p)
+	assert.NoError(t, err)
+	assert.Equal(t, p, packet.Packet{
+		Id:   uint64(123),
+		Type: "foo",
+		Body: []byte("{}"),
+	})
+
+	p = packet.Packet{}
+	err = d.Decode(&p)
+	assert.NoError(t, err)
+	assert.Equal(t, p, packet.Packet{
+		Id:   uint64(456),
+		Type: "bar",
+		Body: []byte(`{"123": 123}`),
+	})
+
+	p = packet.Packet{}
+	err = d.Decode(&p)
+	assert.Error(t, err)
 }

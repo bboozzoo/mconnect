@@ -15,22 +15,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+
+	"github.com/pkg/errors"
 )
 
 func Unmarshal(data []byte, p *Packet) error {
-	if len(data) == 0 {
-		return fmt.Errorf("no data")
-	}
+	return NewDecoder(bytes.NewBuffer(data)).Decode(p)
+}
 
+type Decoder struct {
+	r io.Reader
+	j *json.Decoder
+}
+
+func NewDecoder(r io.Reader) *Decoder {
+	return &Decoder{
+		r: r,
+		j: json.NewDecoder(r),
+	}
+}
+
+func (d *Decoder) Decode(p *Packet) error {
 	if p == nil {
 		return fmt.Errorf("no packet")
 	}
 
-	if idx := bytes.LastIndexByte(data, '\n'); idx != -1 {
-		data = data[0:idx]
-	}
-	if err := json.Unmarshal(data, p); err != nil {
-		return err
+	if err := d.j.Decode(p); err != nil {
+		return errors.Wrap(err, "failed to decode body")
 	}
 
 	if p.Id == uint64(0) || p.Type == "" || p.Body == nil {
