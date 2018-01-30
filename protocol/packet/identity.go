@@ -36,3 +36,7 @@ func (p *Packet) AsIdentity() (*Identity, error) {
 	}
 	return &identity, nil
 }
+
+func NewIdentity(identity *Identity) *Packet {
+	return New("kdeconnect.identity", identity)
+}
