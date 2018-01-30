@@ -94,10 +94,10 @@ func main() {
 			d.From, d.Identity)
 		if _, ok := devices[d.Identity.DeviceId]; !ok {
 			devices[d.Identity.DeviceId] = d
-			fmt.Fprintf(Stdout, " * %q (ID: %v) %v\n",
+			fmt.Fprintf(Stdout, " * %q (ID: %v) %v:%v\n",
 				d.Identity.DeviceName,
 				d.Identity.DeviceId,
-				d.From.IP)
+				d.From.IP, d.Identity.TcpPort)
 		}
 	}
 }
