@@ -30,7 +30,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = "";
     }
     public string name {
         get {
@@ -38,7 +37,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = "";
     }
     public string device_type {
         get {
@@ -46,7 +44,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = "";
     }
     public uint protocol_version {
         get {
@@ -54,7 +51,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = 5;
     }
     public string address {
         get; private set; default = "";
@@ -66,7 +62,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = false;
     }
     public bool allowed {
         get {
@@ -74,7 +69,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = false;
     }
     public bool is_active {
         get {
@@ -82,7 +76,6 @@ class DeviceDBusProxy : Object {
         }
         private set {
         }
-        default = false;
     }
     public bool is_connected {
         get; private set; default = false;
