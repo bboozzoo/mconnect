@@ -13,8 +13,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
+	"os/user"
 
 	"github.com/jessevdk/go-flags"
 
@@ -51,8 +51,21 @@ func main() {
 
 	hostname, err := os.Hostname()
 	if err != nil {
-		fmt.Fprintf(Stderr, "error: failed to obtain hostname: %v\n",
-			err)
+		log.Errorf("cannot obtain hostname: %v", err)
+		os.Exit(1)
+	}
+
+	u, err := user.Current()
+	if err != nil {
+		log.Errorf("cannot obtain current user: %v", err)
+		os.Exit(1)
+	}
+
+	entity := u.Name + "@" + hostname
+	deviceCert, err := protocol.GenerateDeviceCertificate(entity)
+	if err != nil {
+		log.Errorf("cannot generate device certificate for entity %q: %v",
+			entity, err)
 		os.Exit(1)
 	}
 
@@ -64,6 +77,7 @@ func main() {
 			ProtocolVersion: 7,
 			TcpPort:         1716,
 		},
+		Cert: deviceCert.TLSCertificate(),
 	}
 	conn, err := protocol.Dial(ctx, opts.Address, &conf)
 	if err != nil {
@@ -71,4 +85,35 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+
+	for {
+		var response *packet.Packet
+
+		p, err := conn.Receive()
+		if err != nil {
+			log.Errorf("failed to receive packet: %v", err)
+			os.Exit(1)
+		}
+		log.Infof("got packet: %+v", p)
+		log.Infof("packet type: %q", p.Type)
+		switch p.Type {
+		case "kdeconnect.pair":
+			log.Infof("pair request")
+			pair, err := p.AsPair()
+			if err != nil {
+				log.Errorf("cannot decode pair packet: %v", err)
+				continue
+			}
+			if pair.Pair {
+				response = packet.NewPair()
+			}
+		}
+
+		if response != nil {
+			log.Debugf("sending response: %v", response)
+			if err := conn.Send(*response); err != nil {
+				log.Errorf("cannot send a response packet: %v", err)
+			}
+		}
+	}
 }
