@@ -34,20 +34,20 @@ class TransferDBusProxy : Object {
     }
 
     [DBus (visible = false)]
-    public void bus_register (DBusConnection conn) {
+    public void bus_register (DBusConnection conn) throws Error {
         debug ("register transfer at path %s", this.object_path.to_string ());
         this.register_id = conn.register_object (this.object_path, this);
     }
 
     [DBus (visible = false)]
-    public void bus_unregister (DBusConnection conn) {
+    public void bus_unregister (DBusConnection conn) throws Error {
         if (this.register_id != 0) {
             debug ("unregister transfer at path %s", this.object_path.to_string ());
             conn.unregister_object (this.register_id);
         }
     }
 
-    public void cancel () {
+    public void cancel () throws Error {
         debug ("cancelling job");
         this.transfer.cancel ();
     }

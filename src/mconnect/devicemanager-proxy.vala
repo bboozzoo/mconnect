@@ -25,8 +25,7 @@ class DeviceManagerDBusProxy : Object {
         owned get {
             return Core.instance ().certificate.certificate_pem;
         }
-        private set {
-        }
+        private set {}
     }
 
     public signal void device_added (string path);
@@ -52,7 +51,7 @@ class DeviceManagerDBusProxy : Object {
     }
 
     [DBus (visible = false)]
-    public void publish () throws IOError {
+    public void publish () throws Error {
         assert (this.bus != null);
 
         this.bus.register_object (DBUS_PATH, this);
@@ -64,7 +63,7 @@ class DeviceManagerDBusProxy : Object {
      *
      * Allow given device
      */
-    public void allow_device (string path) {
+    public void allow_device (string path) throws Error {
         debug ("allow device %s", path);
 
         var dev_proxy = this.devices.@get (path);
@@ -83,7 +82,7 @@ class DeviceManagerDBusProxy : Object {
      *
      * Disallow given device
      */
-    public void disallow_device (string path) {
+    public void disallow_device (string path) throws Error {
         debug ("disallow device %s", path);
 
         var dev_proxy = this.devices.@get (path);
@@ -101,7 +100,7 @@ class DeviceManagerDBusProxy : Object {
      *
      * Returns a list of DBus paths of all known devices
      */
-    public ObjectPath[] list_devices () {
+    public ObjectPath[] list_devices () throws Error {
         ObjectPath[] devices = {};
 
         foreach (var path in this.devices.keys) {
@@ -155,7 +154,11 @@ class DeviceManagerDBusProxy : Object {
                                                                    capability,
                                                                    iface);
         if (h != null) {
-            h.bus_register (this.bus, dp.object_path);
+            try {
+                h.bus_register (this.bus, dp.object_path);
+            } catch (Error e) {
+                warning ("cannot register handler at path %s: %s", dp.object_path, e.message);
+            }
         }
     }
 

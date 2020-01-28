@@ -193,7 +193,7 @@ class Device : Object {
             dev.host = host;
 
             return dev;
-        } catch (KeyFileError e) {
+        } catch (Error e) {
             warning ("failed to load device data from cache: %s", e.message);
             return null;
         }
@@ -617,7 +617,7 @@ class Device : Object {
     public void send (Packet pkt) {
         // TODO: queue messages
         if (this._channel != null) {
-            _channel.send (pkt);
+            _channel.send.begin (pkt);
         }
     }
 }

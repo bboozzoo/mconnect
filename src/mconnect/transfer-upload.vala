@@ -71,7 +71,13 @@ class UploadTransfer : TransferInterface, Object {
     }
 
     private async void handle_client (SocketConnection conn) {
-        var isa = conn.get_remote_address () as InetSocketAddress;
+        InetSocketAddress isa;
+        try {
+            isa = conn.get_remote_address () as InetSocketAddress;
+        } catch (Error e) {
+            warning ("cannot obtain remote address: %s", e.message);
+            return;
+        }
         debug ("client connected: %s:%u", isa.address.to_string (),
                isa.port);
 
@@ -87,7 +93,7 @@ class UploadTransfer : TransferInterface, Object {
                                                    Utils.TlsConnectionMode.SERVER);
         try {
             debug ("attempt TLS handshake");
-            var tls_res = yield this.tls_conn.handshake_async ();
+            yield this.tls_conn.handshake_async ();
 
             debug ("TLS handshake complete");
         } catch (Error e) {

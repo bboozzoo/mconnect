@@ -29,25 +29,25 @@ class ShareHandlerProxy : Object, PacketHandlerInterfaceProxy {
     }
 
     [DBus (visible = false)]
-    public void bus_register (DBusConnection conn, string path) throws IOError {
+    public void bus_register (DBusConnection conn, string path) throws Error {
         conn.register_object (path, this);
     }
 
     [DBus (visible = false)]
-    public void bus_unregister (DBusConnection conn) throws IOError {
+    public void bus_unregister (DBusConnection conn) throws Error {
         // conn.unregister_object(this);
     }
 
-    public void share_file (string path) throws IOError {
+    public void share_file (string path) throws Error {
         this.share_handler.share_file (this.device, path);
     }
 
-    public void share_url (string url) throws IOError {
+    public void share_url (string url) throws Error {
         debug ("share url %s", url);
         this.share_handler.share_url (this.device, url);
     }
 
-    public void share_text (string text) throws IOError {
+    public void share_text (string text) throws Error {
         this.share_handler.share_text (this.device, text);
     }
 }

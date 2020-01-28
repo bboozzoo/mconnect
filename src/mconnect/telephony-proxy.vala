@@ -38,7 +38,7 @@ class TelephonyHandlerProxy : Object, PacketHandlerInterfaceProxy {
         // conn.unregister_object(this);
     }
 
-    public void send_sms (string number, string message) {
+    public void send_sms (string number, string message) throws Error {
         this.telephony.send_sms (this.device, number, message);
     }
 }

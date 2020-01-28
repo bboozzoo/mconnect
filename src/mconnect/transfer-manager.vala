@@ -32,6 +32,7 @@ class TransferManager : Object {
     }
 
     public SocketService ? make_listener (out uint16 listen_port) {
+        listen_port = 0;
         var ss = new SocketService ();
         for (var port = PORT_MIN; port <= PORT_MAX; port++) {
             var added = false;

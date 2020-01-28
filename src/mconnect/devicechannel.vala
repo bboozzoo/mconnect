@@ -150,10 +150,11 @@ class DeviceChannel : Object {
         var cert = Core.instance ().certificate;
 
         // wrap with TLS
-        var tls_conn = Utils.make_tls_connection (this._sock_conn,
+        TlsConnection tls_conn;
+        try {
+            tls_conn = Utils.make_tls_connection (this._sock_conn,
                                                   cert,
                                                   expected_peer);
-        try {
             info ("attempt TLS handshake");
             var res = yield tls_conn.handshake_async ();
 
