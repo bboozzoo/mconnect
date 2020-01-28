@@ -57,3 +57,17 @@ func (c *Connection) Close() error {
 	}
 	return nil
 }
+
+func (c *Connection) Receive() (*packet.Packet, error) {
+	d := packet.NewDecoder(c.conn)
+	var p packet.Packet
+	if err := d.Decode(&p); err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func (c *Connection) Send(p packet.Packet) error {
+	e := packet.NewEncoder(c.conn)
+	return e.Encode(&p)
+}
