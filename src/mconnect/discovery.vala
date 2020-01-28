@@ -36,7 +36,7 @@ class Discovery : GLib.Object {
                                   SocketType.DATAGRAM,
                                   SocketProtocol.UDP);
         var sa = new InetSocketAddress (new InetAddress.any (SocketFamily.IPV4),
-                                        1714);
+                                        1716);
         debug ("start listening for new devices at: %s:%u",
                sa.address.to_string (), sa.port);
 
