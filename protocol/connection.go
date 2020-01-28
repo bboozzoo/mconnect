@@ -23,7 +23,7 @@ import (
 )
 
 type Connection struct {
-	conn net.Conn
+	conn *tls.Conn
 }
 
 type Configuration struct {
@@ -48,7 +48,19 @@ func Dial(ctx context.Context, where string, conf *Configuration) (*Connection, 
 
 	log.Debugf("identity sent")
 
-	return &Connection{conn: conn}, nil
+	// upgrade to secure connection
+
+	tlsConf := tls.Config{
+		InsecureSkipVerify: true,
+		Certificates:       []tls.Certificate{*conf.Cert},
+	}
+	tlsConn := tls.Server(conn, &tlsConf)
+	if err := tlsConn.Handshake(); err != nil {
+		log.Errorf("TLS handshake failed: %v", err)
+		return nil, err
+	}
+
+	return &Connection{conn: tlsConn}, nil
 }
 
 func (c *Connection) Close() error {
