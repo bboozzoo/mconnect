@@ -40,7 +40,8 @@ deps_fedora() {
         gtk3-devel \
         glib-networking \
         tree \
-        uncrustify
+        uncrustify \
+        diffutils
 }
 
 deps_opensuse() {
