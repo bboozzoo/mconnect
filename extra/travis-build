@@ -83,10 +83,10 @@ deps_archlinux() {
            uncrustify
 }
 
-deps_ubuntu_xenial() {
+deps_ubuntu() {
     apt-get update && \
         apt-get install -y \
-                meson/xenial-backports \
+                meson \
                 pkg-config \
                 valac \
                 libgirepository1.0-dev \
@@ -111,8 +111,8 @@ install_deps() {
         archlinux)
             deps_archlinux
             ;;
-        ubuntu-xenial)
-            deps_ubuntu_xenial
+        ubuntu-bionic)
+            deps_ubuntu
             ;;
         *)
             echo "unsupported distro $1"
@@ -144,7 +144,7 @@ build_in_container() {
 
     # distro specific quirks
     case "$1" in
-        ubuntu-xenial|opensuse|fedora)
+        ubuntu-*|opensuse|fedora)
             echo "$1 is using an outdated version of uncrustify, suppress formatting errors"
             export SUPPRESS_FMT=1
             ;;
@@ -164,8 +164,8 @@ spin_container() {
         opensuse)
             DOCKER_IMG=opensuse/tumbleweed
             ;;
-        ubuntu-xenial)
-            DOCKER_IMG=ubuntu:xenial
+        ubuntu-bionic)
+            DOCKER_IMG=ubuntu:bionic
             ;;
         *)
             echo "unsupported distro $1"
