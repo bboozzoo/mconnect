@@ -122,7 +122,8 @@ conf.set('bindir',
 configure_file(output: 'mconnect.desktop',
                input: 'mconnect.desktop.in',
                configuration: conf,
-               install_dir: applicationsdir)
+               install_dir: applicationsdir,
+               install_mode: 'rw-r--r--')
 
 mconnectdatadir = join_paths(get_option('datadir'),
                              'mconnect')
