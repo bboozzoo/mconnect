@@ -158,10 +158,10 @@ spin_container() {
             DOCKER_IMG=fedora
             ;;
         archlinux)
-            DOCKER_IMG=base/archlinux
+            DOCKER_IMG=archlinux
             ;;
         opensuse)
-            DOCKER_IMG=opensuse:tumbleweed
+            DOCKER_IMG=opensuse/tumbleweed
             ;;
         ubuntu-xenial)
             DOCKER_IMG=ubuntu:xenial
