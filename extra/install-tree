@@ -6,7 +6,7 @@
         |   `-- [-rwxr-xr-x]  mconnectctl
         `-- [drwxr-xr-x]  share
             |-- [drwxr-xr-x]  applications
-            |   `-- [-rw-rw-r--]  mconnect.desktop
+            |   `-- [-rw-r--r--]  mconnect.desktop
             `-- [drwxr-xr-x]  mconnect
                 `-- [-rw-r--r--]  mconnect.conf
 
