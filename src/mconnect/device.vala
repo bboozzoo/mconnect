@@ -133,10 +133,9 @@ class Device : Object {
         this.device_type = disc.device_type;
         this.protocol_version = disc.protocol_version;
         this.tcp_port = disc.tcp_port;
-        this.outgoing_capabilities = new ArrayList<string>.wrap (
-            disc.outgoing_capabilities);
-        this.incoming_capabilities = new ArrayList<string>.wrap (
-            disc.incoming_capabilities);
+        this.outgoing_capabilities = new ArrayList<string>.wrap (disc.outgoing_capabilities);
+
+        this.incoming_capabilities = new ArrayList<string>.wrap (disc.incoming_capabilities);
 
         debug ("new device: %s", this.to_string ());
     }
@@ -177,12 +176,11 @@ class Device : Object {
                     throw e;
                 }
             }
-            dev.outgoing_capabilities = new ArrayList<string>.wrap (
-                cache.get_string_list (name,
-                                       "outgoing_capabilities"));
-            dev.incoming_capabilities = new ArrayList<string>.wrap (
-                cache.get_string_list (name,
-                                       "incoming_capabilities"));
+            dev.outgoing_capabilities = new ArrayList<string>.wrap (cache.get_string_list (name,
+                                                                                           "outgoing_capabilities"));
+
+            dev.incoming_capabilities = new ArrayList<string>.wrap (cache.get_string_list (name,
+                                                                                           "incoming_capabilities"));
 
             var host = new InetAddress.from_string (last_ip_str);
             if (host == null) {
@@ -193,7 +191,7 @@ class Device : Object {
             dev.host = host;
 
             return dev;
-        } catch (KeyFileError e) {
+        } catch (Error e) {
             warning ("failed to load device data from cache: %s", e.message);
             return null;
         }
@@ -617,7 +615,7 @@ class Device : Object {
     public void send (Packet pkt) {
         // TODO: queue messages
         if (this._channel != null) {
-            _channel.send (pkt);
+            _channel.send.begin (pkt);
         }
     }
 }

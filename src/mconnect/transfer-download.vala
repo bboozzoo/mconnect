@@ -69,13 +69,13 @@ class DownloadTransfer : TransferInterface, Object {
         Utils.socket_set_keepalive (sock);
 
         // enable TLS
-        this.tls_conn = Utils.make_tls_connection (this.conn,
-                                                   Core.instance ().certificate,
-                                                   this.device.certificate,
-                                                   Utils.TlsConnectionMode.CLIENT);
         try {
+            this.tls_conn = Utils.make_tls_connection (this.conn,
+                                                       Core.instance ().certificate,
+                                                       this.device.certificate,
+                                                       Utils.TlsConnectionMode.CLIENT);
             debug ("attempt TLS handshake");
-            var tls_res = yield this.tls_conn.handshake_async ();
+            yield this.tls_conn.handshake_async ();
 
             debug ("TLS handshake complete");
         } catch (Error e) {
@@ -124,7 +124,7 @@ class DownloadTransfer : TransferInterface, Object {
         if (this.foutstream != null) {
             try {
                 this.foutstream.close ();
-            } catch (IOError e) {
+            } catch (Error e) {
                 warning ("failed to close file output: %s",
                          e.message);
             }
@@ -133,7 +133,7 @@ class DownloadTransfer : TransferInterface, Object {
         if (this.tls_conn != null) {
             try {
                 this.tls_conn.close ();
-            } catch (IOError e) {
+            } catch (Error e) {
                 warning ("failed to close TLS connection: %s",
                          e.message);
             }
@@ -141,7 +141,7 @@ class DownloadTransfer : TransferInterface, Object {
         if (this.conn != null) {
             try {
                 this.conn.close ();
-            } catch (IOError e) {
+            } catch (Error e) {
                 warning ("failed to close connection: %s",
                          e.message);
             }
@@ -155,8 +155,11 @@ class DownloadTransfer : TransferInterface, Object {
     }
 
     private void cleanup_error (string reason) {
-
-        this.file.@delete ();
+        try {
+            this.file.@delete ();
+        } catch (Error e) {
+            warning ("cannot remove file: %s", e.message);
+        }
 
         this.cleanup ();
 

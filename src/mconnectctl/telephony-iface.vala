@@ -22,6 +22,6 @@ namespace Mconnect {
     public interface TelephonyIface : Object {
 
         public abstract void send_sms (string number,
-                                       string message) throws IOError;
+                                       string message) throws Error;
     }
 }

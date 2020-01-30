@@ -70,7 +70,6 @@ namespace Utils {
         option = 3;
         Posix.setsockopt (sock.fd, 6, 6, &option, (Posix.socklen_t) sizeof (int));
 #endif
-
         int option = 10;
         Posix.setsockopt (sock.fd, IPProto.TCP,
                           Posix.TCP_KEEPIDLE,
@@ -109,7 +108,7 @@ namespace Utils {
     TlsConnection make_tls_connection (SocketConnection sock_conn,
                                        TlsCertificate self_cert,
                                        TlsCertificate ? expected_peer = null,
-                                       TlsConnectionMode mode = TlsConnectionMode.SERVER) {
+                                       TlsConnectionMode mode = TlsConnectionMode.SERVER) throws Error {
         TlsConnection tls_conn;
 
         if (mode == TlsConnectionMode.SERVER) {
@@ -183,7 +182,7 @@ namespace Utils {
             return matches;
         } catch (RegexError e) {
             warning ("failed to compile regex: %s", e.message);
-            return null;
+            return {};
         }
     }
 

@@ -31,8 +31,7 @@ void test_generate_load () {
     }
 
     try {
-        var cert = new TlsCertificate.from_files (cert_path,
-                                                  key_path);
+        new TlsCertificate.from_files (cert_path, key_path);
     } catch (Error e) {
         warning ("load from files failed: %s", e.message);
         Test.fail ();

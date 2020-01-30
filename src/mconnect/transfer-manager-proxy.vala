@@ -20,8 +20,6 @@ using Gee;
 
 [DBus (name = "org.mconnect.TransferManager")]
 class TransferManagerDBusProxy : Object {
-
-    private TransferManager manager;
     private DBusConnection bus;
 
     private int job_idx = 0;
@@ -49,7 +47,7 @@ class TransferManagerDBusProxy : Object {
      *
      * Returns a list of DBus paths of all known transfer jobs
      */
-    public ObjectPath[] list_jobs () {
+    public ObjectPath[] list_jobs () throws Error {
         ObjectPath[] jobs = {};
 
         foreach (var path in this.jobs.keys) {

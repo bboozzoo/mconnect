@@ -22,7 +22,7 @@ namespace Mconnect {
 
         public const string OBJECT_PATH = "/org/mconnect/manager";
 
-        public abstract ObjectPath[] ListDevices () throws IOError;
-        public abstract void AllowDevice (string path) throws IOError;
+        public abstract ObjectPath[] ListDevices () throws Error;
+        public abstract void AllowDevice (string path) throws Error;
     }
 }

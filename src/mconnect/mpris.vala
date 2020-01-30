@@ -173,13 +173,14 @@ class MprisHandler : Object, PacketHandlerInterface {
                 prop.can_seek = mpris_player.can_seek;
                 update_status (make_player_prop_packet (player_id, prop));
             }
-        } catch (IOError e) {
+        } catch (Error e) {
             warning ("dbus communication failed: %s", e.message);
             return;
         }
     }
 
     private static void get_metadata_string (HashTable<string, Variant> metadata, string meta_what, out string where) {
+        where = "";
         if (metadata.contains (meta_what) &&
             metadata.get (meta_what).is_of_type (VariantType.STRING)) {
             where = metadata.get (meta_what).get_string ();
@@ -369,7 +370,7 @@ class MprisHandler : Object, PacketHandlerInterface {
                     add_player (bus_name);
                 }
             }
-        } catch (IOError e) {
+        } catch (Error e) {
             warning ("failed to get mpris player list: %s", e.message);
         }
     }
@@ -396,7 +397,7 @@ class MprisHandler : Object, PacketHandlerInterface {
                                                    bus_name,
                                                    "/org/mpris/MediaPlayer2");
             player_list.insert (mpris.identity, bus_name);
-        } catch (IOError e) {
+        } catch (Error e) {
             warning ("failed to connect to mpris player: %s", e.message);
         }
     }

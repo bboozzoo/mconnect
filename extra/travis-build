@@ -40,7 +40,8 @@ deps_fedora() {
         gtk3-devel \
         glib-networking \
         tree \
-        uncrustify
+        uncrustify \
+        diffutils
 }
 
 deps_opensuse() {
@@ -82,10 +83,10 @@ deps_archlinux() {
            uncrustify
 }
 
-deps_ubuntu_xenial() {
+deps_ubuntu() {
     apt-get update && \
         apt-get install -y \
-                meson/xenial-backports \
+                meson \
                 pkg-config \
                 valac \
                 libgirepository1.0-dev \
@@ -110,8 +111,8 @@ install_deps() {
         archlinux)
             deps_archlinux
             ;;
-        ubuntu-xenial)
-            deps_ubuntu_xenial
+        ubuntu-bionic)
+            deps_ubuntu
             ;;
         *)
             echo "unsupported distro $1"
@@ -139,11 +140,11 @@ build() {
 }
 
 build_in_container() {
-    install_deps $1
+    install_deps "$1"
 
     # distro specific quirks
     case "$1" in
-        ubuntu-xenial|opensuse|fedora)
+        ubuntu-*|opensuse|fedora)
             echo "$1 is using an outdated version of uncrustify, suppress formatting errors"
             export SUPPRESS_FMT=1
             ;;
@@ -158,25 +159,29 @@ spin_container() {
             DOCKER_IMG=fedora
             ;;
         archlinux)
-            DOCKER_IMG=base/archlinux
+            DOCKER_IMG=archlinux
             ;;
         opensuse)
-            DOCKER_IMG=opensuse:tumbleweed
+            DOCKER_IMG=opensuse/tumbleweed
             ;;
-        ubuntu-xenial)
-            DOCKER_IMG=ubuntu:xenial
+        ubuntu-bionic)
+            DOCKER_IMG=ubuntu:bionic
             ;;
         *)
             echo "unsupported distro $1"
             exit 1
     esac
 
+    engine="docker"
+    if ! command -v "$engine" 2>/dev/null ; then
+        engine="podman"
+    fi
     # run a container, mount sources at /mnt, st
-    docker run --rm \
-           -v $PWD:/mnt \
+    "$engine" run --rm \
+           -v "$PWD":/mnt \
            -w /mnt \
            -e IN_CONTAINER=1 \
-           $DOCKER_IMG \
+           "$DOCKER_IMG" \
            /mnt/extra/travis-build "$@"
 }
 

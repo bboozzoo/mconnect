@@ -53,11 +53,14 @@ namespace Mconn {
 
             base.startup ();
 
+            if (log_debug_verbose == true) {
+                Logging.enable_vdebug ();
+                // enable debug logging when verbose is enabled
+                log_debug = true;
+            }
+
             if (log_debug == true)
                 Environment.set_variable ("G_MESSAGES_DEBUG", "all", false);
-
-            if (log_debug_verbose == true)
-                Logging.enable_vdebug ();
 
             core = Core.instance ();
             if (core == null)

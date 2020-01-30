@@ -105,7 +105,11 @@ class ShareHandler : Object, PacketHandlerInterface {
             debug ("got URL: %s, launching...", url);
             Utils.show_own_notification ("Launching shared URL",
                                          dev.device_name);
-            AppInfo.launch_default_for_uri (url, null);
+            try {
+                AppInfo.launch_default_for_uri (url, null);
+            } catch (Error e) {
+                warning ("cannot launch application: %s", e.message);
+            }
         }
     }
 
@@ -161,7 +165,7 @@ class ShareHandler : Object, PacketHandlerInterface {
         dev.send (make_share_packet ("text", text));
     }
 
-    public void share_file (Device dev, string path) {
+    public void share_file (Device dev, string path) throws Error {
         debug ("share file %s to device %s", path, dev.to_string ());
 
         var file = File.new_for_path (path);
