@@ -140,7 +140,7 @@ build() {
 }
 
 build_in_container() {
-    install_deps $1
+    install_deps "$1"
 
     # distro specific quirks
     case "$1" in
@@ -172,12 +172,16 @@ spin_container() {
             exit 1
     esac
 
+    engine="docker"
+    if ! command -v "$engine" 2>/dev/null ; then
+        engine="podman"
+    fi
     # run a container, mount sources at /mnt, st
-    docker run --rm \
-           -v $PWD:/mnt \
+    "$engine" run --rm \
+           -v "$PWD":/mnt \
            -w /mnt \
            -e IN_CONTAINER=1 \
-           $DOCKER_IMG \
+           "$DOCKER_IMG" \
            /mnt/extra/travis-build "$@"
 }
 
