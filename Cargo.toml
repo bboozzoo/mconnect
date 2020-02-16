@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+        "mconnect",
+        "mconnectctl",
+        "kdeconnect",
+        ]
