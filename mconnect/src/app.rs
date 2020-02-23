@@ -21,9 +21,11 @@
 // SOFTWARE.
 use std::path::PathBuf;
 
+use log;
 use glib;
 
 use super::config;
+use super::discovery;
 
 extern crate kdeconnect;
 
@@ -35,7 +37,7 @@ fn user_config_path() -> Result<PathBuf, String> {
 
     config_path.push(user_config_dir);
     config_path.push(config::NAME);
-    println!("user config dir: {}", config_path.as_path().display());
+    log::debug!("user config dir: {}", config_path.as_path().display());
     Ok(config_path)
 }
 
