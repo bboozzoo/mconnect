@@ -19,36 +19,26 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-use std::path::PathBuf;
+use std::net::{SocketAddr, UdpSocket};
 
 use log;
-use glib;
 
-use super::config;
-use super::discovery;
+use kdeconnect::port;
 
-extern crate kdeconnect;
+pub fn discovery() -> Result<(), String> {
+    let addr = SocketAddr::from(([0, 0, 0, 0], port::DISCOVERY));
+    let s = UdpSocket::bind(addr)
+        .or_else(|e| return Err(format!("cannot bind discovery socket: {}", e)))?;
 
-fn user_config_path() -> Result<PathBuf, String> {
-    let user_config_dir = glib::get_user_config_dir()
-        .ok_or("cannot obtain user config directory")?;
+    log::debug!("discovery bound to {}", addr);
 
-    let mut config_path = PathBuf::new();
+    let mut buf = [0; 4096];
+    let (got, from) = s
+        .recv_from(&mut buf)
+        .or_else(|e| return Err(format!("cannot receive data from socket: {}", e)))?;
 
-    config_path.push(user_config_dir);
-    config_path.push(config::NAME);
-    log::debug!("user config dir: {}", config_path.as_path().display());
-    Ok(config_path)
-}
+    log::debug!("got {} bytes from from {}", got, from);
+    log::debug!("got: {}", String::from_utf8_lossy(&buf[..got]));
 
-pub fn run() -> Result<(), String> {
-    let config_path = user_config_path()
-        .or_else(|e| return Err(format!("cannot obtain user config path: {}", e)))?;
-
-    let c = config::load_from_path(config_path);
-
-    kdeconnect::bang();
-
-    discovery::discovery();
     Ok(())
 }
