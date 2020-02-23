@@ -7,10 +7,8 @@ use super::config;
 extern crate kdeconnect;
 
 fn user_config_path() -> Result<PathBuf, String> {
-    let user_config_dir =  match glib::get_user_config_dir() {
-        Some(v) => v,
-        None => return Err(String::from("cannot obtain user config directory"))
-    };
+    let user_config_dir = glib::get_user_config_dir()
+        .ok_or("cannot obtain user config directory")?;
 
     let mut config_path = PathBuf::new();
 
@@ -21,10 +19,8 @@ fn user_config_path() -> Result<PathBuf, String> {
 }
 
 pub fn run() -> Result<(), String> {
-    let config_path = match user_config_path() {
-        Err(x) => return Err(format!("cannot obtain user config path: {}", x)),
-        Ok(p) => p
-    };
+    let config_path = user_config_path()
+        .or_else(|e| return Err(format!("cannot obtain user config path: {}", e)))?;
 
     let c = config::load_from_path(config_path);
 
