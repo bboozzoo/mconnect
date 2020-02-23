@@ -23,6 +23,7 @@ use std::io;
 use std::path::Path;
 
 use glib;
+use log;
 
 pub const NAME: &'static str = "mconnect.conf";
 
@@ -37,7 +38,7 @@ pub fn load_from_path<T: AsRef<Path>>(path: T) -> Result<Config, String> {
     if let Err(err) = c.kf.load_from_file(path, glib::KeyFileFlags::KEEP_COMMENTS) {
         match err.kind::<glib::FileError>() {
             Some(glib::FileError::Noent) => {
-                println!("user config not found, using defaults");
+                log::warn!("user config not found, using defaults");
                 Ok(c)
             }
             _ => Err(err.to_string()),

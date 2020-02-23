@@ -10,6 +10,7 @@ edition = "2018"
 kdeconnect = { path = "../kdeconnect", version = "" }
 log = "0.4"
 tempfile = "3.1.0"
+glib_logger = "0.1.0"
 
 [dependencies.glib]
 version = ""

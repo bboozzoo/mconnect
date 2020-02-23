@@ -21,12 +21,22 @@
 // SOFTWARE.
 mod app;
 mod config;
+mod discovery;
+
+use std::env;
+
+use log;
+use glib_logger;
 
 fn main() {
+    env::set_var("G_MESSAGES_DEBUG", "all");
+    glib_logger::init(&glib_logger::SIMPLE);
+    log::set_max_level(log::LevelFilter::Debug);
+
     std::process::exit(match app::run() {
         Ok(_) => 0,
         Err(err) => {
-            eprintln!("error: {}", err);
+            log::error!("error: {}", err);
             1
         }
     });
