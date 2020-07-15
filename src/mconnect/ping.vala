@@ -50,5 +50,10 @@ class PingHandler : Object, PacketHandlerInterface {
         ping (dev);
     }
 
+    public void send_ping (Device dev) {
+        var pkt = new Packet (PING, new Json.Object ());
+        dev.send (pkt);
+    }
+
     public signal void ping (Device dev);
 }
