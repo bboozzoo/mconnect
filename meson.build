@@ -37,6 +37,7 @@ mconnect_src = [
 	'src/mconnect/packethandlers-proxy.vala',
 	'src/mconnect/notification.vala',
 	'src/mconnect/battery.vala',
+	'src/mconnect/clipboard.vala',
 	'src/mconnect/battery-proxy.vala',
 	'src/mconnect/telephony.vala',
 	'src/mconnect/telephony-proxy.vala',
