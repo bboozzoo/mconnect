@@ -142,10 +142,18 @@ class Packet : GLib.Object {
         builder.add_string_value (device_id);
         builder.set_member_name ("deviceType");
         builder.add_string_value (device_type);
-        builder.set_member_name ("SupportedIncomingInterfaces");
-        builder.add_string_value (string.joinv (",", in_interfaces));
-        builder.set_member_name ("SupportedOutgoingInterfaces");
-        builder.add_string_value (string.joinv (",", out_interfaces));
+        builder.set_member_name ("incomingCapabilities");
+        builder.begin_array ();
+        foreach (string iface in in_interfaces) {
+            builder.add_string_value (iface);
+        }
+        builder.end_array ();
+        builder.set_member_name ("outgoingCapabilities");
+        builder.begin_array ();
+        foreach (string iface in out_interfaces) {
+            builder.add_string_value (iface);
+        }
+        builder.end_array ();
         builder.set_member_name ("protocolVersion");
         builder.add_int_value (PROTOCOL_VERSION);
         builder.end_object ();
