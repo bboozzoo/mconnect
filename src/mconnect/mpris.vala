@@ -326,15 +326,15 @@ class MprisHandler : Object, PacketHandlerInterface {
         }
         if (prop.can_go_next != null) {
             builder.set_member_name ("canGoNext");
-            builder.add_boolean_value (prop.can_pause);
+            builder.add_boolean_value (prop.can_go_next);
         }
         if (prop.can_go_previous != null) {
             builder.set_member_name ("canGoPrevious");
-            builder.add_boolean_value (prop.can_pause);
+            builder.add_boolean_value (prop.can_go_previous);
         }
         if (prop.can_seek != null) {
             builder.set_member_name ("canSeek");
-            builder.add_boolean_value (prop.can_pause);
+            builder.add_boolean_value (prop.can_seek);
         }
         builder.set_member_name ("pos");
         builder.add_int_value (prop.position);
