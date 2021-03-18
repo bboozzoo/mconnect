@@ -160,7 +160,7 @@ namespace Utils {
 
             // regex taken from SO
             // uncrustify breaks the regex, so *INDENT-OFF*
-			Regex r = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+,.~#?&\/=]*)/;
+			GLib.Regex r = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+,.~#?&\/=]*)/;
             // *INDENT-ON*
 
             MatchInfo mi;
@@ -180,7 +180,7 @@ namespace Utils {
                 debug ("no match");
             }
             return matches;
-        } catch (RegexError e) {
+        } catch (GLib.RegexError e) {
             warning ("failed to compile regex: %s", e.message);
             return {};
         }

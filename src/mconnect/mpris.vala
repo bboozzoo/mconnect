@@ -396,7 +396,12 @@ class MprisHandler : Object, PacketHandlerInterface {
             MprisProxy mpris = Bus.get_proxy_sync (BusType.SESSION,
                                                    bus_name,
                                                    "/org/mpris/MediaPlayer2");
-            player_list.insert (mpris.identity, bus_name);
+            debug(mpris.identity);
+            if(mpris.identity == null){
+                warning ("failed to connect to mpris player");
+            }else{
+                player_list.insert (mpris.identity, bus_name);
+            }
         } catch (Error e) {
             warning ("failed to connect to mpris player: %s", e.message);
         }
