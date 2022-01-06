@@ -24,8 +24,8 @@ use std::path::PathBuf;
 use log;
 use glib;
 
-use super::config;
-use super::discovery;
+use crate::config;
+use crate::discovery;
 
 extern crate kdeconnect;
 
