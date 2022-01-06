@@ -14,7 +14,7 @@ package logger
 import (
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type logger struct {
