@@ -228,14 +228,16 @@ class DeviceChannel : Object {
         string to_send = pkt.to_string () + "\n";
         debug ("send data: %s", to_send);
 
-        GLib.assert (this._dout != null);
-
-        try {
-            this._dout.put_string (to_send);
-        } catch (IOError e) {
-            warning ("failed to send message: %s", e.message);
-            // TODO disconnect?
-        }
+	if (this._dout != null) {
+	        try {
+	            this._dout.put_string (to_send);
+	        } catch (IOError e) {
+	            warning ("failed to send message: %s", e.message);
+	            // TODO disconnect?
+	        }
+	} else {
+            warning ("not connected to: %s", this._isa.address.to_string ());
+	}
     }
 
     /**
