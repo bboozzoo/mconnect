@@ -75,6 +75,7 @@ mconnectctl_src = [
   'src/mconnectctl/main.vala',
   'src/mconnectctl/device-manager-iface.vala',
   'src/mconnectctl/device-iface.vala',
+  'src/mconnectctl/battery-iface.vala',
   'src/mconnectctl/share-iface.vala',
   'src/mconnectctl/telephony-iface.vala',
 ]

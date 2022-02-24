@@ -326,15 +326,15 @@ class MprisHandler : Object, PacketHandlerInterface {
         }
         if (prop.can_go_next != null) {
             builder.set_member_name ("canGoNext");
-            builder.add_boolean_value (prop.can_pause);
+            builder.add_boolean_value (prop.can_go_next);
         }
         if (prop.can_go_previous != null) {
             builder.set_member_name ("canGoPrevious");
-            builder.add_boolean_value (prop.can_pause);
+            builder.add_boolean_value (prop.can_go_previous);
         }
         if (prop.can_seek != null) {
             builder.set_member_name ("canSeek");
-            builder.add_boolean_value (prop.can_pause);
+            builder.add_boolean_value (prop.can_seek);
         }
         builder.set_member_name ("pos");
         builder.add_int_value (prop.position);
@@ -396,7 +396,12 @@ class MprisHandler : Object, PacketHandlerInterface {
             MprisProxy mpris = Bus.get_proxy_sync (BusType.SESSION,
                                                    bus_name,
                                                    "/org/mpris/MediaPlayer2");
-            player_list.insert (mpris.identity, bus_name);
+            debug(mpris.identity);
+            if(mpris.identity == null){
+                warning ("failed to connect to mpris player");
+            }else{
+                player_list.insert (mpris.identity, bus_name);
+            }
         } catch (Error e) {
             warning ("failed to connect to mpris player: %s", e.message);
         }
