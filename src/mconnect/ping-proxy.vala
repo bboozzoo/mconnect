@@ -39,6 +39,10 @@ class PingHandlerProxy : Object, PacketHandlerInterfaceProxy {
         // conn.unregister_object(this);
     }
 
+    public void send_ping () throws Error {
+        this.ping_handler.send_ping (this.device);
+    }
+
     private void ping_cb (Device dev) {
         if (this.device != dev)
             return;
