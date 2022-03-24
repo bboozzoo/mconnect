@@ -48,8 +48,9 @@ class IOCopyJob : Object {
             if (data.length == 0) {
                 break;
             }
-            yield this.to.write_bytes_async (data, Priority.DEFAULT,
-                                             cancel);
+
+            // XXX: write_bytes_async will not always write the whole buffer.
+            yield this.to.write_all_async (data.get_data (), Priority.DEFAULT, cancel, null);
 
             bytes_done += data.length;
             this.progress (bytes_done);
