@@ -16,6 +16,10 @@ type Logger interface {
 	Debugf(format string, args ...interface{})
 	Debugln(args ...interface{})
 
+	Trace(args ...interface{})
+	Tracef(format string, args ...interface{})
+	Traceln(args ...interface{})
+
 	Info(args ...interface{})
 	Infof(format string, args ...interface{})
 	Infoln(args ...interface{})
