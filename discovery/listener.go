@@ -13,9 +13,8 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"net"
-
-	"github.com/pkg/errors"
 
 	"github.com/bboozzoo/mconnect/logger"
 	"github.com/bboozzoo/mconnect/protocol"
@@ -56,18 +55,17 @@ func (l *Listener) Receive(ctx context.Context) (*Discovery, error) {
 	buf := make([]byte, 4096)
 	count, addr, err := l.conn.ReadFromUDP(buf)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to receive a packet")
+		return nil, fmt.Errorf("cannot to receive packet: %w", err)
 	}
-
 	log.Debugf("got %v bytes from %v", count, addr)
-	log.Debugf("data:\n%s", string(buf))
+	log.Tracef("data:\n%s", string(buf))
 	var p packet.Packet
 	if err := packet.Unmarshal(buf, &p); err != nil {
-		return nil, errors.Wrap(err, "failed to parse packet")
+		return nil, fmt.Errorf("cannot parse packet: %w", err)
 	}
 	identity, err := p.AsIdentity()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse as identity packet")
+		return nil, fmt.Errorf("cannot parse as identity packet: %w", err)
 	}
 	discovery := &Discovery{
 		Packet:   &p,

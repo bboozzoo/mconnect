@@ -13,9 +13,8 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"net"
-
-	"github.com/pkg/errors"
 
 	"github.com/bboozzoo/mconnect/protocol"
 	"github.com/bboozzoo/mconnect/protocol/packet"
@@ -25,18 +24,18 @@ func Announce(ctx context.Context, identity packet.Identity) error {
 	p := packet.New("kdeconnect.identity", identity)
 	data, err := packet.Marshal(p)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal packet")
+		return fmt.Errorf("cannot build identity packet: %w", err)
 	}
 
 	c, err := net.DialUDP("udp", nil, protocol.UDPDiscoveryAddr)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open UDP socket")
+		return fmt.Errorf("cannot open UDP socket: %w", err)
 	}
 	defer c.Close()
 
 	_, err = c.Write(data)
 	if err != nil {
-		return errors.Wrapf(err, "failed to send identity packet")
+		return fmt.Errorf("cannot send identity packet: %w", err)
 	}
 	return nil
 }
