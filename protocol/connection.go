@@ -14,9 +14,8 @@ package protocol
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
-
-	"github.com/pkg/errors"
 
 	"github.com/bboozzoo/mconnect/logger"
 	"github.com/bboozzoo/mconnect/protocol/packet"
@@ -37,13 +36,13 @@ func Dial(ctx context.Context, where string, conf *Configuration) (*Connection, 
 	dialer := net.Dialer{}
 	conn, err := dialer.DialContext(ctx, "tcp", where)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to dial %s", where)
+		return nil, fmt.Errorf("cannot connect: %w", err)
 	}
 	log.Debugf("connected to %v", conn.RemoteAddr())
 
 	e := packet.NewEncoder(conn)
 	if err := e.Encode(packet.NewIdentity(conf.Identity)); err != nil {
-		return nil, errors.Wrapf(err, "failed to send identity")
+		return nil, fmt.Errorf("cannot send identity: %w", err)
 	}
 
 	log.Debugf("identity sent")
@@ -52,7 +51,8 @@ func Dial(ctx context.Context, where string, conf *Configuration) (*Connection, 
 
 	tlsConf := tls.Config{
 		InsecureSkipVerify: true,
-		Certificates:       []tls.Certificate{*conf.Cert},
+		// TODO verify client certs
+		Certificates: []tls.Certificate{*conf.Cert},
 	}
 	tlsConn := tls.Server(conn, &tlsConf)
 	if err := tlsConn.Handshake(); err != nil {

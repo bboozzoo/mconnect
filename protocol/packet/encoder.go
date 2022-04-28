@@ -14,10 +14,10 @@ package packet
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 var getId = func() uint64 {
@@ -74,7 +74,7 @@ func (e *Encoder) Encode(p *Packet) error {
 		Body: body,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to encode body")
+		return fmt.Errorf("cannot encode body: %w", err)
 	}
 
 	return nil

@@ -16,8 +16,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-
-	"github.com/pkg/errors"
 )
 
 func Unmarshal(data []byte, p *Packet) error {
@@ -42,7 +40,7 @@ func (d *Decoder) Decode(p *Packet) error {
 	}
 
 	if err := d.j.Decode(p); err != nil {
-		return errors.Wrap(err, "failed to decode body")
+		return fmt.Errorf("cannot decode body: %v", err)
 	}
 
 	if p.Id == uint64(0) || p.Type == "" || p.Body == nil {
