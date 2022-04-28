@@ -13,6 +13,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 
@@ -22,7 +23,9 @@ import (
 )
 
 type Listener struct {
-	conn *net.UDPConn
+	conn   *net.UDPConn
+	devC   chan *Discovery
+	closeC chan struct{}
 }
 
 func NewListener() (*Listener, error) {
@@ -73,4 +76,43 @@ func (l *Listener) Receive(ctx context.Context) (*Discovery, error) {
 		From:     addr,
 	}
 	return discovery, nil
+}
+
+func (l *Listener) WaitForDevices(ctx context.Context) {
+	l.closeC = make(chan struct{})
+	l.devC = make(chan *Discovery, 1)
+	log := logger.FromContext(ctx)
+	go func() {
+		for {
+			discovery, err := l.Receive(ctx)
+			if err != nil {
+				if errors.Is(err, net.ErrClosed) {
+					break
+				}
+				log.Errorf("discovery failed: %v", err)
+				continue
+			}
+			l.devC <- discovery
+		}
+		log.Debugf("discovery done")
+		close(l.closeC)
+	}()
+
+	go func() {
+		<-ctx.Done()
+		l.conn.Close()
+	}()
+}
+
+func (l *Listener) Device(ctx context.Context) <-chan *Discovery {
+	if l.devC == nil {
+		logger.FromContext(ctx).Panicf("cannot call Device without Wait first")
+	}
+	return l.devC
+}
+
+func (l *Listener) Done() {
+	if l.closeC != nil {
+		<-l.closeC
+	}
 }
